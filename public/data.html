@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Manager – CIE Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f0f4f8; }
+    .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+    .tab-btn { border-bottom: 3px solid transparent; transition: all 0.15s; }
+    .tab-btn.active { border-color: #3b82f6; color: #1d4ed8; font-weight: 700; }
+    .tab-btn:not(.active):hover { border-color: #cbd5e1; color: #475569; }
+    input[type=text], input[type=search], select {
+      border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px;
+      font-size: 0.85rem; color: #334155; width: 100%; outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.825rem; }
+    .data-table th {
+      background: #1e293b; color: #94a3b8; text-transform: uppercase;
+      font-size: 0.7rem; letter-spacing: 0.05em; padding: 10px 14px;
+      text-align: left; position: sticky; top: 0; z-index: 1;
+    }
+    .data-table th:first-child { border-radius: 8px 0 0 0; }
+    .data-table th:last-child { border-radius: 0 8px 0 0; }
+    .data-table td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #334155; }
+    .data-table tbody tr { transition: background 0.1s; }
+    .data-table tbody tr:hover { background: #f8fafc; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; }
+    .btn-edit { color: #3b82f6; background: #eff6ff; border-radius: 6px; padding: 4px 10px; font-size: 0.75rem; font-weight: 600; transition: all 0.15s; }
+    .btn-edit:hover { background: #dbeafe; }
+    .btn-del { color: #ef4444; background: #fef2f2; border-radius: 6px; padding: 4px 10px; font-size: 0.75rem; font-weight: 600; transition: all 0.15s; }
+    .btn-del:hover { background: #fee2e2; }
+    /* Modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+    .modal-box { background: #fff; border-radius: 20px; padding: 28px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); position: relative; animation: popIn 0.18s ease; }
+    @keyframes popIn { from { opacity:0; transform:scale(0.95) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+    .modal-label { font-size: 0.8rem; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px; }
+    /* Confirm delete */
+    .confirm-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; }
+    .confirm-box { background: #fff; border-radius: 16px; padding: 24px; width: 340px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: popIn 0.18s ease; }
+    /* Toast */
+    #toast { position: fixed; bottom: 28px; right: 28px; z-index: 300; transition: all 0.3s; }
+    .toast-inner { padding: 12px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    .toast-success { background: #166534; color: #fff; }
+    .toast-error { background: #7f1d1d; color: #fff; }
+    .fade-in { animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- Top Bar -->
+  <div class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+      <div class="bg-white/10 rounded-xl w-10 h-10 flex items-center justify-center p-0.5">
+        <img src="/logo.png" alt="DSVV" class="w-full h-full object-contain" onerror="this.style.display='none'" />
+      </div>
+      <a href="/admin.html" class="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Admin
+      </a>
+      <div class="h-4 w-px bg-slate-200"></div>
+      <div class="flex-1">
+        <h1 class="text-slate-800 font-bold text-base">Data Manager</h1>
+        <p class="text-slate-400 text-xs">View, edit and delete imported records</p>
+      </div>
+      <a href="/dashboard.html" class="bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-6 py-6">
+
+    <!-- Stats row -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <div class="card p-4 border-l-4 border-blue-500 flex items-center gap-4">
+        <div class="bg-blue-100 rounded-xl p-2"><svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg></div>
+        <div><p class="text-slate-400 text-xs uppercase tracking-wide">Programs</p><p id="sPrograms" class="text-xl font-bold text-slate-800">–</p></div>
+      </div>
+      <div class="card p-4 border-l-4 border-amber-500 flex items-center gap-4">
+        <div class="bg-amber-100 rounded-xl p-2"><svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg></div>
+        <div><p class="text-slate-400 text-xs uppercase tracking-wide">Courses</p><p id="sCourses" class="text-xl font-bold text-slate-800">–</p></div>
+      </div>
+      <div class="card p-4 border-l-4 border-green-500 flex items-center gap-4">
+        <div class="bg-green-100 rounded-xl p-2"><svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+        <div><p class="text-slate-400 text-xs uppercase tracking-wide">Students</p><p id="sStudents" class="text-xl font-bold text-slate-800">–</p></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="card overflow-hidden">
+      <div class="flex border-b border-slate-100 px-6 gap-6">
+        <button class="tab-btn active py-4 text-sm" id="tabCourses" onclick="switchTab('courses')">📚 Courses</button>
+        <button class="tab-btn py-4 text-sm text-slate-500" id="tabStudents" onclick="switchTab('students')">👥 Students</button>
+      </div>
+
+      <!-- Search + count bar -->
+      <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-50">
+        <div class="relative flex-1 max-w-xs">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="search" id="searchBox" placeholder="Search…" class="pl-8" oninput="onSearch()" />
+        </div>
+        <p id="countLabel" class="text-slate-400 text-xs ml-2"></p>
+        <div class="flex-1"></div>
+        <!-- Delete All -->
+        <button id="btnDeleteAll" onclick="askDeleteAll()"
+          class="flex items-center gap-1.5 text-red-500 hover:text-white hover:bg-red-500 border border-red-200 hover:border-red-500 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all mr-3">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          Delete All
+        </button>
+        <button id="btnPrev" onclick="prevPage()" class="text-slate-500 hover:text-slate-800 disabled:opacity-30 transition-colors" disabled>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <span id="pageLabel" class="text-slate-500 text-xs font-medium px-2">Page 1</span>
+        <button id="btnNext" onclick="nextPage()" class="text-slate-500 hover:text-slate-800 disabled:opacity-30 transition-colors" disabled>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Table Container -->
+      <div class="overflow-x-auto" style="max-height: 560px; overflow-y: auto;">
+        <table class="data-table" id="dataTable">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+        <div id="emptyState" class="hidden text-center py-16 text-slate-400">
+          <svg class="w-10 h-10 mx-auto mb-3 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+          <p class="text-sm font-medium">No records found</p>
+          <p class="text-xs mt-1">Try a different search term</p>
+        </div>
+        <div id="loadingRow" class="text-center py-12 text-slate-400 text-sm">
+          <div class="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
+          Loading…
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── EDIT MODAL ── -->
+  <div id="editModal" class="modal-backdrop hidden" onclick="closeEditIfBackdrop(event)">
+    <div class="modal-box" id="editModalBox">
+      <h2 class="text-slate-800 font-bold text-lg mb-5" id="modalTitle">Edit Record</h2>
+      <div id="modalFields" class="space-y-4"></div>
+      <div class="flex gap-3 mt-6">
+        <button onclick="saveEdit()" class="flex-1 text-white font-semibold text-sm py-2.5 rounded-xl transition-all" style="background-color: #1c4c94;">Save Changes</button>
+        <button onclick="closeEdit()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm py-2.5 rounded-xl transition-all">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONFIRM DELETE MODAL ── -->
+  <div id="confirmModal" class="confirm-backdrop hidden">
+    <div class="confirm-box">
+      <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+      </div>
+      <h3 class="text-slate-800 font-bold text-base mb-2">Delete Record?</h3>
+      <p id="confirmMsg" class="text-slate-500 text-sm mb-6">This action cannot be undone.</p>
+      <div class="flex gap-3">
+        <button onclick="confirmDelete()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm py-2.5 rounded-xl transition-all">Delete</button>
+        <button onclick="closeConfirm()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm py-2.5 rounded-xl transition-all">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DELETE ALL MODAL ── -->
+  <div id="clearModal" class="confirm-backdrop hidden">
+    <div class="confirm-box" style="width:380px">
+      <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      </div>
+      <h3 class="text-slate-800 font-bold text-base mb-1">Delete All <span id="clearTabLabel">Records</span>?</h3>
+      <p class="text-slate-500 text-xs mb-4 leading-relaxed" id="clearDesc">This will permanently remove all records. Type <strong>DELETE</strong> below to confirm.</p>
+      <input type="text" id="clearConfirmInput" placeholder='Type DELETE to confirm'
+        class="border border-slate-200 rounded-lg px-3 py-2 text-sm w-full text-center tracking-widest font-mono mb-4 outline-none focus:border-red-400"
+        oninput="document.getElementById('btnConfirmClear').disabled = this.value !== 'DELETE'" />
+      <div class="flex gap-3">
+        <button id="btnConfirmClear" onclick="confirmClearAll()"
+          class="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-sm py-2.5 rounded-xl transition-all"
+          disabled>Delete All</button>
+        <button onclick="closeClearModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm py-2.5 rounded-xl transition-all">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="opacity-0 pointer-events-none"></div>
+
+  <script>
+    let currentTab = 'courses';
+    let currentPage = 1;
+    const PAGE_SIZE = 50;
+    let totalRecords = 0;
+    let searchTimer = null;
+    let pendingDeleteId = null;
+    let editingId = null;
+
+    // ─── Stats ──────────────────────────────────────────────
+    async function loadStats() {
+      try {
+        const r = await fetch('/api/data/stats');
+        const d = await r.json();
+        document.getElementById('sPrograms').textContent = d.programs ?? '–';
+        document.getElementById('sCourses').textContent = d.courses ?? '–';
+        document.getElementById('sStudents').textContent = d.students ?? '–';
+      } catch {}
+    }
+
+    // ─── Tab switching ───────────────────────────────────────
+    function switchTab(tab) {
+      currentTab = tab;
+      currentPage = 1;
+      document.getElementById('searchBox').value = '';
+      document.getElementById('tabCourses').className = 'tab-btn py-4 text-sm ' + (tab === 'courses' ? 'active' : 'text-slate-500');
+      document.getElementById('tabStudents').className = 'tab-btn py-4 text-sm ' + (tab === 'students' ? 'active' : 'text-slate-500');
+      renderHeader();
+      fetchData();
+    }
+
+    function renderHeader() {
+      const head = document.getElementById('tableHead');
+      if (currentTab === 'courses') {
+        head.innerHTML = `<tr>
+          <th style="width:12%">Course Code</th>
+          <th style="width:24%">Course Name</th>
+          <th style="width:24%">Program</th>
+          <th style="width:12%">Semester</th>
+          <th style="width:18%">Faculty</th>
+          <th style="width:10%">Actions</th>
+        </tr>`;
+      } else {
+        head.innerHTML = `<tr>
+          <th style="width:14%">Scholar ID</th>
+          <th style="width:28%">Student Name</th>
+          <th style="width:32%">Program</th>
+          <th style="width:14%">Semester</th>
+          <th style="width:12%">Actions</th>
+        </tr>`;
+      }
+    }
+
+    // ─── Data fetch ──────────────────────────────────────────
+    async function fetchData() {
+      const search = document.getElementById('searchBox').value;
+      const tbody = document.getElementById('tableBody');
+      const empty = document.getElementById('emptyState');
+      const loading = document.getElementById('loadingRow');
+      tbody.innerHTML = '';
+      empty.classList.add('hidden');
+      loading.classList.remove('hidden');
+
+      const endpoint = currentTab === 'courses' ? 'all-courses' : 'all-students';
+      try {
+        const r = await fetch(`/api/data/${endpoint}?search=${encodeURIComponent(search)}&page=${currentPage}&limit=${PAGE_SIZE}`);
+        const data = await r.json();
+        loading.classList.add('hidden');
+        totalRecords = data.total;
+        updatePagination();
+
+        document.getElementById('countLabel').textContent =
+          totalRecords > 0 ? `Showing ${(currentPage-1)*PAGE_SIZE+1}–${Math.min(currentPage*PAGE_SIZE, totalRecords)} of ${totalRecords}` : '';
+
+        if (!data.rows || data.rows.length === 0) {
+          empty.classList.remove('hidden');
+          return;
+        }
+
+        data.rows.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.className = 'fade-in';
+          if (currentTab === 'courses') {
+            tr.innerHTML = `
+              <td><span class="font-mono text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${esc(row.course_code)}</span></td>
+              <td class="font-medium text-slate-800">${esc(row.course_name)}</td>
+              <td><span class="badge bg-blue-50 text-blue-700">${esc(row.program_name)}</span></td>
+              <td class="text-center"><span class="badge bg-purple-50 text-purple-700">Sem ${esc(row.semester)}</span></td>
+              <td class="text-slate-600">${esc(row.faculty_name || '—')}</td>
+              <td>
+                <div class="flex gap-2">
+                  <button class="btn-edit" onclick='openEditCourse(${JSON.stringify(row)})'>Edit</button>
+                  <button class="btn-del" onclick='askDelete("course","${esc(row.course_code)}","${esc(row.course_name)}","${esc(row.program_name)}")'>Delete</button>
+                </div>
+              </td>`;
+          } else {
+            tr.innerHTML = `
+              <td><span class="font-mono text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${esc(row.scholar_id)}</span></td>
+              <td class="font-medium text-slate-800">${esc(row.student_name)}</td>
+              <td><span class="badge bg-green-50 text-green-700">${esc(row.program_name)}</span></td>
+              <td class="text-center"><span class="badge bg-purple-50 text-purple-700">Sem ${esc(row.semester)}</span></td>
+              <td>
+                <div class="flex gap-2">
+                  <button class="btn-edit" onclick='openEditStudent(${JSON.stringify(row)})'>Edit</button>
+                  <button class="btn-del" onclick='askDelete("student","${esc(row.scholar_id)}","${esc(row.student_name)}")'>Delete</button>
+                </div>
+              </td>`;
+          }
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        loading.classList.add('hidden');
+        showToast('Failed to load data: ' + e.message, 'error');
+      }
+    }
+
+    function esc(str) {
+      return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ─── Search ──────────────────────────────────────────────
+    function onSearch() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => { currentPage = 1; fetchData(); }, 300);
+    }
+
+    // ─── Pagination ──────────────────────────────────────────
+    function updatePagination() {
+      const pages = Math.max(1, Math.ceil(totalRecords / PAGE_SIZE));
+      document.getElementById('pageLabel').textContent = `Page ${currentPage} of ${pages}`;
+      document.getElementById('btnPrev').disabled = currentPage <= 1;
+      document.getElementById('btnNext').disabled = currentPage >= pages;
+    }
+    function prevPage() { if (currentPage > 1) { currentPage--; fetchData(); } }
+    function nextPage() { const pages = Math.ceil(totalRecords / PAGE_SIZE); if (currentPage < pages) { currentPage++; fetchData(); } }
+
+    // ─── Edit Course ─────────────────────────────────────────
+    let editingProgram = null; // store the original program for the composite key
+    function openEditCourse(row) {
+      editingId = row.course_code;
+      editingProgram = row.program_name;
+      document.getElementById('modalTitle').textContent = '✏️ Edit Course';
+      document.getElementById('modalFields').innerHTML = `
+        <div>
+          <label class="modal-label">Course Code <span class="text-slate-400 font-normal">(read-only)</span></label>
+          <input type="text" value="${esc(row.course_code)}" disabled class="bg-slate-50 text-slate-400" />
+        </div>
+        <div>
+          <label class="modal-label">Course Name *</label>
+          <input type="text" id="f_course_name" value="${esc(row.course_name)}" />
+        </div>
+        <div>
+          <label class="modal-label">Program *</label>
+          <input type="text" id="f_course_program_name" value="${esc(row.program_name)}" />
+        </div>
+        <div>
+          <label class="modal-label">Semester *</label>
+          <input type="text" id="f_course_semester" value="${esc(row.semester)}" placeholder="e.g. 1, 2, 3..." />
+        </div>
+        <div>
+          <label class="modal-label">Faculty</label>
+          <input type="text" id="f_faculty_name" value="${esc(row.faculty_name || '')}" />
+        </div>`;
+      document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    // ─── Edit Student ─────────────────────────────────────────
+    function openEditStudent(row) {
+      editingId = row.scholar_id;
+      document.getElementById('modalTitle').textContent = '✏️ Edit Student';
+      document.getElementById('modalFields').innerHTML = `
+        <div>
+          <label class="modal-label">Scholar ID <span class="text-slate-400 font-normal">(read-only)</span></label>
+          <input type="text" value="${esc(row.scholar_id)}" disabled class="bg-slate-50 text-slate-400" />
+        </div>
+        <div>
+          <label class="modal-label">Student Name *</label>
+          <input type="text" id="f_student_name" value="${esc(row.student_name)}" />
+        </div>
+        <div>
+          <label class="modal-label">Program *</label>
+          <input type="text" id="f_student_program_name" value="${esc(row.program_name)}" />
+        </div>
+        <div>
+          <label class="modal-label">Semester *</label>
+          <input type="text" id="f_student_semester" value="${esc(row.semester)}" placeholder="e.g. 1, 2, 3…" />
+        </div>`;
+      document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    async function saveEdit() {
+      let url, body;
+      if (currentTab === 'courses') {
+        url = `/api/data/courses/${encodeURIComponent(editingId)}/${encodeURIComponent(editingProgram)}`;
+        body = {
+          course_name: document.getElementById('f_course_name').value.trim(),
+          program_name: document.getElementById('f_course_program_name').value.trim(),
+          semester: document.getElementById('f_course_semester').value.trim(),
+          faculty_name: document.getElementById('f_faculty_name').value.trim()
+        };
+        if (!body.course_name || !body.program_name || !body.semester) { showToast('Course Name, Program, and Semester are required', 'error'); return; }
+      } else {
+        url = `/api/data/students/${encodeURIComponent(editingId)}`;
+        body = {
+          student_name: document.getElementById('f_student_name').value.trim(),
+          program_name: document.getElementById('f_student_program_name').value.trim(),
+          semester: document.getElementById('f_student_semester').value.trim()
+        };
+        if (!body.student_name || !body.program_name || !body.semester) { showToast('All fields are required', 'error'); return; }
+      }
+      try {
+        const r = await fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const d = await r.json();
+        if (d.success) {
+          closeEdit();
+          fetchData();
+          loadStats();
+          showToast('Record updated successfully', 'success');
+        } else {
+          showToast(d.error || 'Update failed', 'error');
+        }
+      } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    function closeEdit() { document.getElementById('editModal').classList.add('hidden'); }
+    function closeEditIfBackdrop(e) { if (e.target.id === 'editModal') closeEdit(); }
+
+    // ─── Delete ──────────────────────────────────────────────
+    let deleteType = null;
+    let pendingDeleteProgram = null;
+
+    function askDelete(type, id, name, program) {
+      deleteType = type;
+      pendingDeleteId = id;
+      pendingDeleteProgram = program;
+      document.getElementById('confirmMsg').textContent = `Delete "${name}" (${id})? This cannot be undone.`;
+      document.getElementById('confirmModal').classList.remove('hidden');
+    }
+    async function confirmDelete() {
+      const url = deleteType === 'course'
+        ? `/api/data/courses/${encodeURIComponent(pendingDeleteId)}/${encodeURIComponent(pendingDeleteProgram)}`
+        : `/api/data/students/${encodeURIComponent(pendingDeleteId)}`;
+      try {
+        const r = await fetch(url, { method: 'DELETE' });
+        const d = await r.json();
+        closeConfirm();
+        if (d.success) {
+          fetchData();
+          loadStats();
+          showToast('Record deleted', 'success');
+        } else {
+          showToast(d.error || 'Delete failed', 'error');
+        }
+      } catch (e) { showToast('Error: ' + e.message, 'error'); closeConfirm(); }
+    }
+    function closeConfirm() { document.getElementById('confirmModal').classList.add('hidden'); }
+
+    // ─── Toast ───────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg, type) {
+      const t = document.getElementById('toast');
+      t.innerHTML = `<div class="toast-inner toast-${type}">
+        ${type === 'success'
+          ? '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'
+          : '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>'
+        }
+        ${msg}
+      </div>`;
+      t.classList.remove('opacity-0', 'pointer-events-none');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.classList.add('opacity-0', 'pointer-events-none'); }, 3000);
+    }
+
+    // ─── Delete All ───────────────────────────────────────
+    function askDeleteAll() {
+      const isCourses = currentTab === 'courses';
+      document.getElementById('clearTabLabel').textContent = isCourses ? 'Courses & Programs' : 'Students';
+      document.getElementById('clearDesc').innerHTML = isCourses
+        ? 'This will permanently remove <strong>all courses and programs</strong>. You can reimport a new Excel after. Type <strong>DELETE</strong> to confirm.'
+        : 'This will permanently remove <strong>all students</strong>. You can reimport a new Excel after. Type <strong>DELETE</strong> to confirm.';
+      document.getElementById('clearConfirmInput').value = '';
+      document.getElementById('btnConfirmClear').disabled = true;
+      document.getElementById('clearModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('clearConfirmInput').focus(), 100);
+    }
+
+    async function confirmClearAll() {
+      const endpoint = currentTab === 'courses' ? 'courses/clear' : 'students/clear';
+      try {
+        const r = await fetch(`/api/data/${endpoint}`, { method: 'DELETE' });
+        const d = await r.json();
+        closeClearModal();
+        if (d.success) {
+          fetchData();
+          loadStats();
+          showToast(d.message, 'success');
+        } else {
+          showToast(d.error || 'Clear failed', 'error');
+        }
+      } catch (e) { showToast('Error: ' + e.message, 'error'); closeClearModal(); }
+    }
+
+    function closeClearModal() {
+      document.getElementById('clearModal').classList.add('hidden');
+    }
+
+    // ─── Init ────────────────────────────────────────────────
+    renderHeader();
+    fetchData();
+    loadStats();
+  </script>
+</body>
+</html>

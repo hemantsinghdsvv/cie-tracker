@@ -1,0 +1,5 @@
+node_modules/
+.env
+cie_tracker.db
+cie_tracker.db-journal
+uploads/

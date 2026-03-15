@@ -1,0 +1,5 @@
+node_modules
+cie_tracker.db
+cie_tracker.db-journal
+.git
+.env

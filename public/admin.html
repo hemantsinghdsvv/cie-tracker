@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Upload Panel – CIE Tracker</title>
+  <meta name="description" content="Admin panel to upload Course Master and Student Enrollment Excel files." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f0f4f8; }
+    .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+    .dropzone {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: #3b82f6;
+      background: rgba(59,130,246,0.04);
+    }
+    .progress-bar { transition: width 0.4s ease; }
+    .fade-in { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Top Bar -->
+  <div class="bg-white border-b border-slate-200 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-white/10 rounded-xl w-12 h-12 flex items-center justify-center p-1">
+          <img src="/logo.png" alt="DSVV" class="w-full h-full object-contain" onerror="this.style.display='none'" />
+        </div>
+        <div>
+          <h1 class="text-slate-800 font-bold text-base">Admin Panel</h1>
+          <p class="text-slate-500 text-xs">Dev Sanskriti Vishwavidyalaya – CIE Tracker</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/data.html" class="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 text-sm transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+          View Data
+        </a>
+        <a href="/dashboard.html" class="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 text-sm transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8 space-y-8">
+
+    <!-- DB Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="card p-5 border-l-4 border-blue-500">
+        <p class="text-slate-400 text-xs uppercase tracking-wide mb-1">Programs</p>
+        <p id="sPrograms" class="text-2xl font-bold text-slate-800">–</p>
+      </div>
+      <div class="card p-5 border-l-4 border-amber-500">
+        <p class="text-slate-400 text-xs uppercase tracking-wide mb-1">Courses</p>
+        <p id="sCourses" class="text-2xl font-bold text-slate-800">–</p>
+      </div>
+      <div class="card p-5 border-l-4 border-green-500">
+        <p class="text-slate-400 text-xs uppercase tracking-wide mb-1">Students</p>
+        <p id="sStudents" class="text-2xl font-bold text-slate-800">–</p>
+      </div>
+    </div>
+
+    <!-- Column Reference -->
+    <div class="card p-6">
+      <h2 class="text-slate-700 font-bold text-sm mb-4 uppercase tracking-wide">Required Excel Columns</h2>
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <p class="text-blue-600 font-semibold text-sm mb-2">📋 Course Master</p>
+          <ul class="text-xs text-slate-600 space-y-1 font-mono bg-slate-50 rounded-lg p-3">
+            <li>S.N.</li><li>Program</li><li>Semester</li><li>Course Code</li><li>Course Name</li><li>Allocation</li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-green-600 font-semibold text-sm mb-2">👥 Student Enrollment</p>
+          <ul class="text-xs text-slate-600 space-y-1 font-mono bg-slate-50 rounded-lg p-3">
+            <li>Scholar ID</li><li>Student Name</li><li>Program</li><li>Semester</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Course Master -->
+    <div class="card p-6">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 font-bold text-sm">1</div>
+        <div>
+          <h2 class="text-slate-800 font-bold text-base">Course Master</h2>
+          <p class="text-slate-400 text-xs">Programs, Courses &amp; Faculty Allocation</p>
+        </div>
+      </div>
+      <div class="dropzone p-8 text-center mb-4" id="courseDrop" onclick="document.getElementById('courseFile').click()">
+        <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <p class="text-slate-600 font-medium text-sm mb-1">Drop your Excel/CSV file here</p>
+        <p class="text-slate-400 text-xs">or click to browse — .xlsx, .xls, .csv supported</p>
+        <p id="courseFileName" class="text-blue-600 text-sm font-medium mt-2 hidden"></p>
+      </div>
+      <input type="file" id="courseFile" accept=".xlsx,.xls,.csv" class="hidden" onchange="previewFile('course', this)" />
+      <div id="courseProgress" class="hidden mb-3">
+        <div class="bg-slate-100 rounded-full h-2"><div id="courseBar" class="progress-bar bg-blue-500 h-2 rounded-full" style="width:0%"></div></div>
+      </div>
+      <div id="courseResult" class="hidden fade-in"></div>
+      <button id="courseUploadBtn" onclick="uploadFile('courses', 'courseFile', 'courseResult', 'courseProgress', 'courseBar', 'sPrograms', 'sCourses')"
+        class="mt-3 text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full md:w-auto"
+        style="background-color: #1c4c94;"
+        disabled>Upload Course Master</button>
+    </div>
+
+    <!-- Upload Student Enrollment -->
+    <div class="card p-6">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600 font-bold text-sm">2</div>
+        <div>
+          <h2 class="text-slate-800 font-bold text-base">Student Enrollment</h2>
+          <p class="text-slate-400 text-xs">Scholar ID, Name, Program &amp; Semester</p>
+        </div>
+      </div>
+      <div class="dropzone p-8 text-center mb-4" id="studentDrop" onclick="document.getElementById('studentFile').click()">
+        <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <p class="text-slate-600 font-medium text-sm mb-1">Drop your Excel/CSV file here</p>
+        <p class="text-slate-400 text-xs">or click to browse — .xlsx, .xls, .csv supported</p>
+        <p id="studentFileName" class="text-green-600 text-sm font-medium mt-2 hidden"></p>
+      </div>
+      <input type="file" id="studentFile" accept=".xlsx,.xls,.csv" class="hidden" onchange="previewFile('student', this)" />
+      <div id="studentProgress" class="hidden mb-3">
+        <div class="bg-slate-100 rounded-full h-2"><div id="studentBar" class="progress-bar bg-green-500 h-2 rounded-full" style="width:0%"></div></div>
+      </div>
+      <div id="studentResult" class="hidden fade-in"></div>
+      <button id="studentUploadBtn" onclick="uploadFile('students', 'studentFile', 'studentResult', 'studentProgress', 'studentBar', null, null)"
+        class="mt-3 font-semibold text-sm px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full md:w-auto"
+        style="background-color: #fdc82c; color: #1c4c94;"
+        disabled>Upload Student Enrollment</button>
+    </div>
+
+  </div>
+
+  <script>
+    async function loadStats() {
+      try {
+        const r = await fetch('/api/data/stats');
+        const d = await r.json();
+        document.getElementById('sPrograms').textContent = d.programs ?? '–';
+        document.getElementById('sCourses').textContent = d.courses ?? '–';
+        document.getElementById('sStudents').textContent = d.students ?? '–';
+      } catch {}
+    }
+
+    function previewFile(type, input) {
+      const file = input.files[0];
+      if (!file) return;
+      const nameEl = document.getElementById(type + 'FileName');
+      nameEl.textContent = `✓ ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+      nameEl.classList.remove('hidden');
+      document.getElementById(type + 'UploadBtn').disabled = false;
+    }
+
+    // Drag & drop
+    function setupDrop(dropId, inputId, type) {
+      const drop = document.getElementById(dropId);
+      drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
+      drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+      drop.addEventListener('drop', e => {
+        e.preventDefault(); drop.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length) {
+          const inp = document.getElementById(inputId);
+          const dt = new DataTransfer();
+          dt.items.add(files[0]);
+          inp.files = dt.files;
+          previewFile(type, inp);
+        }
+      });
+    }
+    setupDrop('courseDrop', 'courseFile', 'course');
+    setupDrop('studentDrop', 'studentFile', 'student');
+
+    async function uploadFile(endpoint, fileInputId, resultId, progressId, barId, statProg, statCourse) {
+      const fileInput = document.getElementById(fileInputId);
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const progressDiv = document.getElementById(progressId);
+      const bar = document.getElementById(barId);
+      const resultDiv = document.getElementById(resultId);
+      progressDiv.classList.remove('hidden');
+      resultDiv.classList.add('hidden');
+
+      // Animate progress
+      let pct = 0;
+      const interval = setInterval(() => {
+        pct = Math.min(pct + 8, 85);
+        bar.style.width = pct + '%';
+      }, 100);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const r = await fetch(`/api/upload/${endpoint}`, { method: 'POST', body: formData });
+        const data = await r.json();
+        clearInterval(interval);
+        bar.style.width = '100%';
+        setTimeout(() => progressDiv.classList.add('hidden'), 600);
+
+        resultDiv.innerHTML = data.success
+          ? `<div class="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+               <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+               ${data.message}
+             </div>`
+          : `<div class="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+               <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+               ${data.message}
+             </div>`;
+        resultDiv.classList.remove('hidden');
+        loadStats();
+      } catch (e) {
+        clearInterval(interval);
+        bar.style.width = '0%';
+        progressDiv.classList.add('hidden');
+        resultDiv.innerHTML = `<div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">Upload failed: ${e.message}</div>`;
+        resultDiv.classList.remove('hidden');
+      }
+    }
+
+    loadStats();
+  </script>
+</body>
+</html>

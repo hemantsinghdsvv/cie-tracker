@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIE Sheet – Print Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/print.css" />
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f0f4f8; }
+    @media screen {
+      .preview-wrapper {
+        padding: 24px;
+      }
+    }
+    @media print {
+      body { background: #fff; }
+      .preview-wrapper { padding: 0; }
+      .print-container { box-shadow: none; max-width: 100%; margin: 0; border-radius: 0; padding: 0; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Action Bar (hidden on print) -->
+  <div class="no-print bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-6 py-3 flex items-center gap-3">
+      <a href="/dashboard.html" class="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Back
+      </a>
+      <div class="h-4 w-px bg-slate-200"></div>
+      <div id="sheetTitle" class="flex-1 text-slate-700 text-sm font-semibold truncate">CIE Sheet</div>
+      <span id="sheetTypeBadge" class="text-xs px-2.5 py-1 rounded-full font-semibold mr-2">–</span>
+      <button onclick="window.print()"
+        class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        Print Sheet
+      </button>
+      <button onclick="downloadPDF()"
+        class="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Download PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div id="loadingState" class="flex items-center justify-center min-h-96 no-print">
+    <div class="text-center">
+      <div class="w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3" style="border-width:3px"></div>
+      <p class="text-slate-500 text-sm">Loading students...</p>
+    </div>
+  </div>
+
+  <!-- Print Preview -->
+  <div id="previewWrapper" class="preview-wrapper hidden">
+    <div class="print-container" id="printArea">
+
+      <!-- SHEET HEADER (repeated on print via thead) -->
+      <div class="sheet-header-flex sheet-header">
+        <img src="/logo.png" alt="DSVV Logo" class="sheet-header-logo" onerror="this.style.display='none'" />
+        <div class="sheet-header-text">
+          <h1>Department of Computer Science</h1>
+          <h2 id="sheetTypeLabel" class="mt-1 font-semibold">Formative & Mid Term</h2>
+          <h3 id="sessionLabel">Session: Jan – June 2026</h3>
+        </div>
+        <!-- Empty div for flex balance, size handled by CSS to match logo -->
+        <div class="header-flex-balance"></div>
+      </div>
+
+      <!-- Sheet Meta -->
+      <div class="sheet-meta">
+        <div><strong>Course Code:</strong> <span id="metaCourseCode">–</span></div>
+        <div><strong>Course Name:</strong> <span id="metaCourseName">–</span></div>
+        <div><strong>Program / Semester:</strong> <span id="metaProgSem">–</span></div>
+      </div>
+      <div class="sheet-meta" style="margin-top:-4px; margin-bottom:8px;">
+        <div><strong>Faculty:</strong> <span id="metaFaculty">–</span></div>
+        <div><strong>Total Students:</strong> <span id="metaCount">–</span></div>
+        <div></div>
+      </div>
+
+      <!-- TABLE -->
+      <div id="tableArea"></div>
+
+      <!-- Footer -->
+      <div class="sheet-footer">
+        <div class="footer-sign">
+          <div class="sign-line"></div>
+          <p>Teacher's Signature</p>
+        </div>
+        <div class="footer-sign">
+          <div class="sign-line"></div>
+          <p>HoD's Signature</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const program   = params.get('program') || '';
+    const semester  = params.get('semester') || '';
+    const courseCode= params.get('courseCode') || '';
+    const courseName= params.get('courseName') || '';
+    const faculty   = params.get('faculty') || '';
+    const type      = params.get('type') || 'signature'; // 'signature' | 'marks'
+
+    // Set header info
+    document.getElementById('metaCourseCode').textContent = courseCode;
+    document.getElementById('metaCourseName').textContent = courseName;
+    document.getElementById('metaProgSem').textContent = `${program} / Semester ${semester}`;
+    document.getElementById('metaFaculty').textContent = faculty || '–';
+    document.title = `${courseName} - CIE ${type === 'marks' ? 'Marks' : 'Signature'} Sheet`;
+
+    const badge = document.getElementById('sheetTypeBadge');
+    if (type === 'marks') {
+      badge.textContent = 'Marks Award Sheet';
+      badge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold mr-2 bg-amber-100 text-amber-700';
+      document.getElementById('sheetTypeLabel').innerHTML = 'Formative & Mid Term <span class="mx-2 text-slate-300">|</span> Marks Sheet';
+    } else {
+      badge.textContent = 'Signature Sheet';
+      badge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold mr-2 bg-blue-100 text-blue-700';
+      document.getElementById('sheetTypeLabel').innerHTML = 'Formative & Mid Term <span class="mx-2 text-slate-300">|</span> Signature Sheet';
+    }
+    document.getElementById('sheetTitle').textContent = `${courseCode} – ${program} / Semester ${semester}`;
+
+    // Download PDF via print dialog
+    function downloadPDF() {
+      window.print();
+    }
+
+    function buildSignatureTable(students) {
+      /* Template 1: Signature Sheet
+         Columns: S.No | Scholar ID | Name | Assignment(15) [Att/Sign] | Seminar(15) [Att/Sign] | Quiz(10) [Att/Sign] | MidTerm(20) [Att/Sign]
+      */
+      const subjects = [
+        { label: 'Assignment', max: 15 },
+        { label: 'Seminar', max: 15 },
+        { label: 'Quiz', max: 10 },
+        { label: 'Mid Term Exam', max: 20 }
+      ];
+
+      // Compute column widths: sno=4%, sid=12%, name=22%, each subj = (62/4)% each = ~15.5%
+      let html = `
+        <table class="cie-table">
+          <thead>
+            <tr>
+              <th style="width:4%">S.No</th>
+              <th style="width:12%">Scholar ID</th>
+              <th style="width:22%">Name</th>
+              ${subjects.map(s => `<th style="width:15.5%">${s.label} (${s.max})<br/><span style="font-size:8pt;font-weight:normal">Attendance Signature</span></th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      students.forEach((s, i) => {
+        html += `<tr>
+          <td class="sno">${i + 1}</td>
+          <td class="sid">${s.scholar_id}</td>
+          <td class="sname">${s.student_name}</td>
+          ${'<td></td>'.repeat(subjects.length)}
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      return html;
+    }
+
+    function buildMarksTable(students) {
+      /* Template 2: Marks Award Sheet
+         Columns: S.No | Scholar ID | Name |
+           Assignment(15) [Marks top / Sign bottom] |
+           Seminar(15) [Marks / Sign] |
+           Quiz(10) [Marks / Sign] |
+           Mid Term(20) [Marks / Sign]
+      */
+      const subjects = [
+        { label: 'Assignment', max: 15 },
+        { label: 'Seminar', max: 15 },
+        { label: 'Quiz', max: 10 },
+        { label: 'Mid Term Exam', max: 20 }
+      ];
+
+      let html = `
+        <table class="cie-table">
+          <thead>
+            <tr>
+              <th rowspan="2" style="width:4%">S.No</th>
+              <th rowspan="2" style="width:12%">Scholar ID</th>
+              <th rowspan="2" style="width:22%">Name</th>
+              ${subjects.map(s => `<th colspan="2" style="width:15.5%">${s.label}<br/>(${s.max})</th>`).join('')}
+            </tr>
+            <tr>
+              ${subjects.map(() => `<th style="font-weight:600; font-size:8pt; border-left:1pt solid rgba(255,255,255,0.3)">Marks</th><th style="font-weight:600; font-size:8pt; border-left:1pt solid rgba(255,255,255,0.3)">Sign</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      students.forEach((s, i) => {
+        html += `<tr>
+          <td class="sno">${i + 1}</td>
+          <td class="sid">${s.scholar_id}</td>
+          <td class="sname">${s.student_name}</td>
+          ${subjects.map(() => `<td style="border-right:1pt solid #1c4c94"></td><td></td>`).join('')}
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      return html;
+    }
+
+    async function load() {
+      try {
+        const r = await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`);
+        const students = await r.json();
+        document.getElementById('metaCount').textContent = students.length;
+
+        const tableArea = document.getElementById('tableArea');
+        if (type === 'marks') {
+          tableArea.innerHTML = buildMarksTable(students);
+        } else {
+          tableArea.innerHTML = buildSignatureTable(students);
+        }
+
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('previewWrapper').classList.remove('hidden');
+      } catch (e) {
+        document.getElementById('loadingState').innerHTML = `
+          <div class="text-center text-red-500">
+            <p class="font-semibold">Failed to load students</p>
+            <p class="text-sm mt-1">${e.message}</p>
+          </div>`;
+      }
+    }
+    load();
+  </script>
+</body>
+</html>

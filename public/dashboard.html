@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty Dashboard – CIE Tracker</title>
+  <meta name="description" content="Faculty dashboard for generating CIE sheets at DSVV." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f0f4f8; }
+    .sidebar { background: linear-gradient(180deg, #1c4c94 0%, #0d2854 100%); }
+    .nav-item { transition: all 0.15s; }
+    .nav-item:hover, .nav-item.active { background: rgba(253, 200, 44, 0.15); border-left: 3px solid #fdc82c; }
+    .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+    select:focus { outline: none; border-color: #1c4c94; box-shadow: 0 0 0 3px rgba(28, 76, 148, 0.1); }
+    .btn-sig { background: linear-gradient(135deg, #1c4c94, #0d2854); color: #fff; }
+    .btn-marks { background: linear-gradient(135deg, #e6b115, #fdc82c); color: #0d2854; }
+    .btn-sig:hover, .btn-marks:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+    .stat-card { border-left: 4px solid; }
+    .fade-in { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+    .loading { animation: pulse 1.5s infinite; }
+  </style>
+</head>
+<body class="flex flex-col sm:flex-row h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="sidebar w-full sm:w-64 flex-shrink-0 flex flex-col sm:h-full border-b sm:border-b-0 border-white/10 sm:overflow-y-auto z-20">
+    <div class="p-5 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="bg-white/10 rounded-xl w-10 h-10 flex items-center justify-center flex-shrink-0 p-1">
+          <img src="/logo_white.png" alt="DSVV" class="w-full h-full object-contain" onerror="this.src='/logo.png'" />
+        </div>
+        <div>
+          <p class="text-white font-bold text-sm leading-tight">CIE Tracker</p>
+          <p class="text-slate-400 text-xs">DSVV</p>
+        </div>
+      </div>
+    </div>
+    <nav class="p-3 flex-1">
+      <p class="text-slate-500 text-xs uppercase tracking-widest px-3 mb-2 mt-3">Faculty</p>
+      <a href="/dashboard.html" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-lg text-white text-sm mb-1" style="color: #fdc82c">
+        <svg class="w-4 h-4" style="color: #fdc82c" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Dashboard
+      </a>
+      <p class="text-slate-500 text-xs uppercase tracking-widest px-3 mb-2 mt-4">Administration</p>
+      <a href="/admin.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white text-sm mb-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        Upload Data
+      </a>
+      <a href="/data.html" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white text-sm mb-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        View / Manage Data
+      </a>
+    </nav>
+    <div class="p-4 border-t border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="bg-slate-700 rounded-full w-8 h-8 flex items-center justify-center">
+          <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p id="userDisplay" class="text-white text-xs font-medium truncate">–</p>
+          <p class="text-slate-500 text-xs">Faculty</p>
+        </div>
+        <button onclick="logout()" title="Logout" class="text-slate-500 hover:text-red-400 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 overflow-y-auto">
+    <!-- Topbar -->
+    <div class="bg-white border-b border-slate-100 px-4 sm:px-8 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 sticky top-0 z-10">
+      <div>
+        <h1 class="text-slate-800 font-bold text-lg">Generate CIE Sheet</h1>
+        <p class="text-slate-400 text-xs">Session: Jan – June 2026</p>
+      </div>
+      <span class="bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full">
+        Dev Sanskriti Vishwavidyalaya
+      </span>
+    </div>
+
+    <div class="p-4 sm:p-8 max-w-4xl mx-auto">
+
+      <!-- Stats row -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div class="card stat-card border-blue-500 p-5">
+          <p class="text-slate-500 text-xs uppercase tracking-wide mb-1">Total Programs</p>
+          <p id="statPrograms" class="text-2xl font-bold text-slate-800">–</p>
+        </div>
+        <div class="card stat-card border-amber-500 p-5">
+          <p class="text-slate-500 text-xs uppercase tracking-wide mb-1">Total Courses</p>
+          <p id="statCourses" class="text-2xl font-bold text-slate-800">–</p>
+        </div>
+        <div class="card stat-card border-green-500 p-5">
+          <p class="text-slate-500 text-xs uppercase tracking-wide mb-1">Total Students</p>
+          <p id="statStudents" class="text-2xl font-bold text-slate-800">–</p>
+        </div>
+      </div>
+
+      <!-- Form Card -->
+      <div class="card p-8">
+        <h2 class="text-slate-800 font-bold text-base mb-6 flex items-center gap-2">
+          <span class="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-xs font-bold">1</span>
+          Select Course & Students
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mb-6">
+          <!-- Program -->
+          <div>
+            <label class="text-slate-600 text-sm font-semibold block mb-2">Program *</label>
+            <select id="programSelect"
+              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-sm bg-slate-50">
+              <option value="">— Select Program —</option>
+            </select>
+          </div>
+          <!-- Semester -->
+          <div>
+            <label class="text-slate-600 text-sm font-semibold block mb-2">Semester *</label>
+            <select id="semesterSelect" disabled
+              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-400 text-sm bg-slate-50 disabled:opacity-60">
+              <option value="">— Select Semester —</option>
+            </select>
+          </div>
+          <!-- Course -->
+          <div>
+            <label class="text-slate-600 text-sm font-semibold block mb-2">Course *</label>
+            <select id="courseSelect" disabled
+              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-400 text-sm bg-slate-50 disabled:opacity-60">
+              <option value="">— Select Course —</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Faculty info -->
+        <div id="facultyInfo" class="hidden bg-blue-50 border border-blue-100 rounded-xl px-5 py-3 mb-4 text-sm fade-in">
+          <span class="text-slate-500">Assigned Faculty:</span>
+          <span id="facultyName" class="text-blue-700 font-semibold ml-1">–</span>
+        </div>
+
+        <!-- Student preview -->
+        <div id="studentPreview" class="hidden fade-in">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-slate-600 text-sm font-semibold">
+              Students enrolled: <span id="studentCount" class="text-blue-600 font-bold">0</span>
+            </p>
+          </div>
+          <div class="bg-slate-50 rounded-xl border border-slate-200 max-h-40 overflow-y-auto">
+            <ul id="studentList" class="divide-y divide-slate-100 text-sm"></ul>
+          </div>
+        </div>
+
+        <div id="noStudentsMsg" class="hidden text-center py-6 text-slate-400 text-sm fade-in">
+          <svg class="w-8 h-8 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          No students found for this program &amp; semester.
+        </div>
+
+        <hr class="border-slate-100 my-6" />
+
+        <!-- Generate buttons -->
+        <h2 class="text-slate-800 font-bold text-base mb-4 flex items-center gap-2">
+          <span class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 text-xs font-bold">2</span>
+          Generate Sheet
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+          <button id="btnSignature" onclick="generateSheet('signature')" disabled
+            class="btn-sig py-3.5 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            Generate Signature Sheet
+          </button>
+          <button id="btnMarks" onclick="generateSheet('marks')" disabled
+            class="btn-marks py-3.5 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            Generate Marks Award Sheet
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Auth guard
+    const user = sessionStorage.getItem('cie_user');
+    if (!user) window.location.href = '/';
+    document.getElementById('userDisplay').textContent = user || '–';
+
+    function logout() {
+      sessionStorage.removeItem('cie_user');
+      window.location.href = '/';
+    }
+
+    let students = [];
+
+    // Load stats
+    async function loadStats() {
+      try {
+        const r = await fetch('/api/data/stats');
+        const d = await r.json();
+        document.getElementById('statPrograms').textContent = d.programs ?? '–';
+        document.getElementById('statCourses').textContent = d.courses ?? '–';
+        document.getElementById('statStudents').textContent = d.students ?? '–';
+      } catch {}
+    }
+
+    // Load programs
+    async function loadPrograms() {
+      const sel = document.getElementById('programSelect');
+      try {
+        const r = await fetch('/api/data/programs');
+        const data = await r.json();
+        data.forEach(p => {
+          const o = document.createElement('option');
+          o.value = p.program_name;
+          o.textContent = p.program_name;
+          sel.appendChild(o);
+        });
+      } catch {}
+    }
+
+    // Program changed
+    document.getElementById('programSelect').addEventListener('change', async function() {
+      const program = this.value;
+      const semSel = document.getElementById('semesterSelect');
+      const cSel = document.getElementById('courseSelect');
+      semSel.innerHTML = '<option value="">— Select Semester —</option>';
+      cSel.innerHTML = '<option value="">— Select Course —</option>';
+      semSel.disabled = !program;
+      cSel.disabled = true;
+      document.getElementById('facultyInfo').classList.add('hidden');
+      clearStudents();
+
+      if (!program) return;
+      try {
+        const semRes = await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}`);
+        const sems = await semRes.json();
+        sems.forEach(s => {
+          const o = document.createElement('option');
+          o.value = s.semester; o.textContent = s.semester;
+          semSel.appendChild(o);
+        });
+        semSel.disabled = false;
+      } catch {}
+    });
+
+    // Semester changed
+    document.getElementById('semesterSelect').addEventListener('change', async function() {
+      const program = document.getElementById('programSelect').value;
+      const semester = this.value;
+      const cSel = document.getElementById('courseSelect');
+      cSel.innerHTML = '<option value="">— Select Course —</option>';
+      cSel.disabled = !semester;
+      document.getElementById('facultyInfo').classList.add('hidden');
+      
+      fetchStudents(); // still fetch students
+      
+      if (!semester) return;
+      try {
+        const courseRes = await fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`);
+        const courses = await courseRes.json();
+        courses.forEach(c => {
+          const o = document.createElement('option');
+          o.value = c.course_code;
+          o.textContent = `${c.course_code} – ${c.course_name}`;
+          o.dataset.faculty = c.faculty_name || '';
+          o.dataset.courseName = c.course_name;
+          cSel.appendChild(o);
+        });
+        cSel.disabled = false;
+      } catch {}
+    });
+    // Course changed
+    document.getElementById('courseSelect').addEventListener('change', function() {
+      const opt = this.options[this.selectedIndex];
+      if (opt && opt.dataset.faculty) {
+        document.getElementById('facultyName').textContent = opt.dataset.faculty;
+        document.getElementById('facultyInfo').classList.remove('hidden');
+      } else {
+        document.getElementById('facultyInfo').classList.add('hidden');
+      }
+      updateButtons();
+    });
+
+    async function fetchStudents() {
+      const program = document.getElementById('programSelect').value;
+      const semester = document.getElementById('semesterSelect').value;
+      if (!program || !semester) { clearStudents(); return; }
+      try {
+        const r = await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`);
+        students = await r.json();
+        renderStudents();
+      } catch {}
+      updateButtons();
+    }
+
+    function renderStudents() {
+      const preview = document.getElementById('studentPreview');
+      const noMsg = document.getElementById('noStudentsMsg');
+      const list = document.getElementById('studentList');
+      if (!students.length) {
+        preview.classList.add('hidden');
+        noMsg.classList.remove('hidden');
+        return;
+      }
+      noMsg.classList.add('hidden');
+      list.innerHTML = '';
+      students.forEach((s,i) => {
+        const li = document.createElement('li');
+        li.className = 'px-4 py-2 flex items-center gap-3';
+        li.innerHTML = `<span class="text-slate-400 text-xs w-5">${i+1}</span><span class="font-mono text-xs text-blue-600">${s.scholar_id}</span><span class="text-slate-700">${s.student_name}</span>`;
+        list.appendChild(li);
+      });
+      document.getElementById('studentCount').textContent = students.length;
+      preview.classList.remove('hidden');
+    }
+
+    function clearStudents() {
+      students = [];
+      document.getElementById('studentPreview').classList.add('hidden');
+      document.getElementById('noStudentsMsg').classList.add('hidden');
+      updateButtons();
+    }
+
+    function updateButtons() {
+      const program = document.getElementById('programSelect').value;
+      const semester = document.getElementById('semesterSelect').value;
+      const course = document.getElementById('courseSelect').value;
+      const ok = program && semester && course && students.length > 0;
+      document.getElementById('btnSignature').disabled = !ok;
+      document.getElementById('btnMarks').disabled = !ok;
+    }
+
+    function generateSheet(type) {
+      const program = document.getElementById('programSelect').value;
+      const semester = document.getElementById('semesterSelect').value;
+      const courseCode = document.getElementById('courseSelect').value;
+      const cOpt = document.getElementById('courseSelect').options[document.getElementById('courseSelect').selectedIndex];
+      const courseName = cOpt.dataset.courseName || courseCode;
+      const faculty = document.getElementById('facultyName').textContent;
+      const params = new URLSearchParams({ program, semester, courseCode, courseName, faculty, type });
+      window.open(`/generate.html?${params}`, '_blank');
+    }
+
+    loadStats();
+    loadPrograms();
+  </script>
+</body>
+</html>
