@@ -68,20 +68,27 @@ router.delete('/clear', async (req, res) => {
 // GET /api/schedule?program=&semester= — fetch schedule grouped by course
 router.get('/', async (req, res) => {
   const { program, semester } = req.query;
-  if (!program || !semester) return res.status(400).json({ error: 'program and semester required' });
   try {
-    const rows = await pool.query(
-      `SELECT course_name, faculty_name, exam_name, announcement_date, submission_date, conduction_date, show_marks_date
-       FROM schedule
-       WHERE program_name = $1 AND semester = $2
-       ORDER BY course_name, id`,
-      [program, semester]
-    );
-    // Group by course
+    let query = `SELECT program_name, semester, course_name, faculty_name, exam_name, announcement_date, submission_date, conduction_date, show_marks_date
+                 FROM schedule`;
+    const params = [];
+    if (program && semester) {
+      query += ` WHERE program_name = $1 AND semester = $2`;
+      params.push(program, semester);
+    }
+    query += ` ORDER BY program_name, semester, course_name, id`;
+
+    const rows = await pool.query(query, params);
+    
+    // Group by Program > Semester > Course
     const grouped = {};
     rows.rows.forEach(r => {
-      if (!grouped[r.course_name]) grouped[r.course_name] = { faculty_name: r.faculty_name, exams: [] };
-      grouped[r.course_name].exams.push({
+      const key = `${r.program_name} | Semester ${r.semester}`;
+      if (!grouped[key]) grouped[key] = {};
+      if (!grouped[key][r.course_name]) {
+        grouped[key][r.course_name] = { faculty_name: r.faculty_name, exams: [] };
+      }
+      grouped[key][r.course_name].exams.push({
         exam_name: r.exam_name,
         announcement_date: r.announcement_date,
         submission_date:   r.submission_date,
