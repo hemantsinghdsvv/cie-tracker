@@ -2,21 +2,17 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const XLSX = require('xlsx');
-const path = require('path');
 const pool = require('../database');
 
-const storage = multer.diskStorage({
-  destination: path.join(__dirname, '../uploads'),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
-});
-const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } });
+// Use memory storage — Vercel has a read-only filesystem
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
 // Upload Course Master Excel
 router.post('/courses', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
   const client = await pool.connect();
   try {
-    const workbook = XLSX.readFile(req.file.path);
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
     if (!rows.length) return res.status(400).json({ success: false, message: 'Excel file is empty' });
@@ -24,10 +20,10 @@ router.post('/courses', upload.single('file'), async (req, res) => {
     await client.query('BEGIN');
     let count = 0;
     for (const row of rows) {
-      const program  = (row['Program']     || row['program']     || '').toString().trim();
-      const code     = (row['Course Coder'] || row['Course Code'] || row['course_code'] || '').toString().trim();
-      const name     = (row['Course Name']  || row['course_name'] || '').toString().trim();
-      const faculty  = (row['Allocation']   || row['allocation']  || row['Faculty']     || '').toString().trim();
+      const program  = (row['Program']      || row['program']      || '').toString().trim();
+      const code     = (row['Course Coder'] || row['Course Code']  || row['course_code'] || '').toString().trim();
+      const name     = (row['Course Name']  || row['course_name']  || '').toString().trim();
+      const faculty  = (row['Allocation']   || row['allocation']   || row['Faculty']     || '').toString().trim();
       const semester = (row['Semester']     || row['semester']     || '').toString().trim();
       if (!program || !code || !name || !semester) continue;
 
@@ -60,7 +56,7 @@ router.post('/students', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
   const client = await pool.connect();
   try {
-    const workbook = XLSX.readFile(req.file.path);
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
     if (!rows.length) return res.status(400).json({ success: false, message: 'Excel file is empty' });
@@ -68,10 +64,10 @@ router.post('/students', upload.single('file'), async (req, res) => {
     await client.query('BEGIN');
     let count = 0;
     for (const row of rows) {
-      const id       = (row['Scholar ID']    || row['scholar_id'] || row['ScholarID'] || '').toString().trim();
-      const name     = (row['Student Name']  || row['student_name'] || row['Name']   || '').toString().trim();
-      const program  = (row['Program']       || row['program']    || '').toString().trim();
-      const semester = (row['Semester']      || row['semester']   || '').toString().trim();
+      const id       = (row['Scholar ID']   || row['scholar_id'] || row['ScholarID'] || '').toString().trim();
+      const name     = (row['Student Name'] || row['student_name'] || row['Name']    || '').toString().trim();
+      const program  = (row['Program']      || row['program']    || '').toString().trim();
+      const semester = (row['Semester']     || row['semester']   || '').toString().trim();
       if (!id || !name || !program || !semester) continue;
 
       await client.query(

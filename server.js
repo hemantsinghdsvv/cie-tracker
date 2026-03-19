@@ -21,6 +21,11 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ CIE Tracker running at http://localhost:${PORT}`);
-});
+// Export for Vercel serverless — listen only in local dev
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`✅ CIE Tracker running at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
