@@ -129,9 +129,14 @@
       <h2 style="font-size:20px;font-weight:800;color:#1e293b;margin-bottom:6px">Select Academic Session</h2>
       <p style="font-size:13px;color:#64748b;margin-bottom:24px">Choose the session you are working on. This will apply to all modules.</p>
       <div style="display:grid;gap:10px;margin-bottom:20px">
-        <button class="session-btn" onclick="selectSession('January – June 2026')">📅 January – June 2026</button>
-        <button class="session-btn" onclick="selectSession('July – December 2025')">📅 July – December 2025</button>
-        <button class="session-btn" onclick="selectSession('July – December 2026')">📅 July – December 2026</button>
+        <button class="session-btn" onclick="selectSession('January – June 2026')">
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;display:block;margin-bottom:2px">Current Session</span>
+          📅 January – June 2026
+        </button>
+        <button class="session-btn" onclick="selectSession('July – December 2025')">
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;display:block;margin-bottom:2px">Previous Session</span>
+          📅 July – December 2025
+        </button>
       </div>
       <p style="font-size:11px;color:#94a3b8">You can change the session anytime from the sidebar</p>
     </div>
