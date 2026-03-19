@@ -4,18 +4,83 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Faculty Dashboard – CIE Tracker</title>
-  <meta name="description" content="Faculty dashboard for CIE Tracker at DSVV." />
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    body { font-family: 'Inter', sans-serif; background: #f0f4f8; }
-    .topbar { background: linear-gradient(135deg, #1c4c94 0%, #0d2854 100%); }
-    .tab-btn { transition: all 0.2s; }
-    .tab-btn.active { color: #fdc82c; border-bottom: 3px solid #fdc82c; }
-    .tab-btn:not(.active) { color: rgba(255,255,255,0.65); border-bottom: 3px solid transparent; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.25s ease; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f0f4f8; margin: 0; display: flex; height: 100dvh; overflow: hidden; }
+
+    /* ── Sidebar ─────────────────────────────────────── */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, #1c4c94 0%, #0d2854 100%);
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      z-index: 40;
+      transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+      overflow-y: auto;
+    }
+    .sidebar.hidden-mobile { transform: translateX(-100%); }
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 39;
+    }
+    .sidebar-overlay.show { display: block; }
+
+    /* ── Nav item ─────────────────────────────────────── */
+    .nav-item {
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 14px; border-radius: 10px; cursor: pointer;
+      color: rgba(255,255,255,0.65); font-size: 14px; font-weight: 500;
+      transition: all 0.18s; border-left: 3px solid transparent;
+      text-decoration: none; margin: 2px 0;
+    }
+    .nav-item:hover { background: rgba(253,200,44,0.12); color: #fff; }
+    .nav-item.active {
+      background: rgba(253,200,44,0.18);
+      border-left-color: #fdc82c;
+      color: #fdc82c;
+    }
+    .nav-item .icon { font-size: 17px; width: 22px; text-align: center; }
+
+    /* ── Main content ─────────────────────────────────── */
+    .main-wrap {
+      margin-left: 240px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      overflow: hidden;
+    }
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 20px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      position: sticky; top: 0; z-index: 30;
+    }
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 20px;
+    }
+
+    /* ── Tab Content ──────────────────────────────────── */
+    .section { display: none; animation: fadeIn 0.22s ease; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── Form Controls ────────────────────────────────── */
     select {
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -24,422 +89,453 @@
       padding-right: 36px;
     }
     select:focus { outline: none; border-color: #1c4c94; box-shadow: 0 0 0 3px rgba(28,76,148,0.1); }
-    .btn-primary { background: linear-gradient(135deg,#1c4c94,#0d2854); color:#fff; transition: all 0.2s; }
+    input[type=number]:focus { outline: none; }
+    .input-sm { border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 14px; width: 100%; background: #fff; }
+    .btn-primary { background: linear-gradient(135deg,#1c4c94,#0d2854); color:#fff; border-radius:10px; padding:10px 18px; font-size:14px; font-weight:600; border:none; cursor:pointer; display:inline-flex;align-items:center;gap:6px; transition:all 0.18s; }
     .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.2); }
-    .btn-gold { background: linear-gradient(135deg,#e6b115,#fdc82c); color:#0d2854; transition: all 0.2s; }
+    .btn-primary:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+    .btn-gold { background: linear-gradient(135deg,#e6b115,#fdc82c); color:#0d2854; border-radius:10px; padding:10px 18px; font-size:14px; font-weight:600; border:none; cursor:pointer; display:inline-flex;align-items:center;gap:6px; transition:all 0.18s; }
     .btn-gold:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.15); }
-    .notice-card { border: 1.5px solid #1c4c94; }
-    .notice-table td, .notice-table th { border: 1px solid #aaa; padding: 6px 10px; font-size: 13px; }
-    .notice-table { border-collapse: collapse; width: 100%; }
-    /* Bottom nav for mobile */
-    .bottom-nav { background: linear-gradient(135deg,#1c4c94,#0d2854); }
-    .bnav-btn { flex:1; transition: all 0.2s; }
-    .bnav-btn.active { color: #fdc82c; }
-    .bnav-btn:not(.active) { color: rgba(255,255,255,0.6); }
+    .btn-gold:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+    .card { background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px; margin-bottom:16px; }
+
+    /* notice table */
+    .notice-table td,.notice-table th { border:1px solid #aaa; padding:6px 10px; font-size:12.5px; }
+    .notice-table { border-collapse:collapse; width:100%; }
+
+    /* marks input */
+    .marks-input {
+      width:70px; border:1px solid #e2e8f0; border-radius:8px; padding:6px 4px;
+      text-align:center; font-size:13px;
+    }
+    .marks-input:focus { border-color:#1c4c94; outline:none; }
+
+    /* Mobile header hamburger */
+    @media (max-width: 767px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-wrap { margin-left: 0; }
+    }
   </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body>
 
-  <!-- Top Bar -->
-  <div class="topbar sticky top-0 z-30">
-    <div class="flex items-center justify-between px-4 py-3">
-      <div class="flex items-center gap-3">
-        <img src="/logo_white.png" alt="DSVV" class="h-8 w-auto" onerror="this.src='/logo.png'" />
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ── SIDEBAR ────────────────────────────────────────────── -->
+  <aside class="sidebar hidden-mobile" id="sidebar">
+    <!-- Logo -->
+    <div style="padding:18px 16px 14px; border-bottom:1px solid rgba(255,255,255,0.08)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="/logo_white.png" alt="DSVV" style="height:36px;width:auto" onerror="this.src='/logo.png'" />
         <div>
-          <p class="text-white font-bold text-sm leading-tight">CIE Tracker</p>
-          <p class="text-blue-200 text-xs">Dept. of Computer Science, DSVV</p>
+          <div style="color:#fff;font-weight:700;font-size:14px;line-height:1.2">CIE Tracker</div>
+          <div style="color:rgba(255,255,255,0.45);font-size:11px">DSVV – Computer Science</div>
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="text-blue-200 text-xs hidden sm:inline" id="userDisplay">–</span>
-        <a href="/admin.html" class="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          Upload Data
-        </a>
-        <button onclick="logout()" class="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-          Logout
+    </div>
+
+    <!-- Nav Links -->
+    <div style="padding:12px 10px;flex:1">
+      <div style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:8px 6px 4px">Overview</div>
+      <a class="nav-item active" id="nav-notice" onclick="switchSection('notice')">
+        <span class="icon">📢</span> Official Notice
+      </a>
+      <a class="nav-item" id="nav-examplan" onclick="switchSection('examplan')">
+        <span class="icon">📋</span> Exam Plan
+      </a>
+
+      <div style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:14px 6px 4px">Faculty Tools</div>
+      <a class="nav-item" id="nav-generate" onclick="switchSection('generate')">
+        <span class="icon">📄</span> Generate Sheets
+      </a>
+      <a class="nav-item" id="nav-marks" onclick="switchSection('marks')">
+        <span class="icon">✏️</span> Marks Entry
+      </a>
+
+      <div style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:14px 6px 4px">Administration</div>
+      <a class="nav-item" href="/admin.html">
+        <span class="icon">⬆️</span> Upload Data
+      </a>
+      <a class="nav-item" href="/data.html">
+        <span class="icon">🗃️</span> Manage Data
+      </a>
+    </div>
+
+    <!-- Bottom user info -->
+    <div style="padding:14px 16px;border-top:1px solid rgba(255,255,255,0.08)">
+      <div style="color:rgba(255,255,255,0.5);font-size:11px;margin-bottom:6px">Logged in as</div>
+      <div style="color:#fff;font-size:13px;font-weight:600" id="userDisplay">–</div>
+      <button onclick="logout()" style="margin-top:10px;width:100%;background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:7px;color:rgba(255,255,255,0.75);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ──────────────────────────────────────────────── -->
+  <div class="main-wrap">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <!-- Hamburger (mobile) -->
+        <button onclick="toggleSidebar()" class="md:hidden" style="background:none;border:none;cursor:pointer;padding:4px;display:none" id="hamburger">
+          <svg width="22" height="22" fill="none" stroke="#1c4c94" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
+        <div>
+          <span id="pageTitle" style="font-size:16px;font-weight:700;color:#1e293b">Official Notice</span>
+          <span style="color:#94a3b8;font-size:12px;margin-left:8px" id="pageSubtitle">Formative Exam Guidelines</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:#64748b;display:none" class="sm:inline" id="userDisplayTop">–</span>
       </div>
     </div>
-    <!-- Desktop Tab Bar -->
-    <div class="hidden sm:flex border-t border-white/10 px-2">
-      <button onclick="switchTab('notice')" id="dt-notice" class="tab-btn text-sm font-medium px-5 py-2.5">📢 Notice</button>
-      <button onclick="switchTab('examplan')" id="dt-examplan" class="tab-btn text-sm font-medium px-5 py-2.5">📋 Exam Plan</button>
-      <button onclick="switchTab('generate')" id="dt-generate" class="tab-btn text-sm font-medium px-5 py-2.5">📄 Generate Sheets</button>
-      <button onclick="switchTab('marks')" id="dt-marks" class="tab-btn text-sm font-medium px-5 py-2.5">✏️ Marks Entry</button>
-    </div>
-  </div>
 
-  <!-- Main Content -->
-  <main class="flex-1 overflow-y-auto pb-24 sm:pb-4 px-4 sm:px-6 py-4 max-w-4xl mx-auto w-full">
+    <!-- Content -->
+    <div class="content-area">
 
-    <!-- ── TAB 1: NOTICE ──────────────────────────────────────────────── -->
-    <div id="tab-notice" class="tab-content">
-      <h2 class="text-slate-700 font-bold text-lg mb-4 flex items-center gap-2">
-        <span class="text-2xl">📢</span> Official Notice
-      </h2>
-      <div class="bg-white rounded-2xl shadow-sm overflow-hidden notice-card">
-        <!-- Unicode-styled notice rendering -->
-        <div class="p-5 sm:p-8 text-slate-800 max-w-2xl mx-auto">
-          <!-- Header -->
-          <div class="flex items-center gap-4 mb-4 pb-4 border-b-2 border-[#1c4c94]">
-            <img src="/logo.png" alt="DSVV" class="h-14 w-auto" />
+      <!-- ── NOTICE ──────────────────────────────────────── -->
+      <div id="section-notice" class="section active">
+        <div class="card" style="max-width:720px;margin:0 auto">
+          <div style="display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:2px solid #1c4c94;margin-bottom:16px">
+            <img src="/logo.png" alt="DSVV" style="height:52px;width:auto" />
             <div>
-              <h1 class="text-[#1c4c94] font-bold text-base sm:text-lg leading-tight">Dev Sanskriti Vishwavidyalaya</h1>
-              <p class="text-slate-500 text-xs">Gayatrikunj–Shantikunj, Haridwar (Uttarakhand) 249411</p>
+              <div style="color:#1c4c94;font-weight:700;font-size:15px">Dev Sanskriti Vishwavidyalaya</div>
+              <div style="color:#64748b;font-size:11px">Gayatrikunj–Shantikunj, Haridwar (Uttarakhand) 249411</div>
             </div>
           </div>
-          <div class="flex justify-between items-start mb-3">
-            <p class="font-bold text-slate-700 text-sm uppercase tracking-wide">NOTICE</p>
-            <p class="text-slate-500 text-xs">Date: 19th February 2026</p>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+            <div style="font-weight:700;letter-spacing:.05em;color:#1e293b">NOTICE</div>
+            <div style="color:#64748b;font-size:11px">Date: 19th February 2026</div>
           </div>
-          <p class="text-sm text-slate-700 mb-4 leading-relaxed">
+          <p style="font-size:13px;color:#334155;line-height:1.7;margin-bottom:14px">
             This is to inform all Students, Faculty Members, HoDs and Deans about the upcoming academic activities, including Mid-Term Examinations, Assignments, Seminars and Viva/Group Discussions (GD). The detailed schedule and guidelines are as follows:
           </p>
-
-          <p class="font-bold text-sm text-slate-800 mb-2">1. Schedule of Academic Activities</p>
-          <p class="font-semibold text-xs text-[#1c4c94] mb-2">UG Major Courses: PG/Minor/SEC/Multidisciplinary/AEC</p>
-
-          <div class="overflow-x-auto mb-5">
-            <table class="notice-table text-xs">
+          <p style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:8px">1. Schedule of Academic Activities</p>
+          <p style="font-weight:600;font-size:12px;color:#1c4c94;margin-bottom:8px">UG Major Courses: PG/Minor/SEC/Multidisciplinary/AEC</p>
+          <div style="overflow-x:auto;margin-bottom:16px">
+            <table class="notice-table">
               <tbody>
-                <tr class="bg-slate-50">
-                  <td class="font-medium w-1/2"><span class="text-[#1c4c94] font-semibold">UG</span>–Assignment (15 Marks) and Seminar (15 Marks)<br/><span class="text-purple-700 font-semibold">PG</span>–Assignment (10 Marks) and Seminar (10 Marks)</td>
+                <tr style="background:#f8fafc">
+                  <td style="width:45%"><strong style="color:#1c4c94">UG</strong> – Assignment (15 Marks) &amp; Seminar (15 Marks)<br/><strong style="color:#7c3aed">PG</strong> – Assignment (10 Marks) &amp; Seminar (10 Marks)</td>
                   <td>Date to be decided by instructor</td>
-                  <td><strong>Timing:</strong> During their class / As per instructor</td>
+                  <td><strong>Timing:</strong> During class / As per instructor</td>
                 </tr>
                 <tr>
                   <td>Marks Uploading in ERP for Assignment-1 and Seminar-1</td>
                   <td colspan="2"><strong>By 15th May 2026</strong></td>
                 </tr>
-                <tr class="bg-slate-50">
-                  <td>Viva / Group Discussion (GD) / Other Assessments: (10 Marks)</td>
+                <tr style="background:#f8fafc">
+                  <td>Viva / Group Discussion (GD) / Other Assessments (10 Marks)</td>
                   <td>Date to be decided by instructor</td>
-                  <td>During their class / As per instructor</td>
+                  <td>During class / As per instructor</td>
                 </tr>
                 <tr>
                   <td>Marks Uploading in ERP for Viva / GD / Other Assessments</td>
                   <td colspan="2"><strong>By 15th May 2026</strong></td>
                 </tr>
-                <tr class="bg-slate-50">
+                <tr style="background:#f8fafc">
                   <td><strong>UG Mid-Term Examinations / PG</strong></td>
-                  <td><strong>23rd to 30th April 2026</strong></td>
-                  <td>During their class / As per instructor</td>
+                  <td><strong>23rd – 30th April 2026</strong></td>
+                  <td>During class / As per instructor</td>
                 </tr>
                 <tr>
-                  <td>Marks Uploading in ERP for UG Mid-Term Examinations / PG</td>
+                  <td>Marks Uploading for UG Mid-Term / PG</td>
                   <td colspan="2"><strong>By 19th July 2026</strong></td>
                 </tr>
               </tbody>
             </table>
           </div>
-
-          <p class="font-bold text-sm text-slate-800 mb-2">2. Guidelines for Mid-Term Examinations</p>
-          <ul class="text-xs text-slate-700 list-disc list-inside mb-4 space-y-1 leading-relaxed">
+          <p style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:8px">2. Guidelines for Mid-Term Examinations</p>
+          <ul style="font-size:13px;color:#334155;line-height:1.8;padding-left:20px;margin-bottom:12px">
             <li>Mid-Term Examinations will be conducted by the respective instructors during their classes.</li>
             <li>Instructors are required to prepare their own question papers.</li>
-            <li>Examination Cell will observe the following examination in their respective classes.</li>
+            <li>Examination Cell will observe the examination in their respective classes.</li>
           </ul>
-          <p class="text-xs text-slate-700 leading-relaxed">
-            <strong>3. Notice to Students:</strong> All students are required to adhere to the examination schedule and Guidelines issued by their respective Departments / Instructors.
+          <p style="font-size:13px;color:#334155;line-height:1.7">
+            <strong>3. Notice to Students:</strong> All students are required to adhere to the examination schedule and guidelines issued by their respective Departments / Instructors.
           </p>
-          <div class="mt-6 text-right text-sm text-slate-700 font-semibold">For. Registrar</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── TAB 2: EXAM PLAN ─────────────────────────────────────────── -->
-    <div id="tab-examplan" class="tab-content">
-      <h2 class="text-slate-700 font-bold text-lg mb-4 flex items-center gap-2">
-        <span class="text-2xl">📋</span> Exam Component Plan
-      </h2>
-
-      <!-- UG Table -->
-      <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6 mb-5">
-        <div class="flex items-center gap-2 mb-4">
-          <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">UG Programs</span>
-          <span class="text-slate-400 text-xs">BCA, BIT, MINOR, SEC, MULTI, AEC</span>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm border-collapse">
-            <thead>
-              <tr class="bg-[#1c4c94] text-white">
-                <th class="px-4 py-2.5 text-left rounded-tl-lg">Component</th>
-                <th class="px-4 py-2.5 text-center">Max Marks</th>
-                <th class="px-4 py-2.5 text-left rounded-tr-lg">Schedule / Timing</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="border-b border-slate-100">
-                <td class="px-4 py-3 font-medium">Assignment</td>
-                <td class="px-4 py-3 text-center"><span class="bg-green-100 text-green-700 font-bold text-sm px-2 py-0.5 rounded-lg">15</span></td>
-                <td class="px-4 py-3 text-slate-500 text-xs">Date decided by instructor — during class</td>
-              </tr>
-              <tr class="border-b border-slate-100 bg-slate-50">
-                <td class="px-4 py-3 font-medium">Seminar</td>
-                <td class="px-4 py-3 text-center"><span class="bg-green-100 text-green-700 font-bold text-sm px-2 py-0.5 rounded-lg">15</span></td>
-                <td class="px-4 py-3 text-slate-500 text-xs">Date decided by instructor — during class</td>
-              </tr>
-              <tr class="border-b border-slate-100">
-                <td class="px-4 py-3 font-medium">Viva / Quiz / Group Discussion</td>
-                <td class="px-4 py-3 text-center"><span class="bg-amber-100 text-amber-700 font-bold text-sm px-2 py-0.5 rounded-lg">10</span></td>
-                <td class="px-4 py-3 text-slate-500 text-xs">Date decided by instructor — during class</td>
-              </tr>
-              <tr class="border-b border-slate-100 bg-slate-50">
-                <td class="px-4 py-3 font-medium">Mid-Term Examination</td>
-                <td class="px-4 py-3 text-center"><span class="bg-red-100 text-red-700 font-bold text-sm px-2 py-0.5 rounded-lg">20</span></td>
-                <td class="px-4 py-3 text-slate-500 text-xs">23rd – 30th April 2026</td>
-              </tr>
-              <tr class="bg-[#1c4c94]/5">
-                <td class="px-4 py-3 font-bold text-[#1c4c94]">Total</td>
-                <td class="px-4 py-3 text-center"><span class="bg-[#1c4c94] text-white font-bold text-sm px-3 py-0.5 rounded-lg">60</span></td>
-                <td class="px-4 py-3 text-slate-400 text-xs">Marks upload deadline: 19th July 2026</td>
-              </tr>
-            </tbody>
-          </table>
+          <div style="text-align:right;margin-top:24px;font-size:13px;font-weight:600;color:#1e293b">For. Registrar</div>
         </div>
       </div>
 
-      <!-- PG Table -->
-      <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6">
-        <div class="flex items-center gap-2 mb-4">
-          <span class="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">PG Programs</span>
-          <span class="text-slate-400 text-xs">MCA-DS and other PG courses</span>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm border-collapse">
-            <thead>
-              <tr class="bg-purple-700 text-white">
-                <th class="px-4 py-2.5 text-left rounded-tl-lg">Component</th>
-                <th class="px-4 py-2.5 text-center">Max Marks</th>
-                <th class="px-4 py-2.5 text-left rounded-tr-lg">Schedule / Timing</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="border-b border-slate-100">
-                <td class="px-4 py-3 font-medium">Assignment</td>
-                <td class="px-4 py-3 text-center"><span class="bg-green-100 text-green-700 font-bold text-sm px-2 py-0.5 rounded-lg">10</span></td>
-                <td class="px-4 py-3 text-slate-500 text-xs">Date decided by instructor — during class</td>
-              </tr>
-              <tr class="border-b border-slate-100 bg-slate-50">
-                <td class="px-4 py-3 font-medium">Seminar</td>
-                <td class="px-4 py-3 text-center"><span class="bg-green-100 text-green-700 font-bold text-sm px-2 py-0.5 rounded-lg">10</span></td>
-                <td class="px-4 py-3 text-slate-500 text-xs">Date decided by instructor — during class</td>
-              </tr>
-              <tr class="border-b border-slate-100">
-                <td class="px-4 py-3 font-medium">Mid-Term Examination</td>
-                <td class="px-4 py-3 text-center"><span class="bg-red-100 text-red-700 font-bold text-sm px-2 py-0.5 rounded-lg">20</span></td>
-                <td class="px-4 py-3 text-slate-500 text-xs">23rd – 30th April 2026</td>
-              </tr>
-              <tr class="bg-purple-700/5">
-                <td class="px-4 py-3 font-bold text-purple-700">Total</td>
-                <td class="px-4 py-3 text-center"><span class="bg-purple-700 text-white font-bold text-sm px-3 py-0.5 rounded-lg">40</span></td>
-                <td class="px-4 py-3 text-slate-400 text-xs">Marks upload deadline: 19th July 2026</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      <!-- ── EXAM PLAN ────────────────────────────────────── -->
+      <div id="section-examplan" class="section">
+        <div style="display:grid;gap:16px;grid-template-columns:1fr;max-width:720px">
 
-    <!-- ── TAB 3: GENERATE SHEETS ──────────────────────────────────── -->
-    <div id="tab-generate" class="tab-content">
-      <h2 class="text-slate-700 font-bold text-lg mb-4 flex items-center gap-2">
-        <span class="text-2xl">📄</span> Generate Sheets
-      </h2>
-
-      <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6">
-        <!-- Stats -->
-        <div class="grid grid-cols-3 gap-3 mb-6">
-          <div class="text-center p-3 bg-blue-50 rounded-xl">
-            <p class="text-2xl font-bold text-[#1c4c94]" id="statPrograms">–</p>
-            <p class="text-xs text-slate-500 mt-1">Programs</p>
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+              <span style="background:#dbeafe;color:#1c4c94;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px">UG Programs</span>
+              <span style="color:#94a3b8;font-size:12px">BCA, BIT, MINOR, SEC, MULTI, AEC</span>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+                <thead>
+                  <tr style="background:#1c4c94;color:#fff">
+                    <th style="padding:10px 14px;text-align:left;border-radius:8px 0 0 0">Component</th>
+                    <th style="padding:10px 14px;text-align:center">Max Marks</th>
+                    <th style="padding:10px 14px;text-align:left;border-radius:0 8px 0 0">Schedule</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom:1px solid #f1f5f9">
+                    <td style="padding:10px 14px;font-weight:500">Assignment</td>
+                    <td style="padding:10px 14px;text-align:center"><span style="background:#dcfce7;color:#16a34a;font-weight:700;padding:2px 10px;border-radius:8px">15</span></td>
+                    <td style="padding:10px 14px;color:#64748b;font-size:12px">Date decided by instructor</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #f1f5f9;background:#f8fafc">
+                    <td style="padding:10px 14px;font-weight:500">Seminar</td>
+                    <td style="padding:10px 14px;text-align:center"><span style="background:#dcfce7;color:#16a34a;font-weight:700;padding:2px 10px;border-radius:8px">15</span></td>
+                    <td style="padding:10px 14px;color:#64748b;font-size:12px">Date decided by instructor</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #f1f5f9">
+                    <td style="padding:10px 14px;font-weight:500">Viva / Quiz / Group Discussion</td>
+                    <td style="padding:10px 14px;text-align:center"><span style="background:#fef3c7;color:#d97706;font-weight:700;padding:2px 10px;border-radius:8px">10</span></td>
+                    <td style="padding:10px 14px;color:#64748b;font-size:12px">Date decided by instructor</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #f1f5f9;background:#f8fafc">
+                    <td style="padding:10px 14px;font-weight:500">Mid-Term Examination</td>
+                    <td style="padding:10px 14px;text-align:center"><span style="background:#fee2e2;color:#dc2626;font-weight:700;padding:2px 10px;border-radius:8px">20</span></td>
+                    <td style="padding:10px 14px;color:#64748b;font-size:12px">23rd – 30th April 2026</td>
+                  </tr>
+                  <tr style="background:#eff6ff">
+                    <td style="padding:10px 14px;font-weight:700;color:#1c4c94">Total</td>
+                    <td style="padding:10px 14px;text-align:center"><span style="background:#1c4c94;color:#fff;font-weight:700;padding:2px 12px;border-radius:8px">60</span></td>
+                    <td style="padding:10px 14px;color:#94a3b8;font-size:12px">Upload deadline: 19th July 2026</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div class="text-center p-3 bg-amber-50 rounded-xl">
-            <p class="text-2xl font-bold text-amber-600" id="statCourses">–</p>
-            <p class="text-xs text-slate-500 mt-1">Courses</p>
-          </div>
-          <div class="text-center p-3 bg-green-50 rounded-xl">
-            <p class="text-2xl font-bold text-green-600" id="statStudents">–</p>
-            <p class="text-xs text-slate-500 mt-1">Students</p>
+
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+              <span style="background:#f3e8ff;color:#7c3aed;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px">PG Programs</span>
+              <span style="color:#94a3b8;font-size:12px">MCA-DS and other PG courses</span>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+                <thead>
+                  <tr style="background:#7c3aed;color:#fff">
+                    <th style="padding:10px 14px;text-align:left;border-radius:8px 0 0 0">Component</th>
+                    <th style="padding:10px 14px;text-align:center">Max Marks</th>
+                    <th style="padding:10px 14px;text-align:left;border-radius:0 8px 0 0">Schedule</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom:1px solid #f1f5f9">
+                    <td style="padding:10px 14px;font-weight:500">Assignment</td>
+                    <td style="padding:10px 14px;text-align:center"><span style="background:#dcfce7;color:#16a34a;font-weight:700;padding:2px 10px;border-radius:8px">10</span></td>
+                    <td style="padding:10px 14px;color:#64748b;font-size:12px">Date decided by instructor</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #f1f5f9;background:#f8fafc">
+                    <td style="padding:10px 14px;font-weight:500">Seminar</td>
+                    <td style="padding:10px 14px;text-align:center"><span style="background:#dcfce7;color:#16a34a;font-weight:700;padding:2px 10px;border-radius:8px">10</span></td>
+                    <td style="padding:10px 14px;color:#64748b;font-size:12px">Date decided by instructor</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #f1f5f9">
+                    <td style="padding:10px 14px;font-weight:500">Mid-Term Examination</td>
+                    <td style="padding:10px 14px;text-align:center"><span style="background:#fee2e2;color:#dc2626;font-weight:700;padding:2px 10px;border-radius:8px">20</span></td>
+                    <td style="padding:10px 14px;color:#64748b;font-size:12px">23rd – 30th April 2026</td>
+                  </tr>
+                  <tr style="background:#faf5ff">
+                    <td style="padding:10px 14px;font-weight:700;color:#7c3aed">Total</td>
+                    <td style="padding:10px 14px;text-align:center"><span style="background:#7c3aed;color:#fff;font-weight:700;padding:2px 12px;border-radius:8px">40</span></td>
+                    <td style="padding:10px 14px;color:#94a3b8;font-size:12px">Upload deadline: 19th July 2026</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+      </div>
 
-        <h3 class="text-slate-700 font-semibold text-sm mb-3 flex items-center gap-2">
-          <span class="w-5 h-5 bg-blue-100 rounded-md flex items-center justify-center text-blue-600 text-xs font-bold">1</span>
-          Select Course
-        </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-          <select id="programSelect" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 bg-white">
-            <option value="">— Program —</option>
-          </select>
-          <select id="semesterSelect" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 bg-white" disabled>
-            <option value="">— Semester —</option>
-          </select>
-          <select id="courseSelect" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 bg-white" disabled>
-            <option value="">— Course —</option>
-          </select>
-        </div>
+      <!-- ── GENERATE SHEETS ──────────────────────────────── -->
+      <div id="section-generate" class="section">
+        <div class="card" style="max-width:680px">
+          <!-- Stats -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+            <div style="text-align:center;padding:12px;background:#eff6ff;border-radius:12px">
+              <div style="font-size:24px;font-weight:800;color:#1c4c94" id="statPrograms">–</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px">Programs</div>
+            </div>
+            <div style="text-align:center;padding:12px;background:#fffbeb;border-radius:12px">
+              <div style="font-size:24px;font-weight:800;color:#d97706" id="statCourses">–</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px">Courses</div>
+            </div>
+            <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:12px">
+              <div style="font-size:24px;font-weight:800;color:#16a34a" id="statStudents">–</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px">Students</div>
+            </div>
+          </div>
 
-        <div id="facultyInfo" class="hidden mb-4 px-3 py-2 bg-blue-50 rounded-xl text-sm text-blue-800 flex items-center gap-2">
-          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-          Faculty: <strong id="facultyName">–</strong>
-        </div>
+          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:10px">Step 1 — Select Course</div>
+          <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px">
+            <select id="programSelect" class="input-sm" style="color:#334155">
+              <option value="">— Select Program —</option>
+            </select>
+            <select id="semesterSelect" class="input-sm" disabled style="color:#334155">
+              <option value="">— Select Semester —</option>
+            </select>
+            <select id="courseSelect" class="input-sm" disabled style="color:#334155">
+              <option value="">— Select Course —</option>
+            </select>
+          </div>
 
-        <!-- Student list -->
-        <div id="studentPreview" class="hidden mb-5">
-          <h3 class="text-slate-700 font-semibold text-sm mb-2 flex items-center gap-2">
-            <span class="w-5 h-5 bg-green-100 rounded-md flex items-center justify-center text-green-600 text-xs font-bold">2</span>
-            Students (<span id="studentCount">0</span>)
-          </h3>
-          <div class="border border-slate-100 rounded-xl overflow-hidden max-h-40 overflow-y-auto">
-            <ul id="studentList" class="divide-y divide-slate-50 text-sm"></ul>
+          <div id="facultyInfo" style="display:none;background:#eff6ff;border-radius:10px;padding:9px 14px;font-size:13px;color:#1c4c94;margin-bottom:14px">
+            👤 Faculty: <strong id="facultyName">–</strong>
+          </div>
+
+          <div id="studentPreview" style="display:none;margin-bottom:16px">
+            <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:8px">Step 2 — Students (<span id="studentCount">0</span>)</div>
+            <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;max-height:160px;overflow-y:auto">
+              <ul id="studentList" style="list-style:none;margin:0;padding:0"></ul>
+            </div>
+          </div>
+          <div id="noStudentsMsg" style="display:none;text-align:center;color:#94a3b8;padding:16px;font-size:13px">No students found.</div>
+
+          <hr style="border:none;border-top:1px solid #f1f5f9;margin:16px 0" />
+
+          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:10px">Step 3 — Generate Sheet</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <button id="btnSignature" onclick="generateSheet('signature')" disabled class="btn-primary">
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              Signature Sheet
+            </button>
+            <button id="btnMarks" onclick="generateSheet('marks')" disabled class="btn-gold">
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+              Marks Award Sheet
+            </button>
+          </div>
+
+          <hr style="border:none;border-top:1px solid #f1f5f9;margin-bottom:12px" />
+          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:4px">⭐ Master Download — All Courses at Once</div>
+          <div style="font-size:12px;color:#94a3b8;margin-bottom:10px">Available after selecting Program + Semester</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button id="btnMasterSig" onclick="masterDownload('signature')" disabled
+              style="background:#7c3aed;color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;opacity:0.4">
+              📥 All Signature Sheets
+            </button>
+            <button id="btnMasterMarks" onclick="masterDownload('marks')" disabled
+              style="background:#4f46e5;color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;opacity:0.4">
+              📥 All Marks Sheets
+            </button>
           </div>
         </div>
-        <div id="noStudentsMsg" class="hidden mb-4 text-sm text-slate-400 text-center py-4">No students found for this program &amp; semester.</div>
-
-        <hr class="border-slate-100 my-4" />
-
-        <h3 class="text-slate-700 font-semibold text-sm mb-3 flex items-center gap-2">
-          <span class="w-5 h-5 bg-amber-100 rounded-md flex items-center justify-center text-amber-600 text-xs font-bold">3</span>
-          Generate Sheet
-        </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <button id="btnSignature" onclick="generateSheet('signature')" disabled
-            class="btn-primary py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-            Signature Sheet
-          </button>
-          <button id="btnMarks" onclick="generateSheet('marks')" disabled
-            class="btn-gold py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            Marks Award Sheet
-          </button>
-        </div>
-
-        <!-- Master Download -->
-        <hr class="border-slate-100 my-4" />
-        <h3 class="text-slate-700 font-semibold text-sm mb-1 flex items-center gap-2">
-          <span class="w-5 h-5 bg-purple-100 rounded-md flex items-center justify-center text-purple-600 text-xs font-bold">★</span>
-          Master Download
-        </h3>
-        <p class="text-slate-400 text-xs mb-3">Download sheets for <strong>all courses</strong> at once.</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button id="btnMasterSig" onclick="masterDownload('signature')" disabled
-            class="py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-purple-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-            All Signature Sheets
-          </button>
-          <button id="btnMasterMarks" onclick="masterDownload('marks')" disabled
-            class="py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-indigo-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            All Marks Award Sheets
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── TAB 4: MARKS ENTRY ──────────────────────────────────────── -->
-    <div id="tab-marks" class="tab-content">
-      <h2 class="text-slate-700 font-bold text-lg mb-4 flex items-center gap-2">
-        <span class="text-2xl">✏️</span> Digital Marks Entry
-      </h2>
-      <div class="bg-white rounded-2xl shadow-sm p-5 sm:p-6 mb-4">
-        <p class="text-slate-500 text-sm mb-4">Select a program, semester and course to enter marks for each student.</p>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-          <select id="mProgramSelect" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white" onchange="mOnProgramChange()">
-            <option value="">— Program —</option>
-          </select>
-          <select id="mSemesterSelect" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white" disabled onchange="mOnSemesterChange()">
-            <option value="">— Semester —</option>
-          </select>
-          <select id="mCourseSelect" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white" disabled onchange="mOnCourseChange()">
-            <option value="">— Course —</option>
-          </select>
-        </div>
-        <div id="mLoadingMsg" class="hidden text-center py-6 text-slate-400 text-sm">
-          <div class="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2" style="border-width:2px"></div>
-          Loading students & marks...
-        </div>
-        <div id="mNoData" class="hidden text-center py-6 text-slate-400 text-sm">No students found. Upload student data first.</div>
       </div>
 
-      <!-- Marks Table -->
-      <div id="mTableWrap" class="hidden">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <div>
-            <p class="text-slate-700 font-semibold text-sm" id="mCourseLabel">—</p>
-            <p class="text-slate-400 text-xs" id="mSaveStatus">Unsaved changes</p>
+      <!-- ── MARKS ENTRY ──────────────────────────────────── -->
+      <div id="section-marks" class="section">
+        <div class="card" style="max-width:720px">
+          <p style="color:#64748b;font-size:13px;margin-bottom:14px">Select program, semester and course to enter marks for each student digitally.</p>
+          <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px">
+            <select id="mProgramSelect" class="input-sm" style="color:#334155" onchange="mOnProgramChange()">
+              <option value="">— Select Program —</option>
+            </select>
+            <select id="mSemesterSelect" class="input-sm" disabled style="color:#334155" onchange="mOnSemesterChange()">
+              <option value="">— Select Semester —</option>
+            </select>
+            <select id="mCourseSelect" class="input-sm" disabled style="color:#334155" onchange="mOnCourseChange()">
+              <option value="">— Select Course —</option>
+            </select>
           </div>
-          <button onclick="saveAllMarks()" class="btn-primary text-sm font-bold px-5 py-2.5 rounded-xl flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            Save All Marks
-          </button>
+          <div id="mLoadingMsg" style="display:none;text-align:center;padding:24px;color:#64748b;font-size:13px">
+            <div style="width:24px;height:24px;border:2px solid #bfdbfe;border-top-color:#1c4c94;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px"></div>
+            Loading...
+          </div>
+          <div id="mNoData" style="display:none;text-align:center;padding:24px;color:#94a3b8;font-size:13px">No students found. Upload student data first.</div>
         </div>
-        <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
-          <table class="w-full text-sm" id="marksTable">
-            <thead id="marksTableHead"></thead>
-            <tbody id="marksTableBody"></tbody>
-          </table>
+
+        <div id="mTableWrap" style="display:none;max-width:900px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:#1e293b" id="mCourseLabel">—</div>
+              <div style="font-size:12px;color:#64748b;margin-top:2px" id="mSaveStatus">No changes yet</div>
+            </div>
+            <button onclick="saveAllMarks()" class="btn-primary">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Save All Marks
+            </button>
+          </div>
+          <div class="card" style="overflow-x:auto;padding:0">
+            <table style="width:100%;border-collapse:collapse;font-size:13px" id="marksTable">
+              <thead id="marksTableHead"></thead>
+              <tbody id="marksTableBody"></tbody>
+            </table>
+          </div>
+          <p style="text-align:center;font-size:11px;color:#94a3b8;margin-top:8px">Click "Save All Marks" to persist changes to the database</p>
         </div>
-        <p class="text-slate-400 text-xs mt-2 text-center">All changes are saved only when you click "Save All Marks"</p>
       </div>
-    </div>
 
-  </main>
+    </div><!-- /content-area -->
+  </div><!-- /main-wrap -->
 
-  <!-- Mobile Bottom Nav -->
-  <nav class="bottom-nav fixed bottom-0 left-0 right-0 flex sm:hidden z-30 border-t border-white/10">
-    <button onclick="switchTab('notice')" id="bn-notice" class="bnav-btn py-3 flex flex-col items-center gap-0.5 text-xs font-medium">
-      <span class="text-xl">📢</span>Notice
-    </button>
-    <button onclick="switchTab('examplan')" id="bn-examplan" class="bnav-btn py-3 flex flex-col items-center gap-0.5 text-xs font-medium">
-      <span class="text-xl">📋</span>Exam Plan
-    </button>
-    <button onclick="switchTab('generate')" id="bn-generate" class="bnav-btn py-3 flex flex-col items-center gap-0.5 text-xs font-medium">
-      <span class="text-xl">📄</span>Sheets
-    </button>
-    <button onclick="switchTab('marks')" id="bn-marks" class="bnav-btn py-3 flex flex-col items-center gap-0.5 text-xs font-medium">
-      <span class="text-xl">✏️</span>Marks
-    </button>
-  </nav>
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 
   <script>
-    // Auth guard
+    // Auth
     const user = sessionStorage.getItem('cie_user');
     if (!user) window.location.href = '/';
     document.getElementById('userDisplay').textContent = user || '–';
+    document.getElementById('userDisplayTop').textContent = user || '–';
 
-    function logout() {
-      sessionStorage.removeItem('cie_user');
-      window.location.href = '/';
+    function logout() { sessionStorage.removeItem('cie_user'); window.location.href = '/'; }
+
+    // Mobile sidebar
+    function toggleSidebar() {
+      const s = document.getElementById('sidebar');
+      const o = document.getElementById('sidebarOverlay');
+      s.classList.toggle('open');
+      o.classList.toggle('show');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('show');
     }
 
-    // ── Tab Management ──────────────────────────────────────────────────────
-    const TABS = ['notice','examplan','generate','marks'];
-    function switchTab(tab) {
-      TABS.forEach(t => {
-        document.getElementById('tab-' + t).classList.toggle('active', t === tab);
-        const dt = document.getElementById('dt-' + t);
-        if (dt) dt.classList.toggle('active', t === tab);
-        const bn = document.getElementById('bn-' + t);
-        if (bn) bn.classList.toggle('active', t === tab);
+    // Show hamburger on mobile
+    function checkMobile() {
+      const hb = document.getElementById('hamburger');
+      if (window.innerWidth < 768) hb.style.display = 'block';
+      else { hb.style.display = 'none'; closeSidebar(); }
+    }
+    window.addEventListener('resize', checkMobile);
+    checkMobile();
+
+    // ── Section switching ────────────────────────────────────
+    const SECTIONS = ['notice','examplan','generate','marks'];
+    const TITLES = {
+      notice:   ['Official Notice',    'Formative Exam Guidelines'],
+      examplan: ['Exam Component Plan','UG & PG marks breakdown'],
+      generate: ['Generate Sheets',    'Print signature & marks award sheets'],
+      marks:    ['Digital Marks Entry','Enter & save student marks']
+    };
+    let generateInited = false, marksInited = false;
+
+    function switchSection(id) {
+      SECTIONS.forEach(s => {
+        document.getElementById('section-' + s).classList.toggle('active', s === id);
+        const n = document.getElementById('nav-' + s);
+        if (n) n.classList.toggle('active', s === id);
       });
-      if (tab === 'generate' && !programsLoaded) { loadPrograms(); loadStats(); programsLoaded = true; }
-      if (tab === 'marks' && !mProgramsLoaded) { mLoadPrograms(); mProgramsLoaded = true; }
+      document.getElementById('pageTitle').textContent    = TITLES[id][0];
+      document.getElementById('pageSubtitle').textContent = TITLES[id][1];
+      if (id === 'generate' && !generateInited) { loadStats(); loadPrograms(); generateInited = true; }
+      if (id === 'marks'    && !marksInited)    { mLoadPrograms(); marksInited = true; }
+      if (window.innerWidth < 768) closeSidebar();
     }
-    // Default tab
-    switchTab('notice');
 
-    // ── GENERATE SHEETS logic ───────────────────────────────────────────────
-    let programsLoaded = false;
+    // ── GENERATE SHEETS ──────────────────────────────────────
     let students = [];
 
     async function loadStats() {
       try {
-        const r = await fetch('/api/data/stats');
-        const d = await r.json();
+        const d = await (await fetch('/api/data/stats')).json();
         document.getElementById('statPrograms').textContent = d.programs ?? '–';
         document.getElementById('statCourses').textContent  = d.courses  ?? '–';
         document.getElementById('statStudents').textContent = d.students ?? '–';
@@ -449,13 +545,8 @@
     async function loadPrograms() {
       const sel = document.getElementById('programSelect');
       try {
-        const r = await fetch('/api/data/programs');
-        const data = await r.json();
-        data.forEach(p => {
-          const o = document.createElement('option');
-          o.value = p.program_name; o.textContent = p.program_name;
-          sel.appendChild(o);
-        });
+        const data = await (await fetch('/api/data/programs')).json();
+        data.forEach(p => { const o = new Option(p.program_name, p.program_name); sel.add(o); });
       } catch {}
     }
 
@@ -463,43 +554,35 @@
       const program = this.value;
       const semSel = document.getElementById('semesterSelect');
       const cSel   = document.getElementById('courseSelect');
-      semSel.innerHTML = '<option value="">— Semester —</option>';
-      cSel.innerHTML   = '<option value="">— Course —</option>';
+      semSel.innerHTML = '<option value="">— Select Semester —</option>';
+      cSel.innerHTML   = '<option value="">— Select Course —</option>';
       semSel.disabled = !program; cSel.disabled = true;
-      document.getElementById('facultyInfo').classList.add('hidden');
+      document.getElementById('facultyInfo').style.display = 'none';
       clearStudents();
       if (!program) return;
       try {
-        const r = await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}`);
-        const sems = await r.json();
-        sems.forEach(s => {
-          const o = document.createElement('option');
-          o.value = s.semester; o.textContent = s.semester;
-          semSel.appendChild(o);
-        });
+        const sems = await (await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}`)).json();
+        sems.forEach(s => semSel.add(new Option(s.semester, s.semester)));
         semSel.disabled = false;
       } catch {}
     });
 
     document.getElementById('semesterSelect').addEventListener('change', async function() {
-      const program = document.getElementById('programSelect').value;
+      const program  = document.getElementById('programSelect').value;
       const semester = this.value;
       const cSel = document.getElementById('courseSelect');
-      cSel.innerHTML = '<option value="">— Course —</option>';
+      cSel.innerHTML = '<option value="">— Select Course —</option>';
       cSel.disabled = !semester;
-      document.getElementById('facultyInfo').classList.add('hidden');
+      document.getElementById('facultyInfo').style.display = 'none';
       fetchStudents();
       if (!semester) return;
       try {
-        const r = await fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`);
-        const courses = await r.json();
+        const courses = await (await fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`)).json();
         courses.forEach(c => {
-          const o = document.createElement('option');
-          o.value = c.course_code;
-          o.textContent = `${c.course_code} – ${c.course_name}`;
+          const o = new Option(`${c.course_code} – ${c.course_name}`, c.course_code);
           o.dataset.faculty = c.faculty_name || '';
           o.dataset.courseName = c.course_name;
-          cSel.appendChild(o);
+          cSel.add(o);
         });
         cSel.disabled = false;
       } catch {}
@@ -509,10 +592,8 @@
       const opt = this.options[this.selectedIndex];
       if (opt && opt.dataset.faculty) {
         document.getElementById('facultyName').textContent = opt.dataset.faculty;
-        document.getElementById('facultyInfo').classList.remove('hidden');
-      } else {
-        document.getElementById('facultyInfo').classList.add('hidden');
-      }
+        document.getElementById('facultyInfo').style.display = 'flex';
+      } else document.getElementById('facultyInfo').style.display = 'none';
       updateButtons();
     });
 
@@ -521,8 +602,7 @@
       const semester = document.getElementById('semesterSelect').value;
       if (!program || !semester) { clearStudents(); return; }
       try {
-        const r = await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`);
-        students = await r.json();
+        students = await (await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`)).json();
         renderStudents();
       } catch {}
       updateButtons();
@@ -532,23 +612,23 @@
       const preview = document.getElementById('studentPreview');
       const noMsg   = document.getElementById('noStudentsMsg');
       const list    = document.getElementById('studentList');
-      if (!students.length) { preview.classList.add('hidden'); noMsg.classList.remove('hidden'); return; }
-      noMsg.classList.add('hidden');
+      if (!students.length) { preview.style.display = 'none'; noMsg.style.display = 'block'; return; }
+      noMsg.style.display = 'none';
       list.innerHTML = '';
       students.forEach((s, i) => {
         const li = document.createElement('li');
-        li.className = 'px-4 py-2 flex items-center gap-3';
-        li.innerHTML = `<span class="text-slate-400 text-xs w-5">${i+1}</span><span class="font-mono text-xs text-blue-600">${s.scholar_id}</span><span class="text-slate-700">${s.student_name}</span>`;
+        li.style.cssText = 'padding:8px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f8fafc;font-size:13px';
+        li.innerHTML = `<span style="color:#94a3b8;font-size:11px;width:20px">${i+1}</span><span style="font-family:monospace;color:#1c4c94;font-size:12px">${s.scholar_id}</span><span style="color:#334155">${s.student_name}</span>`;
         list.appendChild(li);
       });
       document.getElementById('studentCount').textContent = students.length;
-      preview.classList.remove('hidden');
+      preview.style.display = 'block';
     }
 
     function clearStudents() {
       students = [];
-      document.getElementById('studentPreview').classList.add('hidden');
-      document.getElementById('noStudentsMsg').classList.add('hidden');
+      document.getElementById('studentPreview').style.display = 'none';
+      document.getElementById('noStudentsMsg').style.display  = 'none';
       updateButtons();
     }
 
@@ -556,12 +636,14 @@
       const program  = document.getElementById('programSelect').value;
       const semester = document.getElementById('semesterSelect').value;
       const course   = document.getElementById('courseSelect').value;
-      const ok = program && semester && course && students.length > 0;
+      const ok = !!(program && semester && course && students.length);
       document.getElementById('btnSignature').disabled = !ok;
       document.getElementById('btnMarks').disabled     = !ok;
       const masterOk = !!(program && semester);
-      document.getElementById('btnMasterSig').disabled   = !masterOk;
-      document.getElementById('btnMasterMarks').disabled = !masterOk;
+      const mSig  = document.getElementById('btnMasterSig');
+      const mMrk  = document.getElementById('btnMasterMarks');
+      mSig.disabled  = !masterOk; mSig.style.opacity  = masterOk ? '1' : '0.4';
+      mMrk.disabled  = !masterOk; mMrk.style.opacity  = masterOk ? '1' : '0.4';
     }
 
     function generateSheet(type) {
@@ -569,50 +651,38 @@
       const semester   = document.getElementById('semesterSelect').value;
       const courseCode = document.getElementById('courseSelect').value;
       const cOpt = document.getElementById('courseSelect').options[document.getElementById('courseSelect').selectedIndex];
-      const courseName = cOpt.dataset.courseName || courseCode;
-      const faculty    = document.getElementById('facultyName').textContent;
-      const params = new URLSearchParams({ program, semester, courseCode, courseName, faculty, type });
+      const params = new URLSearchParams({ program, semester, courseCode, courseName: cOpt.dataset.courseName || courseCode, faculty: document.getElementById('facultyName').textContent, type });
       window.open(`/generate.html?${params}`, '_blank');
     }
 
     function masterDownload(type) {
-      const program  = document.getElementById('programSelect').value;
-      const semester = document.getElementById('semesterSelect').value;
-      const params = new URLSearchParams({ program, semester, type });
-      window.open(`/bulk.html?${params}`, '_blank');
+      const p = document.getElementById('programSelect').value;
+      const s = document.getElementById('semesterSelect').value;
+      window.open(`/bulk.html?${new URLSearchParams({program:p,semester:s,type})}`, '_blank');
     }
 
-    // ── MARKS ENTRY logic ──────────────────────────────────────────────────
-    let mProgramsLoaded = false;
-    let mStudents = [];
-    let mComponents = [];
-    let mCurrentProgram = '', mCurrentSemester = '', mCurrentCourse = '';
+    // ── MARKS ENTRY ──────────────────────────────────────────
+    let mStudents = [], mComponents = [], mCurrentProgram = '', mCurrentSemester = '', mCurrentCourse = '';
 
     function getComponents(prog) {
-      const p = (prog || '').trim().toUpperCase();
-      if (p === 'MCA-DS') return [
-        { key: 'assignment', label: 'Assignment', max: 10 },
-        { key: 'seminar',    label: 'Seminar',    max: 10 },
-        { key: 'midterm',    label: 'Mid Term',   max: 20 }
+      if ((prog||'').trim().toUpperCase() === 'MCA-DS') return [
+        { key:'assignment', label:'Assignment', max:10 },
+        { key:'seminar',    label:'Seminar',    max:10 },
+        { key:'midterm',    label:'Mid Term',   max:20 }
       ];
       return [
-        { key: 'assignment', label: 'Assignment', max: 15 },
-        { key: 'seminar',    label: 'Seminar',    max: 15 },
-        { key: 'quiz',       label: 'Quiz / Viva',max: 10 },
-        { key: 'midterm',    label: 'Mid Term',   max: 20 }
+        { key:'assignment', label:'Assignment',      max:15 },
+        { key:'seminar',    label:'Seminar',          max:15 },
+        { key:'quiz',       label:'Quiz / Viva',      max:10 },
+        { key:'midterm',    label:'Mid Term',         max:20 }
       ];
     }
 
     async function mLoadPrograms() {
       const sel = document.getElementById('mProgramSelect');
       try {
-        const r = await fetch('/api/data/programs');
-        const data = await r.json();
-        data.forEach(p => {
-          const o = document.createElement('option');
-          o.value = p.program_name; o.textContent = p.program_name;
-          sel.appendChild(o);
-        });
+        const data = await (await fetch('/api/data/programs')).json();
+        data.forEach(p => sel.add(new Option(p.program_name, p.program_name)));
       } catch {}
     }
 
@@ -620,19 +690,14 @@
       const program = document.getElementById('mProgramSelect').value;
       const semSel  = document.getElementById('mSemesterSelect');
       const cSel    = document.getElementById('mCourseSelect');
-      semSel.innerHTML = '<option value="">— Semester —</option>';
-      cSel.innerHTML   = '<option value="">— Course —</option>';
+      semSel.innerHTML = '<option value="">— Select Semester —</option>';
+      cSel.innerHTML   = '<option value="">— Select Course —</option>';
       semSel.disabled = !program; cSel.disabled = true;
       mHideTable();
       if (!program) return;
       try {
-        const r = await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}`);
-        const sems = await r.json();
-        sems.forEach(s => {
-          const o = document.createElement('option');
-          o.value = s.semester; o.textContent = s.semester;
-          semSel.appendChild(o);
-        });
+        const sems = await (await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}`)).json();
+        sems.forEach(s => semSel.add(new Option(s.semester, s.semester)));
         semSel.disabled = false;
       } catch {}
     }
@@ -641,19 +706,15 @@
       const program  = document.getElementById('mProgramSelect').value;
       const semester = document.getElementById('mSemesterSelect').value;
       const cSel = document.getElementById('mCourseSelect');
-      cSel.innerHTML = '<option value="">— Course —</option>';
-      cSel.disabled = !semester;
-      mHideTable();
+      cSel.innerHTML = '<option value="">— Select Course —</option>';
+      cSel.disabled = !semester; mHideTable();
       if (!semester) return;
       try {
-        const r = await fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`);
-        const courses = await r.json();
+        const courses = await (await fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`)).json();
         courses.forEach(c => {
-          const o = document.createElement('option');
-          o.value = c.course_code;
-          o.textContent = `${c.course_code} – ${c.course_name}`;
+          const o = new Option(`${c.course_code} – ${c.course_name}`, c.course_code);
           o.dataset.courseName = c.course_name;
-          cSel.appendChild(o);
+          cSel.add(o);
         });
         cSel.disabled = false;
       } catch {}
@@ -665,134 +726,89 @@
       const courseCode = document.getElementById('mCourseSelect').value;
       const cOpt       = document.getElementById('mCourseSelect').options[document.getElementById('mCourseSelect').selectedIndex];
       if (!courseCode) { mHideTable(); return; }
-
       mCurrentProgram = program; mCurrentSemester = semester; mCurrentCourse = courseCode;
       mComponents = getComponents(program);
-
-      document.getElementById('mLoadingMsg').classList.remove('hidden');
-      document.getElementById('mNoData').classList.add('hidden');
-      document.getElementById('mTableWrap').classList.add('hidden');
-
+      document.getElementById('mLoadingMsg').style.display = 'block';
+      document.getElementById('mNoData').style.display     = 'none';
+      document.getElementById('mTableWrap').style.display  = 'none';
       try {
         const [sRes, mRes] = await Promise.all([
           fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`),
           fetch(`/api/marks?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&courseCode=${encodeURIComponent(courseCode)}`)
         ]);
         mStudents = await sRes.json();
-        const savedMarks = await mRes.json();
-
-        // Build marks map: scholar_id -> component -> marks_obtained
-        const marksMap = {};
-        savedMarks.forEach(m => {
-          if (!marksMap[m.scholar_id]) marksMap[m.scholar_id] = {};
-          marksMap[m.scholar_id][m.component] = m.marks_obtained;
-        });
-
-        document.getElementById('mLoadingMsg').classList.add('hidden');
-
-        if (!mStudents.length) {
-          document.getElementById('mNoData').classList.remove('hidden');
-          return;
-        }
-
-        // Render table
-        document.getElementById('mCourseLabel').textContent = cOpt.dataset.courseName + ' (' + courseCode + ')';
-        document.getElementById('mSaveStatus').textContent = savedMarks.length ? '✓ Last saved data loaded' : 'No saved marks yet';
-
+        const saved = await mRes.json();
+        const map = {};
+        saved.forEach(m => { if (!map[m.scholar_id]) map[m.scholar_id] = {}; map[m.scholar_id][m.component] = m.marks_obtained; });
+        document.getElementById('mLoadingMsg').style.display = 'none';
+        if (!mStudents.length) { document.getElementById('mNoData').style.display = 'block'; return; }
+        document.getElementById('mCourseLabel').textContent = (cOpt.dataset.courseName||courseCode) + ' (' + courseCode + ')';
+        document.getElementById('mSaveStatus').textContent  = saved.length ? '✓ Loaded saved marks' : 'No marks saved yet';
         const thead = document.getElementById('marksTableHead');
         const tbody = document.getElementById('marksTableBody');
-        thead.innerHTML = `
-          <tr class="bg-[#1c4c94] text-white text-xs">
-            <th class="px-3 py-2.5 text-left sticky left-0 bg-[#1c4c94] z-10 min-w-[40px]">#</th>
-            <th class="px-3 py-2.5 text-left min-w-[90px]">Scholar ID</th>
-            <th class="px-3 py-2.5 text-left min-w-[130px]">Name</th>
-            ${mComponents.map(c => `<th class="px-3 py-2.5 text-center min-w-[90px]">${c.label}<br/><span class="font-normal opacity-75 text-xs">(max ${c.max})</span></th>`).join('')}
-            <th class="px-3 py-2.5 text-center min-w-[70px]">Total</th>
-          </tr>`;
-
+        thead.innerHTML = `<tr style="background:#1c4c94;color:#fff;font-size:12px">
+          <th style="padding:10px 12px;text-align:left">#</th>
+          <th style="padding:10px 12px;text-align:left">Scholar ID</th>
+          <th style="padding:10px 12px;text-align:left">Student Name</th>
+          ${mComponents.map(c=>`<th style="padding:10px 12px;text-align:center">${c.label}<br/><span style="opacity:.7;font-weight:400">(max ${c.max})</span></th>`).join('')}
+          <th style="padding:10px 12px;text-align:center">Total</th>
+        </tr>`;
         tbody.innerHTML = '';
-        mStudents.forEach((s, i) => {
+        mStudents.forEach((s,i)=>{
           const tr = document.createElement('tr');
-          tr.className = i % 2 === 0 ? 'border-b border-slate-100' : 'border-b border-slate-100 bg-slate-50';
-          const maxTotal = mComponents.reduce((sum, c) => sum + c.max, 0);
+          tr.style.cssText = `border-bottom:1px solid #f1f5f9;${i%2?'background:#f8fafc':''}`;
           tr.innerHTML = `
-            <td class="px-3 py-2 text-slate-400 text-xs sticky left-0 ${i%2===0?'bg-white':'bg-slate-50'}">${i+1}</td>
-            <td class="px-3 py-2 font-mono text-xs text-blue-600">${s.scholar_id}</td>
-            <td class="px-3 py-2 text-sm font-medium text-slate-800">${s.student_name}</td>
-            ${mComponents.map(c => {
-              const val = marksMap[s.scholar_id]?.[c.key] ?? '';
-              return `<td class="px-2 py-1.5 text-center">
-                <input type="number" min="0" max="${c.max}" step="0.5"
-                  class="marks-input w-full border border-slate-200 rounded-lg px-2 py-1.5 text-center text-sm focus:border-[#1c4c94] focus:ring-1 focus:ring-[#1c4c94]/20 focus:outline-none"
+            <td style="padding:8px 12px;color:#94a3b8;font-size:12px">${i+1}</td>
+            <td style="padding:8px 12px;font-family:monospace;font-size:12px;color:#1c4c94">${s.scholar_id}</td>
+            <td style="padding:8px 12px;font-size:13px;font-weight:500;color:#1e293b">${s.student_name}</td>
+            ${mComponents.map(c=>{
+              const val = map[s.scholar_id]?.[c.key] ?? '';
+              return `<td style="padding:6px 8px;text-align:center">
+                <input type="number" min="0" max="${c.max}" step="0.5" class="marks-input"
                   data-scholar="${s.scholar_id}" data-component="${c.key}" data-max="${c.max}"
                   value="${val}" placeholder="–" oninput="updateRowTotal(this)" />
               </td>`;
             }).join('')}
-            <td class="px-3 py-2 text-center font-bold text-slate-700 text-sm" id="total-${s.scholar_id}">–</td>
-          `;
+            <td style="padding:8px 12px;text-align:center;font-weight:700;color:#1e293b;font-size:13px" id="total-${s.scholar_id}">–</td>`;
           tbody.appendChild(tr);
-          // Compute initial total
           updateRowTotal(tr.querySelector('.marks-input'));
         });
-
-        document.getElementById('mTableWrap').classList.remove('hidden');
-      } catch (err) {
-        document.getElementById('mLoadingMsg').classList.add('hidden');
-        document.getElementById('mNoData').classList.remove('hidden');
-        document.getElementById('mNoData').textContent = 'Error loading data: ' + err.message;
+        document.getElementById('mTableWrap').style.display = 'block';
+      } catch(err) {
+        document.getElementById('mLoadingMsg').style.display = 'none';
+        document.getElementById('mNoData').style.display = 'block';
+        document.getElementById('mNoData').textContent = 'Error: ' + err.message;
       }
     }
 
     function updateRowTotal(inp) {
-      const row = inp.closest('tr');
-      const inputs = row.querySelectorAll('.marks-input');
-      let total = 0, hasValue = false;
-      inputs.forEach(i => {
-        const v = parseFloat(i.value);
-        if (!isNaN(v)) { total += v; hasValue = true; }
-      });
-      const sid = inp.dataset.scholar;
-      const cell = document.getElementById('total-' + sid);
-      if (cell) cell.textContent = hasValue ? total : '–';
+      const inputs = inp.closest('tr').querySelectorAll('.marks-input');
+      let total = 0, has = false;
+      inputs.forEach(i => { const v = parseFloat(i.value); if (!isNaN(v)) { total+=v; has=true; } });
+      const cell = document.getElementById('total-' + inp.dataset.scholar);
+      if (cell) cell.textContent = has ? total : '–';
       document.getElementById('mSaveStatus').textContent = '⚠ Unsaved changes';
     }
 
     async function saveAllMarks() {
-      const inputs = document.querySelectorAll('.marks-input');
-      const entries = [];
-      inputs.forEach(inp => {
-        entries.push({
-          scholar_id: inp.dataset.scholar,
-          component:  inp.dataset.component,
-          marks_obtained: inp.value !== '' ? parseFloat(inp.value) : null
-        });
-      });
+      const entries = [...document.querySelectorAll('.marks-input')].map(inp => ({
+        scholar_id: inp.dataset.scholar, component: inp.dataset.component,
+        marks_obtained: inp.value !== '' ? parseFloat(inp.value) : null
+      }));
       try {
-        const r = await fetch('/api/marks/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            program: mCurrentProgram,
-            semester: mCurrentSemester,
-            courseCode: mCurrentCourse,
-            entries
-          })
-        });
+        const r = await fetch('/api/marks/save', { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ program:mCurrentProgram, semester:mCurrentSemester, courseCode:mCurrentCourse, entries }) });
         const d = await r.json();
-        if (d.success) {
-          document.getElementById('mSaveStatus').textContent = `✓ Saved at ${new Date().toLocaleTimeString()}`;
-        } else {
-          alert('Save failed: ' + d.error);
-        }
-      } catch (err) {
-        alert('Save error: ' + err.message);
-      }
+        document.getElementById('mSaveStatus').textContent = d.success
+          ? `✓ Saved successfully at ${new Date().toLocaleTimeString()}`
+          : '✗ Save failed: ' + d.error;
+      } catch(err) { document.getElementById('mSaveStatus').textContent = '✗ Error: ' + err.message; }
     }
 
     function mHideTable() {
-      document.getElementById('mTableWrap').classList.add('hidden');
-      document.getElementById('mNoData').classList.add('hidden');
-      document.getElementById('mLoadingMsg').classList.add('hidden');
+      document.getElementById('mTableWrap').style.display  = 'none';
+      document.getElementById('mNoData').style.display     = 'none';
+      document.getElementById('mLoadingMsg').style.display = 'none';
     }
   </script>
 </body>
