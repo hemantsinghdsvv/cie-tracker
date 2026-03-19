@@ -190,23 +190,35 @@
         <span class="icon">📅</span> Formative Schedule
       </a>
 
-      <div style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:14px 6px 4px">Administration</div>
-      <a class="nav-item" href="/admin.html">
-        <span class="icon">⬆️</span> Upload Data
-      </a>
-      <a class="nav-item" href="/data.html">
-        <span class="icon">🗃️</span> Manage Data
-      </a>
+      <div id="adminNav">
+        <div style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:14px 6px 4px">Administration</div>
+        <a class="nav-item" href="/admin.html">
+          <span class="icon">⬆️</span> Upload Data
+        </a>
+        <a class="nav-item" href="/data.html">
+          <span class="icon">🗃️</span> Manage Data
+        </a>
+      </div>
     </div>
 
     <!-- Bottom user info -->
     <div style="padding:14px 16px;border-top:1px solid rgba(255,255,255,0.08)">
       <div style="color:rgba(255,255,255,0.5);font-size:11px;margin-bottom:6px">Logged in as</div>
       <div style="color:#fff;font-size:13px;font-weight:600" id="userDisplay">–</div>
+      <div id="roleTag" style="display:inline-block;margin-top:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(253,200,44,0.2);color:#fdc82c;letter-spacing:.06em"></div>
       <button onclick="logout()" style="margin-top:10px;width:100%;background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:7px;color:rgba(255,255,255,0.75);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
         <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         Logout
       </button>
+    </div>
+    
+    <!-- Powered by -->
+    <div style="padding: 12px 16px; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
+      <div style="color: rgba(255,255,255,0.3); font-size: 10px; line-height: 1.4;">
+        Powered by:<br/>
+        <span style="color: rgba(255,255,255,0.5); font-weight: 600;">Software Development Cell</span><br/>
+        DSVV, Haridwar
+      </div>
     </div>
   </aside>
 
@@ -294,7 +306,7 @@
           <p style="font-size:13px;color:#334155;line-height:1.7">
             <strong>3. Notice to Students:</strong> All students are required to adhere to the examination schedule and guidelines issued by their respective Departments / Instructors.
           </p>
-          <div style="text-align:right;margin-top:24px;font-size:13px;font-weight:600;color:#1e293b">For. Registrar</div>
+          <div style="text-align:right;margin-top:24px;font-size:13px;font-weight:600;color:#1e293b">Registrar</div>
         </div>
       </div>
 
@@ -545,15 +557,21 @@
         </div>
 
         <div id="mTableWrap" style="display:none;max-width:900px">
-          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">
             <div>
               <div style="font-size:15px;font-weight:700;color:#1e293b" id="mCourseLabel">—</div>
-              <div style="font-size:12px;color:#64748b;margin-top:2px" id="mSaveStatus">No changes yet</div>
+              <div style="font-size:12px;margin-top:2px" id="mSaveStatus">No changes yet</div>
             </div>
-            <button onclick="saveAllMarks()" class="btn-primary">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              Save All Marks
-            </button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button onclick="printMarks()" style="background:#f1f5f9;color:#334155;border:1.5px solid #e2e8f0;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Print / PDF
+              </button>
+              <button onclick="saveAllMarks()" class="btn-primary">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Save All Marks
+              </button>
+            </div>
           </div>
           <div class="card" style="overflow-x:auto;padding:0">
             <table style="width:100%;border-collapse:collapse;font-size:13px" id="marksTable">
@@ -601,7 +619,24 @@
       document.getElementById('sessionLabel').textContent = currentSession;
     }
 
-    function logout() { sessionStorage.removeItem('cie_user'); window.location.href = '/'; }
+    function logout() {
+      sessionStorage.removeItem('cie_user');
+      sessionStorage.removeItem('cie_role');
+      sessionStorage.removeItem('cie_session');
+      window.location.href = '/';
+    }
+
+    // Role-based access
+    const role = sessionStorage.getItem('cie_role') || 'user';
+    const roleTag = document.getElementById('roleTag');
+    if (role === 'admin') {
+      roleTag.textContent = 'ADMIN';
+    } else {
+      roleTag.textContent = 'FACULTY';
+      roleTag.style.background = 'rgba(255,255,255,0.1)';
+      roleTag.style.color = 'rgba(255,255,255,0.55)';
+      document.getElementById('adminNav').style.display = 'none';
+    }
 
     // Mobile sidebar
     function toggleSidebar() {
@@ -622,7 +657,7 @@
       else { hb.style.display = 'none'; closeSidebar(); }
     }
     window.addEventListener('resize', checkMobile);
-    checkMobile();
+    checkMobile(); // Initial check
 
     // ── Section switching ────────────────────────────────────
     const SECTIONS = ['notice','examplan','signature','marksaward','schedule','marks'];
@@ -900,16 +935,23 @@
       }
     }
 
+    let autoSaveTimer = null;
+
     function updateRowTotal(inp) {
       const inputs = inp.closest('tr').querySelectorAll('.marks-input');
       let total = 0, has = false;
       inputs.forEach(i => { const v = parseFloat(i.value); if (!isNaN(v)) { total+=v; has=true; } });
       const cell = document.getElementById('total-' + inp.dataset.scholar);
       if (cell) cell.textContent = has ? total : '–';
-      document.getElementById('mSaveStatus').textContent = '⚠ Unsaved changes';
+      const status = document.getElementById('mSaveStatus');
+      status.style.color = '#f59e0b'; status.textContent = '● Unsaved changes';
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => saveAllMarks(true), 1500);
     }
 
-    async function saveAllMarks() {
+    async function saveAllMarks(silent = false) {
+      const status = document.getElementById('mSaveStatus');
+      if (!silent) { status.style.color = '#64748b'; status.textContent = 'Saving…'; }
       const entries = [...document.querySelectorAll('.marks-input')].map(inp => ({
         scholar_id: inp.dataset.scholar, component: inp.dataset.component,
         marks_obtained: inp.value !== '' ? parseFloat(inp.value) : null
@@ -918,11 +960,23 @@
         const r = await fetch('/api/marks/save', { method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ program:mCurrentProgram, semester:mCurrentSemester, courseCode:mCurrentCourse, entries }) });
         const d = await r.json();
-        document.getElementById('mSaveStatus').textContent = d.success
-          ? `✓ Saved successfully at ${new Date().toLocaleTimeString()}`
-          : '✗ Save failed: ' + d.error;
-      } catch(err) { document.getElementById('mSaveStatus').textContent = '✗ Error: ' + err.message; }
+        if (d.success) {
+          status.style.color = '#16a34a';
+          status.textContent = `✓ Auto-saved at ${new Date().toLocaleTimeString()}`;
+        } else {
+          status.style.color = '#dc2626';
+          status.textContent = '✗ Save failed: ' + d.error;
+        }
+      } catch(err) { status.style.color='#dc2626'; status.textContent = '✗ Error: ' + err.message; }
     }
+
+    function printMarks() {
+      const params = new URLSearchParams({
+        program: mCurrentProgram, semester: mCurrentSemester, courseCode: mCurrentCourse
+      });
+      window.open(`/marks-print.html?${params}`, '_blank');
+    }
+
 
     function mHideTable() {
       document.getElementById('mTableWrap').style.display  = 'none';

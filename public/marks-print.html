@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marks Award Sheet – Print</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/print.css" />
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f0f4f8; margin: 0; }
+    @media print {
+      body { background: #fff; }
+      .no-print { display: none !important; }
+      .print-container { box-shadow: none !important; max-width: 100% !important; margin: 0 !important; border-radius: 0 !important; padding: 0 !important; }
+    }
+    .action-bar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 12px 24px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 50; flex-wrap: wrap; }
+    .action-bar a { font-size: 13px; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    .action-bar a:hover { color: #1e293b; }
+    .divider { width: 1px; height: 20px; background: #e2e8f0; }
+    .action-title { flex: 1; font-size: 13px; font-weight: 600; color: #1e293b; }
+    .btn-action { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .18s; }
+    .btn-print { background: #1e293b; color: #fff; }
+    .btn-print:hover { background: #0f172a; }
+    .btn-pdf { background: #f59e0b; color: #fff; }
+    .btn-pdf:hover { background: #d97706; }
+
+    .preview-wrapper { padding: 24px; }
+    .print-container {
+      background: #fff;
+      max-width: 900px;
+      margin: 0 auto;
+      border-radius: 12px;
+      box-shadow: 0 2px 24px rgba(0,0,0,0.1);
+      overflow: hidden;
+      padding: 32px;
+    }
+
+    /* Header */
+    .sheet-header { display: flex; align-items: center; gap: 18px; padding-bottom: 14px; border-bottom: 2px solid #1c4c94; margin-bottom: 16px; }
+    .sheet-header img { height: 56px; width: auto; }
+    .sheet-header-text h1 { font-size: 18px; font-weight: 800; color: #1c4c94; margin: 0; }
+    .sheet-header-text h2 { font-size: 12px; color: #64748b; margin: 2px 0 0; font-weight: 400; }
+
+    /* Meta */
+    .sheet-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 20px; font-size: 13px; }
+    .sheet-meta .meta-item strong { color: #374151; }
+    .sheet-meta .meta-item span { color: #1e293b; }
+
+    /* Table */
+    .marks-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .marks-table thead tr { background: #1c4c94; color: #fff; }
+    .marks-table th { padding: 9px 12px; font-weight: 600; text-align: center; white-space: nowrap; }
+    .marks-table th:nth-child(1), .marks-table th:nth-child(3) { text-align: left; }
+    .marks-table td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+    .marks-table td:nth-child(1), .marks-table td:nth-child(3) { text-align: left; }
+    .marks-table tbody tr:nth-child(even) { background: #f8fafc; }
+    .marks-table .total-cell { font-weight: 700; color: #1c4c94; }
+
+    /* Loading */
+    #loadingState { text-align: center; padding: 60px; color: #64748b; font-size: 14px; }
+    .spinner { width: 28px; height: 28px; border: 3px solid #e2e8f0; border-top-color: #1c4c94; border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- Action Bar -->
+  <div class="action-bar no-print">
+    <a href="/dashboard.html">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      Back
+    </a>
+    <div class="divider"></div>
+    <div class="action-title" id="actionTitle">Marks Award Sheet</div>
+    <button class="btn-action btn-print" onclick="window.print()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+      Print Sheet
+    </button>
+    <button class="btn-action btn-pdf" onclick="window.print()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      Download PDF
+    </button>
+  </div>
+
+  <div id="loadingState"><div class="spinner"></div>Loading marks…</div>
+
+  <div id="previewWrapper" class="preview-wrapper" style="display:none">
+    <div class="print-container" id="printArea">
+
+      <div class="sheet-header">
+        <img src="/logo.png" alt="DSVV" onerror="this.style.display='none'" />
+        <div class="sheet-header-text">
+          <h1>Department of Computer Science</h1>
+          <h2 id="sheetSession">Session: —</h2>
+        </div>
+      </div>
+
+      <div class="sheet-meta">
+        <div class="meta-item"><strong>Course Code: </strong><span id="metaCourseCode">—</span></div>
+        <div class="meta-item"><strong>Program / Semester: </strong><span id="metaProgSem">—</span></div>
+        <div class="meta-item"><strong>Course Name: </strong><span id="metaCourseName">—</span></div>
+        <div class="meta-item"><strong>Faculty: </strong><span id="metaFaculty">—</span></div>
+      </div>
+
+      <div style="overflow-x:auto">
+        <table class="marks-table" id="marksTable">
+          <thead id="marksHead"></thead>
+          <tbody id="marksBody"></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px;font-size:12px;color:#374151">
+        <div style="border-top:1px solid #334155;padding-top:8px">Faculty Signature</div>
+        <div style="border-top:1px solid #334155;padding-top:8px">HoD Signature</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params  = new URLSearchParams(location.search);
+    const program = params.get('program')  || '';
+    const semester= params.get('semester') || '';
+    const courseCode = params.get('courseCode') || '';
+    const session = sessionStorage.getItem('cie_session') || 'Jan – June 2026';
+
+    document.getElementById('sheetSession').textContent = 'Session: ' + session;
+    document.getElementById('metaProgSem').textContent  = `${program} / Semester ${semester}`;
+    document.getElementById('metaCourseCode').textContent = courseCode;
+
+    function getComponents(prog) {
+      if ((prog||'').trim().toUpperCase() === 'MCA-DS') return [
+        { key:'assignment', label:'Assignment', max:10 },
+        { key:'seminar',    label:'Seminar',    max:10 },
+        { key:'midterm',    label:'Mid Term',   max:20 }
+      ];
+      return [
+        { key:'assignment', label:'Assignment',  max:15 },
+        { key:'seminar',    label:'Seminar',     max:15 },
+        { key:'quiz',       label:'Quiz / Viva', max:10 },
+        { key:'midterm',    label:'Mid Term',    max:20 }
+      ];
+    }
+
+    async function loadData() {
+      if (!program || !semester || !courseCode) {
+        document.getElementById('loadingState').textContent = 'Missing parameters. Please open this page from the Marks Entry section.';
+        return;
+      }
+      try {
+        const [coursesRes, studentsRes, marksRes] = await Promise.all([
+          fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`),
+          fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`),
+          fetch(`/api/marks?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&courseCode=${encodeURIComponent(courseCode)}`)
+        ]);
+        const courses  = await coursesRes.json();
+        const students = await studentsRes.json();
+        const marks    = await marksRes.json();
+
+        const course = courses.find(c => c.course_code === courseCode) || {};
+        document.getElementById('metaCourseName').textContent = course.course_name || courseCode;
+        document.getElementById('metaFaculty').textContent    = course.faculty_name || '—';
+        document.getElementById('actionTitle').textContent    = `${course.course_name || courseCode} — Marks Award Sheet`;
+
+        const components = getComponents(program);
+        const marksMap = {};
+        marks.forEach(m => { if (!marksMap[m.scholar_id]) marksMap[m.scholar_id]={}; marksMap[m.scholar_id][m.component]=m.marks_obtained; });
+
+        const maxTotal = components.reduce((s,c)=>s+c.max,0);
+
+        document.getElementById('marksHead').innerHTML = `<tr>
+          <th style="text-align:left;padding:9px 12px">S.No</th>
+          <th style="text-align:left;padding:9px 12px">Scholar ID</th>
+          <th style="text-align:left;padding:9px 12px">Student Name</th>
+          ${components.map(c=>`<th>${c.label}<br/><span style="font-weight:400;opacity:.8">(${c.max})</span></th>`).join('')}
+          <th>Total<br/><span style="font-weight:400;opacity:.8">(${maxTotal})</span></th>
+          <th>Remarks</th>
+        </tr>`;
+
+        const tbody = document.getElementById('marksBody');
+        tbody.innerHTML = '';
+        students.forEach((s, i) => {
+          const sm = marksMap[s.scholar_id] || {};
+          let total = 0, hasAny = false;
+          components.forEach(c => { const v = parseFloat(sm[c.key]); if (!isNaN(v)) { total+=v; hasAny=true; } });
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${i+1}</td>
+            <td style="text-align:left;font-family:monospace;font-size:11px;color:#1c4c94">${s.scholar_id}</td>
+            <td style="text-align:left;font-weight:500">${s.student_name}</td>
+            ${components.map(c => { const v=sm[c.key]; return `<td>${v!=null&&v!==undefined&&v!==''?v:''}</td>`; }).join('')}
+            <td class="total-cell">${hasAny?total:''}</td>
+            <td></td>`;
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('previewWrapper').style.display = 'block';
+      } catch(err) {
+        document.getElementById('loadingState').textContent = 'Error loading data: ' + err.message;
+      }
+    }
+
+    loadData();
+  </script>
+
+  <footer class="no-print" style="max-width: 900px; margin: 40px auto; padding: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
+    <p style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.6;">
+      Powered by:<br/>
+      <span style="font-weight: 700; color: #475569;">Software Development Cell</span><br/>
+      Dev Sanskriti Vishwavidyalaya, Haridwar
+    </p>
+  </footer>
+</body>
+</html>
