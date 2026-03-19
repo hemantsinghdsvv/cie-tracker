@@ -140,6 +140,40 @@
         disabled>Upload Student Enrollment</button>
     </div>
 
+    <!-- Upload Formative Schedule -->
+    <div class="card p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 font-bold text-sm">3</div>
+        <div>
+          <h2 class="text-slate-800 font-bold text-base">Formative Exam Schedule</h2>
+          <p class="text-slate-400 text-xs">Upload date schedule for all exam components per course</p>
+        </div>
+      </div>
+      <div class="bg-purple-50 border border-purple-100 rounded-xl p-3 mb-4 text-xs text-purple-700">
+        <strong>Required columns:</strong> Program, Semester, Course Name, Exam Name, Announcement Date, Submission Date, Conduction Date, Show Marks Date, Faculty Name
+      </div>
+      <div class="dropzone p-8 text-center mb-4" id="scheduleDrop" onclick="document.getElementById('scheduleFile').click()">
+        <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <p class="text-slate-600 font-medium text-sm mb-1">Drop your Excel/CSV file here</p>
+        <p class="text-slate-400 text-xs">or click to browse — .xlsx, .xls, .csv supported</p>
+        <p id="scheduleFileName" class="text-purple-600 text-sm font-medium mt-2 hidden"></p>
+      </div>
+      <input type="file" id="scheduleFile" accept=".xlsx,.xls,.csv" class="hidden" onchange="previewSchedule(this)" />
+      <div id="scheduleProgress" class="hidden mb-3">
+        <div class="bg-slate-100 rounded-full h-2"><div id="scheduleBar" class="progress-bar bg-purple-500 h-2 rounded-full" style="width:0%"></div></div>
+      </div>
+      <div id="scheduleResult" class="hidden fade-in"></div>
+      <div class="flex flex-wrap gap-3 mt-3">
+        <button id="scheduleUploadBtn" onclick="uploadSchedule()" disabled
+          class="font-semibold text-sm px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          style="background-color:#7c3aed;color:#fff;">Upload Schedule</button>
+        <button onclick="clearSchedule()"
+          class="font-semibold text-sm px-5 py-2.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-all">
+          Clear All Schedule Data
+        </button>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -181,6 +215,57 @@
     }
     setupDrop('courseDrop', 'courseFile', 'course');
     setupDrop('studentDrop', 'studentFile', 'student');
+    setupDrop('scheduleDrop', 'scheduleFile', 'schedule');
+
+    function previewSchedule(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const el = document.getElementById('scheduleFileName');
+      el.textContent = `✓ ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+      el.classList.remove('hidden');
+      document.getElementById('scheduleUploadBtn').disabled = false;
+    }
+
+    async function uploadSchedule() {
+      const fileInput = document.getElementById('scheduleFile');
+      const file = fileInput.files[0];
+      if (!file) return;
+      const bar = document.getElementById('scheduleBar');
+      const progressDiv = document.getElementById('scheduleProgress');
+      const resultDiv = document.getElementById('scheduleResult');
+      progressDiv.classList.remove('hidden');
+      resultDiv.classList.add('hidden');
+      let pct = 0;
+      const iv = setInterval(() => { pct = Math.min(pct+8,85); bar.style.width=pct+'%'; }, 100);
+      const fd = new FormData();
+      fd.append('file', file);
+      try {
+        const r = await fetch('/api/schedule/upload', { method:'POST', body:fd });
+        const d = await r.json();
+        clearInterval(iv); bar.style.width='100%';
+        setTimeout(()=>progressDiv.classList.add('hidden'),600);
+        resultDiv.innerHTML = d.success
+          ? `<div class="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">✓ ${d.message}</div>`
+          : `<div class="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3">✗ ${d.message}</div>`;
+        resultDiv.classList.remove('hidden');
+      } catch(e) {
+        clearInterval(iv); progressDiv.classList.add('hidden');
+        resultDiv.innerHTML = `<div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">Upload failed: ${e.message}</div>`;
+        resultDiv.classList.remove('hidden');
+      }
+    }
+
+    async function clearSchedule() {
+      if (!confirm('Delete ALL schedule data?')) return;
+      try {
+        const r = await fetch('/api/schedule/clear', {method:'DELETE'});
+        const d = await r.json();
+        document.getElementById('scheduleResult').innerHTML = d.success
+          ? `<div class="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">✓ Schedule data cleared.</div>`
+          : `<div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">✗ ${d.error}</div>`;
+        document.getElementById('scheduleResult').classList.remove('hidden');
+      } catch(e) { alert('Error: '+e.message); }
+    }
 
     async function uploadFile(endpoint, fileInputId, resultId, progressId, barId, statProg, statCourse) {
       const fileInput = document.getElementById(fileInputId);

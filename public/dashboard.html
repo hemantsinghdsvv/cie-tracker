@@ -152,6 +152,9 @@
       <a class="nav-item" id="nav-marks" onclick="switchSection('marks')">
         <span class="icon">✏️</span> Marks Entry
       </a>
+      <a class="nav-item" id="nav-schedule" onclick="switchSection('schedule')">
+        <span class="icon">📅</span> Formative Schedule
+      </a>
 
       <div style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:14px 6px 4px">Administration</div>
       <a class="nav-item" href="/admin.html">
@@ -426,6 +429,27 @@
         </div>
       </div>
 
+      <!-- ── FORMATIVE SCHEDULE ──────────────────────────────── -->
+      <div id="section-schedule" class="section">
+        <div class="card" style="max-width:720px">
+          <p style="color:#64748b;font-size:13px;margin-bottom:14px">Select program and semester to view the formative exam schedule for all courses.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+            <select id="schProgramSelect" class="input-sm" style="color:#334155" onchange="schOnProgramChange()">
+              <option value="">— Select Program —</option>
+            </select>
+            <select id="schSemesterSelect" class="input-sm" disabled style="color:#334155" onchange="loadSchedule()">
+              <option value="">— Select Semester —</option>
+            </select>
+          </div>
+          <div id="schLoading" style="display:none;text-align:center;padding:24px;color:#64748b;font-size:13px">
+            <div style="width:24px;height:24px;border:2px solid #e9d5ff;border-top-color:#7c3aed;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px"></div>
+            Loading schedule...
+          </div>
+          <div id="schEmpty" style="display:none;text-align:center;padding:24px;color:#94a3b8;font-size:13px">No schedule found. Upload from <a href="/admin.html" style="color:#7c3aed">Admin Panel</a>.</div>
+        </div>
+        <div id="schContent" style="display:none;max-width:900px;margin-top:16px"></div>
+      </div>
+
       <!-- ── MARKS ENTRY ──────────────────────────────────── -->
       <div id="section-marks" class="section">
         <div class="card" style="max-width:720px">
@@ -507,14 +531,15 @@
     checkMobile();
 
     // ── Section switching ────────────────────────────────────
-    const SECTIONS = ['notice','examplan','generate','marks'];
+    const SECTIONS = ['notice','examplan','generate','schedule','marks'];
     const TITLES = {
       notice:   ['Official Notice',    'Formative Exam Guidelines'],
       examplan: ['Exam Component Plan','UG & PG marks breakdown'],
       generate: ['Generate Sheets',    'Print signature & marks award sheets'],
+      schedule: ['Formative Schedule', 'Exam dates per course'],
       marks:    ['Digital Marks Entry','Enter & save student marks']
     };
-    let generateInited = false, marksInited = false;
+    let generateInited = false, marksInited = false, scheduleInited = false;
 
     function switchSection(id) {
       SECTIONS.forEach(s => {
@@ -526,6 +551,7 @@
       document.getElementById('pageSubtitle').textContent = TITLES[id][1];
       if (id === 'generate' && !generateInited) { loadStats(); loadPrograms(); generateInited = true; }
       if (id === 'marks'    && !marksInited)    { mLoadPrograms(); marksInited = true; }
+      if (id === 'schedule' && !scheduleInited) { schLoadPrograms(); scheduleInited = true; }
       if (window.innerWidth < 768) closeSidebar();
     }
 
@@ -808,6 +834,89 @@
       document.getElementById('mTableWrap').style.display  = 'none';
       document.getElementById('mNoData').style.display     = 'none';
       document.getElementById('mLoadingMsg').style.display = 'none';
+    }
+
+    // ── FORMATIVE SCHEDULE ───────────────────────────────────
+    async function schLoadPrograms() {
+      const sel = document.getElementById('schProgramSelect');
+      try {
+        const data = await (await fetch('/api/data/programs')).json();
+        data.forEach(p => sel.add(new Option(p.program_name, p.program_name)));
+      } catch {}
+    }
+
+    async function schOnProgramChange() {
+      const program = document.getElementById('schProgramSelect').value;
+      const semSel  = document.getElementById('schSemesterSelect');
+      semSel.innerHTML = '<option value="">— Select Semester —</option>';
+      semSel.disabled = !program;
+      document.getElementById('schContent').style.display = 'none';
+      document.getElementById('schEmpty').style.display   = 'none';
+      if (!program) return;
+      try {
+        const sems = await (await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}`)).json();
+        sems.forEach(s => semSel.add(new Option(s.semester, s.semester)));
+        semSel.disabled = false;
+      } catch {}
+    }
+
+    async function loadSchedule() {
+      const program  = document.getElementById('schProgramSelect').value;
+      const semester = document.getElementById('schSemesterSelect').value;
+      if (!program || !semester) return;
+      document.getElementById('schLoading').style.display  = 'block';
+      document.getElementById('schContent').style.display  = 'none';
+      document.getElementById('schEmpty').style.display    = 'none';
+      try {
+        const data = await (await fetch(`/api/schedule?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`)).json();
+        document.getElementById('schLoading').style.display = 'none';
+        const courses = Object.keys(data);
+        if (!courses.length) { document.getElementById('schEmpty').style.display = 'block'; return; }
+        renderSchedule(data, courses);
+      } catch(err) {
+        document.getElementById('schLoading').style.display = 'none';
+        document.getElementById('schEmpty').style.display   = 'block';
+        document.getElementById('schEmpty').textContent     = 'Error loading schedule: ' + err.message;
+      }
+    }
+
+    function renderSchedule(data, courses) {
+      const container = document.getElementById('schContent');
+      container.innerHTML = '';
+      courses.forEach((courseName, idx) => {
+        const { faculty_name, exams } = data[courseName];
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.cssText = 'margin-bottom:14px;overflow-x:auto;padding:0';
+        card.innerHTML = `
+          <div style="background:#1c4c94;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-radius:16px 16px 0 0">
+            <span style="font-weight:700;font-size:13px">${idx+1}. ${courseName}</span>
+            ${faculty_name ? `<span style="font-size:11px;opacity:.85">👤 ${faculty_name}</span>` : ''}
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+            <thead>
+              <tr style="background:#eff6ff;color:#1e293b">
+                <th style="padding:8px 14px;text-align:left;font-weight:600">Exam Name</th>
+                <th style="padding:8px 12px;text-align:center;font-weight:600">Announcement Date<br/><span style="font-weight:400;color:#64748b;font-size:10px">(Topic Allotment)</span></th>
+                <th style="padding:8px 12px;text-align:center;font-weight:600">Submission Date<br/><span style="font-weight:400;color:#64748b;font-size:10px">(PPT / Assignment)</span></th>
+                <th style="padding:8px 12px;text-align:center;font-weight:600">Conduction Date</th>
+                <th style="padding:8px 12px;text-align:center;font-weight:600">Show Marks to Student</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${exams.map((e, i) => `
+                <tr style="border-top:1px solid #f1f5f9;${i%2?'background:#f8fafc':''}">
+                  <td style="padding:9px 14px;font-weight:500;color:#1e293b">${e.exam_name}</td>
+                  <td style="padding:9px 12px;text-align:center;color:${e.announcement_date==='NA'?'#f59e0b':'#334155'}">${e.announcement_date||'—'}</td>
+                  <td style="padding:9px 12px;text-align:center;color:${e.submission_date==='NA'?'#f59e0b':'#334155'}">${e.submission_date||'—'}</td>
+                  <td style="padding:9px 12px;text-align:center;color:${e.conduction_date==='NA'?'#f59e0b':'#334155'}">${e.conduction_date||'—'}</td>
+                  <td style="padding:9px 12px;text-align:center;color:${e.show_marks_date==='NA'?'#f59e0b':'#334155'}">${e.show_marks_date||'—'}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>`;
+        container.appendChild(card);
+      });
+      container.style.display = 'block';
     }
   </script>
 </body>

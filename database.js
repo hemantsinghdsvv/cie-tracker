@@ -43,6 +43,21 @@ async function initDB() {
         )
       `);
       await client.query(`
+        CREATE TABLE IF NOT EXISTS schedule (
+          id SERIAL PRIMARY KEY,
+          program_name TEXT NOT NULL,
+          semester TEXT NOT NULL,
+          course_name TEXT NOT NULL,
+          faculty_name TEXT,
+          exam_name TEXT NOT NULL,
+          announcement_date TEXT,
+          submission_date TEXT,
+          conduction_date TEXT,
+          show_marks_date TEXT,
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      await client.query(`
         CREATE TABLE IF NOT EXISTS marks (
           id SERIAL PRIMARY KEY,
           scholar_id TEXT NOT NULL,

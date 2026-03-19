@@ -17,6 +17,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/data', require('./routes/api'));
 app.use('/api/marks', require('./routes/marks'));
+app.use('/api/schedule', require('./routes/schedule'));
 
 // Catch-all: serve index.html for non-API routes
 app.get('*', (req, res) => {
