@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const XLSX = require('xlsx');
 const path = require('path');
-const db = require('../database');
+const pool = require('../database');
 
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../uploads'),
@@ -12,77 +12,85 @@ const storage = multer.diskStorage({
 const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } });
 
 // Upload Course Master Excel
-router.post('/courses', upload.single('file'), (req, res) => {
+router.post('/courses', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+  const client = await pool.connect();
   try {
     const workbook = XLSX.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
     if (!rows.length) return res.status(400).json({ success: false, message: 'Excel file is empty' });
 
+    await client.query('BEGIN');
     let count = 0;
-    const stmtProg = db.prepare('INSERT OR IGNORE INTO programs (program_name) VALUES (?)');
-    const stmtCourse = db.prepare(`INSERT OR REPLACE INTO courses (course_code, course_name, program_name, faculty_name, semester) VALUES (?,?,?,?,?)`);
+    for (const row of rows) {
+      const program  = (row['Program']     || row['program']     || '').toString().trim();
+      const code     = (row['Course Coder'] || row['Course Code'] || row['course_code'] || '').toString().trim();
+      const name     = (row['Course Name']  || row['course_name'] || '').toString().trim();
+      const faculty  = (row['Allocation']   || row['allocation']  || row['Faculty']     || '').toString().trim();
+      const semester = (row['Semester']     || row['semester']     || '').toString().trim();
+      if (!program || !code || !name || !semester) continue;
 
-    db.serialize(() => {
-      db.run('BEGIN');
-      for (const row of rows) {
-        const program = (row['Program'] || row['program'] || '').toString().trim();
-        const code    = (row['Course Coder'] || row['Course Code'] || row['course_code'] || '').toString().trim();
-        const name    = (row['Course Name'] || row['course_name'] || '').toString().trim();
-        const faculty  = (row['Allocation'] || row['allocation'] || row['Faculty'] || '').toString().trim();
-        const semester = (row['Semester'] || row['semester'] || '').toString().trim();
-        
-        if (!program || !code || !name || !semester) continue;
-        stmtProg.run(program);
-        stmtCourse.run(code, name, program, faculty, semester);
-        count++;
-      }
-      db.run('COMMIT', (err) => {
-        stmtProg.finalize();
-        stmtCourse.finalize();
-        if (err) return res.status(500).json({ success: false, message: err.message });
-        res.json({ success: true, message: `Imported ${count} courses successfully.` });
-      });
-    });
+      await client.query(
+        'INSERT INTO programs (program_name) VALUES ($1) ON CONFLICT DO NOTHING',
+        [program]
+      );
+      await client.query(
+        `INSERT INTO courses (course_code, course_name, program_name, faculty_name, semester)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (course_code, program_name) DO UPDATE
+           SET course_name=$2, faculty_name=$4, semester=$5`,
+        [code, name, program, faculty, semester]
+      );
+      count++;
+    }
+    await client.query('COMMIT');
+    res.json({ success: true, message: `Imported ${count} courses successfully.` });
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('Course upload error:', err);
     res.status(500).json({ success: false, message: err.message });
+  } finally {
+    client.release();
   }
 });
 
 // Upload Student Enrollment Excel
-router.post('/students', upload.single('file'), (req, res) => {
+router.post('/students', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+  const client = await pool.connect();
   try {
     const workbook = XLSX.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
     if (!rows.length) return res.status(400).json({ success: false, message: 'Excel file is empty' });
 
+    await client.query('BEGIN');
     let count = 0;
-    const stmt = db.prepare(`INSERT OR REPLACE INTO students (scholar_id, student_name, program_name, semester) VALUES (?,?,?,?)`);
+    for (const row of rows) {
+      const id       = (row['Scholar ID']    || row['scholar_id'] || row['ScholarID'] || '').toString().trim();
+      const name     = (row['Student Name']  || row['student_name'] || row['Name']   || '').toString().trim();
+      const program  = (row['Program']       || row['program']    || '').toString().trim();
+      const semester = (row['Semester']      || row['semester']   || '').toString().trim();
+      if (!id || !name || !program || !semester) continue;
 
-    db.serialize(() => {
-      db.run('BEGIN');
-      for (const row of rows) {
-        const id       = (row['Scholar ID'] || row['scholar_id'] || row['ScholarID'] || '').toString().trim();
-        const name     = (row['Student Name'] || row['student_name'] || row['Name'] || '').toString().trim();
-        const program  = (row['Program'] || row['program'] || '').toString().trim();
-        const semester = (row['Semester'] || row['semester'] || '').toString().trim();
-        if (!id || !name || !program || !semester) continue;
-        stmt.run(id, name, program, semester);
-        count++;
-      }
-      db.run('COMMIT', (err) => {
-        stmt.finalize();
-        if (err) return res.status(500).json({ success: false, message: err.message });
-        res.json({ success: true, message: `Imported ${count} students successfully.` });
-      });
-    });
+      await client.query(
+        `INSERT INTO students (scholar_id, student_name, program_name, semester)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (scholar_id) DO UPDATE
+           SET student_name=$2, program_name=$3, semester=$4`,
+        [id, name, program, semester]
+      );
+      count++;
+    }
+    await client.query('COMMIT');
+    res.json({ success: true, message: `Imported ${count} students successfully.` });
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('Student upload error:', err);
     res.status(500).json({ success: false, message: err.message });
+  } finally {
+    client.release();
   }
 });
 

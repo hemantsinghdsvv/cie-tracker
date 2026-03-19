@@ -184,6 +184,30 @@
             Generate Marks Award Sheet
           </button>
         </div>
+
+        <!-- Master Download Section -->
+        <hr class="border-slate-100 my-6" />
+        <h2 class="text-slate-800 font-bold text-base mb-1 flex items-center gap-2">
+          <span class="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 text-xs font-bold">★</span>
+          Master Download
+        </h2>
+        <p class="text-slate-400 text-xs mb-4">Download sheets for <strong>all courses</strong> in the selected program &amp; semester at once.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button id="btnMasterSig" onclick="masterDownload('signature')" disabled
+            class="py-3.5 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3
+                   bg-purple-600 hover:bg-purple-700 text-white transition-all
+                   disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-purple-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            All Signature Sheets
+          </button>
+          <button id="btnMasterMarks" onclick="masterDownload('marks')" disabled
+            class="py-3.5 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3
+                   bg-indigo-600 hover:bg-indigo-700 text-white transition-all
+                   disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-indigo-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            All Marks Award Sheets
+          </button>
+        </div>
       </div>
     </div>
   </main>
@@ -337,6 +361,10 @@
       const ok = program && semester && course && students.length > 0;
       document.getElementById('btnSignature').disabled = !ok;
       document.getElementById('btnMarks').disabled = !ok;
+      // Master download only needs program + semester
+      const masterOk = !!(program && semester);
+      document.getElementById('btnMasterSig').disabled = !masterOk;
+      document.getElementById('btnMasterMarks').disabled = !masterOk;
     }
 
     function generateSheet(type) {
@@ -348,6 +376,13 @@
       const faculty = document.getElementById('facultyName').textContent;
       const params = new URLSearchParams({ program, semester, courseCode, courseName, faculty, type });
       window.open(`/generate.html?${params}`, '_blank');
+    }
+
+    function masterDownload(type) {
+      const program = document.getElementById('programSelect').value;
+      const semester = document.getElementById('semesterSelect').value;
+      const params = new URLSearchParams({ program, semester, type });
+      window.open(`/bulk.html?${params}`, '_blank');
     }
 
     loadStats();
