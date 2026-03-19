@@ -15,6 +15,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/data', require('./routes/api'));
+app.use('/api/marks', require('./routes/marks'));
 
 // Catch-all: serve index.html for non-API routes
 app.get('*', (req, res) => {

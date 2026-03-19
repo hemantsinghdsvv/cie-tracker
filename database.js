@@ -13,7 +13,6 @@ pool.on('error', (err) => {
   console.error('Unexpected database pool error:', err.message);
 });
 
-// Create tables on first start
 async function initDB() {
   if (!process.env.DATABASE_URL) return;
   try {
@@ -41,6 +40,19 @@ async function initDB() {
           student_name TEXT NOT NULL,
           program_name TEXT NOT NULL,
           semester TEXT NOT NULL
+        )
+      `);
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS marks (
+          id SERIAL PRIMARY KEY,
+          scholar_id TEXT NOT NULL,
+          course_code TEXT NOT NULL,
+          program_name TEXT NOT NULL,
+          semester TEXT NOT NULL,
+          component TEXT NOT NULL,
+          marks_obtained NUMERIC,
+          updated_at TIMESTAMPTZ DEFAULT NOW(),
+          UNIQUE (scholar_id, course_code, program_name, semester, component)
         )
       `);
       console.log('✅ Database tables ready (PostgreSQL / Neon)');
