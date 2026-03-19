@@ -177,8 +177,11 @@
       </a>
 
       <div style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:14px 6px 4px">Faculty Tools</div>
-      <a class="nav-item" id="nav-generate" onclick="switchSection('generate')">
-        <span class="icon">📄</span> Generate Sheets
+      <a class="nav-item" id="nav-signature" onclick="switchSection('signature')">
+        <span class="icon">✍️</span> Signature Sheet
+      </a>
+      <a class="nav-item" id="nav-marksaward" onclick="switchSection('marksaward')">
+        <span class="icon">📝</span> Marks Award Sheet
       </a>
       <a class="nav-item" id="nav-marks" onclick="switchSection('marks')">
         <span class="icon">✏️</span> Marks Entry
@@ -386,79 +389,117 @@
         </div>
       </div>
 
-      <!-- ── GENERATE SHEETS ──────────────────────────────── -->
-      <div id="section-generate" class="section">
+      <!-- ── SIGNATURE SHEET ────────────────────────────────── -->
+      <div id="section-signature" class="section">
         <div class="card" style="max-width:680px">
-          <!-- Stats -->
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
             <div style="text-align:center;padding:12px;background:#eff6ff;border-radius:12px">
-              <div style="font-size:24px;font-weight:800;color:#1c4c94" id="statPrograms">–</div>
+              <div style="font-size:24px;font-weight:800;color:#1c4c94" id="sig-statPrograms">–</div>
               <div style="font-size:11px;color:#64748b;margin-top:2px">Programs</div>
             </div>
             <div style="text-align:center;padding:12px;background:#fffbeb;border-radius:12px">
-              <div style="font-size:24px;font-weight:800;color:#d97706" id="statCourses">–</div>
+              <div style="font-size:24px;font-weight:800;color:#d97706" id="sig-statCourses">–</div>
               <div style="font-size:11px;color:#64748b;margin-top:2px">Courses</div>
             </div>
             <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:12px">
-              <div style="font-size:24px;font-weight:800;color:#16a34a" id="statStudents">–</div>
+              <div style="font-size:24px;font-weight:800;color:#16a34a" id="sig-statStudents">–</div>
               <div style="font-size:11px;color:#64748b;margin-top:2px">Students</div>
             </div>
           </div>
-
           <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:10px">Step 1 — Select Course</div>
-          <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px">
-            <select id="programSelect" class="input-sm" style="color:#334155">
+          <div style="display:grid;gap:10px;margin-bottom:14px">
+            <select id="sig-program" class="input-sm" style="color:#334155" onchange="sheetOnProgram('sig')">
               <option value="">— Select Program —</option>
             </select>
-            <select id="semesterSelect" class="input-sm" disabled style="color:#334155">
+            <select id="sig-semester" class="input-sm" disabled style="color:#334155" onchange="sheetOnSemester('sig')">
               <option value="">— Select Semester —</option>
             </select>
-            <select id="courseSelect" class="input-sm" disabled style="color:#334155">
+            <select id="sig-course" class="input-sm" disabled style="color:#334155" onchange="sheetOnCourse('sig')">
               <option value="">— Select Course —</option>
             </select>
           </div>
-
-          <div id="facultyInfo" style="display:none;background:#eff6ff;border-radius:10px;padding:9px 14px;font-size:13px;color:#1c4c94;margin-bottom:14px">
-            👤 Faculty: <strong id="facultyName">–</strong>
+          <div id="sig-faculty" style="display:none;background:#eff6ff;border-radius:10px;padding:9px 14px;font-size:13px;color:#1c4c94;margin-bottom:14px">
+            👤 Faculty: <strong id="sig-facultyName">–</strong>
           </div>
-
-          <div id="studentPreview" style="display:none;margin-bottom:16px">
-            <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:8px">Step 2 — Students (<span id="studentCount">0</span>)</div>
+          <div id="sig-studentPreview" style="display:none;margin-bottom:14px">
+            <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:8px">Step 2 — Students (<span id="sig-count">0</span>)</div>
             <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;max-height:160px;overflow-y:auto">
-              <ul id="studentList" style="list-style:none;margin:0;padding:0"></ul>
+              <ul id="sig-list" style="list-style:none;margin:0;padding:0"></ul>
             </div>
           </div>
-          <div id="noStudentsMsg" style="display:none;text-align:center;color:#94a3b8;padding:16px;font-size:13px">No students found.</div>
-
-          <hr style="border:none;border-top:1px solid #f1f5f9;margin:16px 0" />
-
-          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:10px">Step 3 — Generate Sheet</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-            <button id="btnSignature" onclick="generateSheet('signature')" disabled class="btn-primary">
-              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-              Signature Sheet
-            </button>
-            <button id="btnMarks" onclick="generateSheet('marks')" disabled class="btn-gold">
-              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-              Marks Award Sheet
-            </button>
-          </div>
-
-          <hr style="border:none;border-top:1px solid #f1f5f9;margin-bottom:12px" />
-          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:4px">⭐ Master Download — All Courses at Once</div>
-          <div style="font-size:12px;color:#94a3b8;margin-bottom:10px">Available after selecting Program + Semester</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <button id="btnMasterSig" onclick="masterDownload('signature')" disabled
-              style="background:#7c3aed;color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;opacity:0.4">
-              📥 All Signature Sheets
-            </button>
-            <button id="btnMasterMarks" onclick="masterDownload('marks')" disabled
-              style="background:#4f46e5;color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;opacity:0.4">
-              📥 All Marks Sheets
-            </button>
-          </div>
+          <div id="sig-noStudents" style="display:none;text-align:center;color:#94a3b8;padding:14px;font-size:13px">No students found.</div>
+          <hr style="border:none;border-top:1px solid #f1f5f9;margin:14px 0"/>
+          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:10px">Step 3 — Generate</div>
+          <button id="sig-btn" onclick="openSheet('sig','signature')" disabled class="btn-primary" style="width:100%;justify-content:center;margin-bottom:14px">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            Generate Signature Sheet
+          </button>
+          <hr style="border:none;border-top:1px solid #f1f5f9;margin-bottom:12px"/>
+          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:4px">⭐ Bulk Download</div>
+          <div style="font-size:12px;color:#94a3b8;margin-bottom:10px">Download all signature sheets for a program + semester at once</div>
+          <button id="sig-bulk" onclick="bulkSheet('sig','signature')" disabled
+            style="background:#7c3aed;color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;width:100%;opacity:0.4">
+            📥 All Signature Sheets
+          </button>
         </div>
       </div>
+
+      <!-- ── MARKS AWARD SHEET ───────────────────────────────── -->
+      <div id="section-marksaward" class="section">
+        <div class="card" style="max-width:680px">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+            <div style="text-align:center;padding:12px;background:#eff6ff;border-radius:12px">
+              <div style="font-size:24px;font-weight:800;color:#1c4c94" id="ma-statPrograms">–</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px">Programs</div>
+            </div>
+            <div style="text-align:center;padding:12px;background:#fffbeb;border-radius:12px">
+              <div style="font-size:24px;font-weight:800;color:#d97706" id="ma-statCourses">–</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px">Courses</div>
+            </div>
+            <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:12px">
+              <div style="font-size:24px;font-weight:800;color:#16a34a" id="ma-statStudents">–</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px">Students</div>
+            </div>
+          </div>
+          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:10px">Step 1 — Select Course</div>
+          <div style="display:grid;gap:10px;margin-bottom:14px">
+            <select id="ma-program" class="input-sm" style="color:#334155" onchange="sheetOnProgram('ma')">
+              <option value="">— Select Program —</option>
+            </select>
+            <select id="ma-semester" class="input-sm" disabled style="color:#334155" onchange="sheetOnSemester('ma')">
+              <option value="">— Select Semester —</option>
+            </select>
+            <select id="ma-course" class="input-sm" disabled style="color:#334155" onchange="sheetOnCourse('ma')">
+              <option value="">— Select Course —</option>
+            </select>
+          </div>
+          <div id="ma-faculty" style="display:none;background:#eff6ff;border-radius:10px;padding:9px 14px;font-size:13px;color:#1c4c94;margin-bottom:14px">
+            👤 Faculty: <strong id="ma-facultyName">–</strong>
+          </div>
+          <div id="ma-studentPreview" style="display:none;margin-bottom:14px">
+            <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:8px">Step 2 — Students (<span id="ma-count">0</span>)</div>
+            <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;max-height:160px;overflow-y:auto">
+              <ul id="ma-list" style="list-style:none;margin:0;padding:0"></ul>
+            </div>
+          </div>
+          <div id="ma-noStudents" style="display:none;text-align:center;color:#94a3b8;padding:14px;font-size:13px">No students found.</div>
+          <hr style="border:none;border-top:1px solid #f1f5f9;margin:14px 0"/>
+          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:10px">Step 3 — Generate</div>
+          <button id="ma-btn" onclick="openSheet('ma','marks')" disabled class="btn-gold" style="width:100%;justify-content:center;margin-bottom:14px">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            Generate Marks Award Sheet
+          </button>
+          <hr style="border:none;border-top:1px solid #f1f5f9;margin-bottom:12px"/>
+          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:4px">⭐ Bulk Download</div>
+          <div style="font-size:12px;color:#94a3b8;margin-bottom:10px">Download all marks award sheets for a program + semester at once</div>
+          <button id="ma-bulk" onclick="bulkSheet('ma','marks')" disabled
+            style="background:#4f46e5;color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;width:100%;opacity:0.4">
+            📥 All Marks Award Sheets
+          </button>
+        </div>
+      </div>
+
+
 
       <!-- ── FORMATIVE SCHEDULE ──────────────────────────────── -->
       <div id="section-schedule" class="section">
@@ -584,15 +625,16 @@
     checkMobile();
 
     // ── Section switching ────────────────────────────────────
-    const SECTIONS = ['notice','examplan','generate','schedule','marks'];
+    const SECTIONS = ['notice','examplan','signature','marksaward','schedule','marks'];
     const TITLES = {
-      notice:   ['Official Notice',    'Formative Exam Guidelines'],
-      examplan: ['Exam Component Plan','UG & PG marks breakdown'],
-      generate: ['Generate Sheets',    'Print signature & marks award sheets'],
-      schedule: ['Formative Schedule', 'Exam dates per course'],
-      marks:    ['Digital Marks Entry','Enter & save student marks']
+      notice:     ['Official Notice',       'Formative Exam Guidelines'],
+      examplan:   ['Exam Component Plan',   'UG & PG marks breakdown'],
+      signature:  ['Signature Sheet',       'Generate attendance signature sheets'],
+      marksaward: ['Marks Award Sheet',     'Generate marks award sheets for submission'],
+      schedule:   ['Formative Schedule',    'Exam dates per course'],
+      marks:      ['Digital Marks Entry',   'Enter & save student marks']
     };
-    let generateInited = false, marksInited = false, scheduleInited = false;
+    let sigInited = false, maInited = false, marksInited = false, scheduleInited = false;
 
     function switchSection(id) {
       SECTIONS.forEach(s => {
@@ -602,57 +644,58 @@
       });
       document.getElementById('pageTitle').textContent    = TITLES[id][0];
       document.getElementById('pageSubtitle').textContent = TITLES[id][1];
-      if (id === 'generate' && !generateInited) { loadStats(); loadPrograms(); generateInited = true; }
-      if (id === 'marks'    && !marksInited)    { mLoadPrograms(); marksInited = true; }
-      if (id === 'schedule' && !scheduleInited) { schLoadPrograms(); scheduleInited = true; }
+      if (id === 'signature'  && !sigInited)      { initSheetSection('sig');  loadSheetStats('sig'); sigInited = true; }
+      if (id === 'marksaward' && !maInited)       { initSheetSection('ma');   loadSheetStats('ma');  maInited  = true; }
+      if (id === 'marks'      && !marksInited)    { mLoadPrograms(); marksInited = true; }
+      if (id === 'schedule'   && !scheduleInited) { schLoadPrograms(); scheduleInited = true; }
       if (window.innerWidth < 768) closeSidebar();
     }
 
-    // ── GENERATE SHEETS ──────────────────────────────────────
-    let students = [];
+    // ── SIGNATURE + MARKS AWARD SHEETS (shared factory) ─────────
+    const sheetStudents = { sig: [], ma: [] };
 
-    async function loadStats() {
+    async function loadSheetStats(p) {
       try {
         const d = await (await fetch('/api/data/stats')).json();
-        document.getElementById('statPrograms').textContent = d.programs ?? '–';
-        document.getElementById('statCourses').textContent  = d.courses  ?? '–';
-        document.getElementById('statStudents').textContent = d.students ?? '–';
+        document.getElementById(`${p}-statPrograms`).textContent = d.programs ?? '–';
+        document.getElementById(`${p}-statCourses`).textContent  = d.courses  ?? '–';
+        document.getElementById(`${p}-statStudents`).textContent = d.students ?? '–';
       } catch {}
     }
 
-    async function loadPrograms() {
-      const sel = document.getElementById('programSelect');
+    async function initSheetSection(p) {
+      const sel = document.getElementById(`${p}-program`);
       try {
         const data = await (await fetch('/api/data/programs')).json();
-        data.forEach(p => { const o = new Option(p.program_name, p.program_name); sel.add(o); });
+        data.forEach(prog => sel.add(new Option(prog.program_name, prog.program_name)));
       } catch {}
     }
 
-    document.getElementById('programSelect').addEventListener('change', async function() {
-      const program = this.value;
-      const semSel = document.getElementById('semesterSelect');
-      const cSel   = document.getElementById('courseSelect');
+    async function sheetOnProgram(p) {
+      const program = document.getElementById(`${p}-program`).value;
+      const semSel  = document.getElementById(`${p}-semester`);
+      const cSel    = document.getElementById(`${p}-course`);
       semSel.innerHTML = '<option value="">— Select Semester —</option>';
       cSel.innerHTML   = '<option value="">— Select Course —</option>';
       semSel.disabled = !program; cSel.disabled = true;
-      document.getElementById('facultyInfo').style.display = 'none';
-      clearStudents();
+      document.getElementById(`${p}-faculty`).style.display = 'none';
+      sheetClearStudents(p);
       if (!program) return;
       try {
         const sems = await (await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}`)).json();
         sems.forEach(s => semSel.add(new Option(s.semester, s.semester)));
         semSel.disabled = false;
       } catch {}
-    });
+    }
 
-    document.getElementById('semesterSelect').addEventListener('change', async function() {
-      const program  = document.getElementById('programSelect').value;
-      const semester = this.value;
-      const cSel = document.getElementById('courseSelect');
+    async function sheetOnSemester(p) {
+      const program  = document.getElementById(`${p}-program`).value;
+      const semester = document.getElementById(`${p}-semester`).value;
+      const cSel = document.getElementById(`${p}-course`);
       cSel.innerHTML = '<option value="">— Select Course —</option>';
       cSel.disabled = !semester;
-      document.getElementById('facultyInfo').style.display = 'none';
-      fetchStudents();
+      document.getElementById(`${p}-faculty`).style.display = 'none';
+      await sheetFetchStudents(p);
       if (!semester) return;
       try {
         const courses = await (await fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`)).json();
@@ -664,79 +707,77 @@
         });
         cSel.disabled = false;
       } catch {}
-    });
-
-    document.getElementById('courseSelect').addEventListener('change', function() {
-      const opt = this.options[this.selectedIndex];
-      if (opt && opt.dataset.faculty) {
-        document.getElementById('facultyName').textContent = opt.dataset.faculty;
-        document.getElementById('facultyInfo').style.display = 'flex';
-      } else document.getElementById('facultyInfo').style.display = 'none';
-      updateButtons();
-    });
-
-    async function fetchStudents() {
-      const program  = document.getElementById('programSelect').value;
-      const semester = document.getElementById('semesterSelect').value;
-      if (!program || !semester) { clearStudents(); return; }
-      try {
-        students = await (await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`)).json();
-        renderStudents();
-      } catch {}
-      updateButtons();
     }
 
-    function renderStudents() {
-      const preview = document.getElementById('studentPreview');
-      const noMsg   = document.getElementById('noStudentsMsg');
-      const list    = document.getElementById('studentList');
-      if (!students.length) { preview.style.display = 'none'; noMsg.style.display = 'block'; return; }
-      noMsg.style.display = 'none';
-      list.innerHTML = '';
-      students.forEach((s, i) => {
-        const li = document.createElement('li');
-        li.style.cssText = 'padding:8px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f8fafc;font-size:13px';
-        li.innerHTML = `<span style="color:#94a3b8;font-size:11px;width:20px">${i+1}</span><span style="font-family:monospace;color:#1c4c94;font-size:12px">${s.scholar_id}</span><span style="color:#334155">${s.student_name}</span>`;
+    function sheetOnCourse(p) {
+      const opt = document.getElementById(`${p}-course`).options[document.getElementById(`${p}-course`).selectedIndex];
+      if (opt && opt.dataset.faculty) {
+        document.getElementById(`${p}-facultyName`).textContent = opt.dataset.faculty;
+        document.getElementById(`${p}-faculty`).style.display = 'flex';
+      } else { document.getElementById(`${p}-faculty`).style.display = 'none'; }
+      sheetUpdateButtons(p);
+    }
+
+    async function sheetFetchStudents(p) {
+      const program  = document.getElementById(`${p}-program`).value;
+      const semester = document.getElementById(`${p}-semester`).value;
+      if (!program || !semester) { sheetClearStudents(p); return; }
+      try {
+        sheetStudents[p] = await (await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`)).json();
+        sheetRenderStudents(p);
+      } catch {}
+      sheetUpdateButtons(p);
+    }
+
+    function sheetRenderStudents(p) {
+      const st = sheetStudents[p];
+      const preview = document.getElementById(`${p}-studentPreview`);
+      const noMsg   = document.getElementById(`${p}-noStudents`);
+      const list    = document.getElementById(`${p}-list`);
+      if (!st.length) { preview.style.display='none'; noMsg.style.display='block'; return; }
+      noMsg.style.display='none'; list.innerHTML='';
+      st.forEach((s,i)=>{
+        const li=document.createElement('li');
+        li.style.cssText='padding:8px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f8fafc;font-size:13px';
+        li.innerHTML=`<span style="color:#94a3b8;font-size:11px;width:20px">${i+1}</span><span style="font-family:monospace;color:#1c4c94;font-size:12px">${s.scholar_id}</span><span style="color:#334155">${s.student_name}</span>`;
         list.appendChild(li);
       });
-      document.getElementById('studentCount').textContent = students.length;
-      preview.style.display = 'block';
+      document.getElementById(`${p}-count`).textContent = st.length;
+      preview.style.display='block';
     }
 
-    function clearStudents() {
-      students = [];
-      document.getElementById('studentPreview').style.display = 'none';
-      document.getElementById('noStudentsMsg').style.display  = 'none';
-      updateButtons();
+    function sheetClearStudents(p) {
+      sheetStudents[p]=[];
+      document.getElementById(`${p}-studentPreview`).style.display='none';
+      document.getElementById(`${p}-noStudents`).style.display='none';
+      sheetUpdateButtons(p);
     }
 
-    function updateButtons() {
-      const program  = document.getElementById('programSelect').value;
-      const semester = document.getElementById('semesterSelect').value;
-      const course   = document.getElementById('courseSelect').value;
-      const ok = !!(program && semester && course && students.length);
-      document.getElementById('btnSignature').disabled = !ok;
-      document.getElementById('btnMarks').disabled     = !ok;
+    function sheetUpdateButtons(p) {
+      const program  = document.getElementById(`${p}-program`).value;
+      const semester = document.getElementById(`${p}-semester`).value;
+      const course   = document.getElementById(`${p}-course`).value;
+      const ok = !!(program && semester && course && sheetStudents[p].length);
+      document.getElementById(`${p}-btn`).disabled = !ok;
+      const bulk = document.getElementById(`${p}-bulk`);
       const masterOk = !!(program && semester);
-      const mSig  = document.getElementById('btnMasterSig');
-      const mMrk  = document.getElementById('btnMasterMarks');
-      mSig.disabled  = !masterOk; mSig.style.opacity  = masterOk ? '1' : '0.4';
-      mMrk.disabled  = !masterOk; mMrk.style.opacity  = masterOk ? '1' : '0.4';
+      bulk.disabled = !masterOk; bulk.style.opacity = masterOk ? '1' : '0.4';
     }
 
-    function generateSheet(type) {
-      const program    = document.getElementById('programSelect').value;
-      const semester   = document.getElementById('semesterSelect').value;
-      const courseCode = document.getElementById('courseSelect').value;
-      const cOpt = document.getElementById('courseSelect').options[document.getElementById('courseSelect').selectedIndex];
-      const params = new URLSearchParams({ program, semester, courseCode, courseName: cOpt.dataset.courseName || courseCode, faculty: document.getElementById('facultyName').textContent, type });
+    function openSheet(p, type) {
+      const program    = document.getElementById(`${p}-program`).value;
+      const semester   = document.getElementById(`${p}-semester`).value;
+      const courseCode = document.getElementById(`${p}-course`).value;
+      const cOpt = document.getElementById(`${p}-course`).options[document.getElementById(`${p}-course`).selectedIndex];
+      const faculty = document.getElementById(`${p}-facultyName`).textContent;
+      const params = new URLSearchParams({ program, semester, courseCode, courseName: cOpt.dataset.courseName || courseCode, faculty, type });
       window.open(`/generate.html?${params}`, '_blank');
     }
 
-    function masterDownload(type) {
-      const p = document.getElementById('programSelect').value;
-      const s = document.getElementById('semesterSelect').value;
-      window.open(`/bulk.html?${new URLSearchParams({program:p,semester:s,type})}`, '_blank');
+    function bulkSheet(p, type) {
+      const program  = document.getElementById(`${p}-program`).value;
+      const semester = document.getElementById(`${p}-semester`).value;
+      window.open(`/bulk.html?${new URLSearchParams({program,semester,type})}`, '_blank');
     }
 
     // ── MARKS ENTRY ──────────────────────────────────────────
