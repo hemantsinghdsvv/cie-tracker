@@ -8,6 +8,26 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "server.js"
+    },
+    {
+      "src": "/css/(.*)",
+      "dest": "/public/css/$1"
+    },
+    {
+      "src": "/logo.png",
+      "dest": "/public/logo.png"
+    },
+    {
+      "src": "/logo_white.png",
+      "dest": "/public/logo_white.png"
+    },
+    {
+      "src": "/(.*\\.html)",
+      "dest": "/public/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "server.js"
     }
