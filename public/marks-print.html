@@ -25,6 +25,9 @@
     .btn-pdf:hover { background: #d97706; }
 
     .preview-wrapper { padding: 24px; }
+    @media (max-width: 640px) {
+      .preview-wrapper { padding: 12px; }
+    }
     .print-container {
       background: #fff;
       max-width: 900px;
@@ -34,20 +37,30 @@
       overflow: hidden;
       padding: 32px;
     }
+    @media (max-width: 640px) {
+      .print-container { padding: 16px; border-radius: 0; }
+    }
 
     /* Header */
     .sheet-header { display: flex; align-items: center; gap: 18px; padding-bottom: 14px; border-bottom: 2px solid #1c4c94; margin-bottom: 16px; }
+    @media (max-width: 640px) {
+      .sheet-header { flex-direction: column; text-align: center; gap: 12px; }
+    }
     .sheet-header img { height: 56px; width: auto; }
     .sheet-header-text h1 { font-size: 18px; font-weight: 800; color: #1c4c94; margin: 0; }
     .sheet-header-text h2 { font-size: 12px; color: #64748b; margin: 2px 0 0; font-weight: 400; }
 
     /* Meta */
     .sheet-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 20px; font-size: 13px; }
+    @media (max-width: 640px) {
+      .sheet-meta { grid-template-columns: 1fr; gap: 10px; }
+    }
     .sheet-meta .meta-item strong { color: #374151; }
     .sheet-meta .meta-item span { color: #1e293b; }
 
     /* Table */
-    .marks-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .table-scroll-wrap { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin-bottom:10px; }
+    .marks-table { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 700px; }
     .marks-table thead tr { background: #1c4c94; color: #fff; }
     .marks-table th { padding: 9px 12px; font-weight: 600; text-align: center; white-space: nowrap; }
     .marks-table th:nth-child(1), .marks-table th:nth-child(3) { text-align: left; }
@@ -55,6 +68,13 @@
     .marks-table td:nth-child(1), .marks-table td:nth-child(3) { text-align: left; }
     .marks-table tbody tr:nth-child(even) { background: #f8fafc; }
     .marks-table .total-cell { font-weight: 700; color: #1c4c94; }
+
+    /* Footer Signatures */
+    .footer-signs { margin-top:24px; display:grid; grid-template-columns:1fr 1fr; gap:24px; font-size:12px; color:#374151; }
+    @media (max-width: 640px) {
+      .footer-signs { grid-template-columns: 1fr; gap: 40px; margin-top: 40px; }
+    }
+    .sign-box { border-top:1px solid #334155; padding-top:8px; text-align: center; }
 
     /* Loading */
     #loadingState { text-align: center; padding: 60px; color: #64748b; font-size: 14px; }
@@ -102,16 +122,16 @@
         <div class="meta-item"><strong>Faculty: </strong><span id="metaFaculty">—</span></div>
       </div>
 
-      <div style="overflow-x:auto">
+      <div class="table-scroll-wrap">
         <table class="marks-table" id="marksTable">
           <thead id="marksHead"></thead>
           <tbody id="marksBody"></tbody>
         </table>
       </div>
 
-      <div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px;font-size:12px;color:#374151">
-        <div style="border-top:1px solid #334155;padding-top:8px">Faculty Signature</div>
-        <div style="border-top:1px solid #334155;padding-top:8px">HoD Signature</div>
+      <div class="footer-signs">
+        <div class="sign-box">Faculty Signature</div>
+        <div class="sign-box">HoD Signature</div>
       </div>
     </div>
   </div>

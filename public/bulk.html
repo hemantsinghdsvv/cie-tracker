@@ -24,6 +24,13 @@
       .course-sheet { page-break-after: always; break-after: page; }
       .course-sheet:last-child { page-break-after: avoid; break-after: avoid; }
     }
+
+    /* ── Table scrolls horizontally on mobile ────── */
+    .table-scroll-wrap { 
+      width: 100%;
+      overflow-x: auto; 
+      -webkit-overflow-scrolling: touch; 
+    }
   </style>
 </head>
 <body>
@@ -114,16 +121,17 @@
       const subjects = getSubjects(program);
       const subjectW = Math.floor(74 / subjects.length);
       let html = `
-        <table class="cie-table">
-          <thead>
-            <tr>
-              <th style="width:4%">S.No</th>
-              <th style="width:9%">Scholar ID</th>
-              <th style="width:13%">Name</th>
-              ${subjects.map(s => `<th style="width:${subjectW}%">${s.label} (${s.max})<br/><span style="font-size:8pt;font-weight:normal">Sign (Date and Time)</span></th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>`;
+        <div class="table-scroll-wrap">
+          <table class="cie-table">
+            <thead>
+              <tr>
+                <th style="width:4%">S.No</th>
+                <th style="width:9%">Scholar ID</th>
+                <th style="width:13%">Name</th>
+                ${subjects.map(s => `<th style="width:${subjectW}%">${s.label} (${s.max})<br/><span style="font-size:8pt;font-weight:normal">Sign (Date and Time)</span></th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>`;
       students.forEach((s, i) => {
         html += `<tr>
           <td class="sno">${i + 1}</td>
@@ -132,7 +140,7 @@
           ${'<td></td>'.repeat(subjects.length)}
         </tr>`;
       });
-      html += `</tbody></table>`;
+      html += `</tbody></table></div>`;
       return html;
     }
 
@@ -140,19 +148,20 @@
       const subjects = getSubjects(program);
       const subjectW = Math.floor(74 / subjects.length);
       let html = `
-        <table class="cie-table">
-          <thead>
-            <tr>
-              <th rowspan="2" style="width:4%">S.No</th>
-              <th rowspan="2" style="width:9%">Scholar ID</th>
-              <th rowspan="2" style="width:13%">Name</th>
-              ${subjects.map(s => `<th colspan="2" style="width:${subjectW}%">${s.label}<br/>(${s.max})</th>`).join('')}
-            </tr>
-            <tr>
-              ${subjects.map(() => `<th style="font-weight:600;font-size:8pt;border-left:1pt solid rgba(255,255,255,0.3)">Marks</th><th style="font-weight:600;font-size:8pt;border-left:1pt solid rgba(255,255,255,0.3)">Sign</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>`;
+        <div class="table-scroll-wrap">
+          <table class="cie-table">
+            <thead>
+              <tr>
+                <th rowspan="2" style="width:4%">S.No</th>
+                <th rowspan="2" style="width:9%">Scholar ID</th>
+                <th rowspan="2" style="width:13%">Name</th>
+                ${subjects.map(s => `<th colspan="2" style="width:${subjectW}%">${s.label}<br/>(${s.max})</th>`).join('')}
+              </tr>
+              <tr>
+                ${subjects.map(() => `<th style="font-weight:600;font-size:8pt;border-left:1pt solid rgba(255,255,255,0.3)">Marks</th><th style="font-weight:600;font-size:8pt;border-left:1pt solid rgba(255,255,255,0.3)">Sign</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>`;
       students.forEach((s, i) => {
         html += `<tr>
           <td class="sno">${i + 1}</td>
@@ -161,7 +170,7 @@
           ${subjects.map(() => `<td style="border-right:1pt solid #1c4c94"></td><td></td>`).join('')}
         </tr>`;
       });
-      html += `</tbody></table>`;
+      html += `</tbody></table></div>`;
       return html;
     }
 
