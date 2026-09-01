@@ -95,16 +95,26 @@
         </div>
       </div>
       
-      <nav class="flex items-center gap-2">
-        <a href="/data.html" class="px-4 py-2.5 rounded-xl text-slate-500 hover:text-primary hover:bg-blue-50 font-semibold text-sm transition-all flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-          Manage Data
-        </a>
-        <a href="/dashboard.html" class="px-5 py-2.5 bg-slate-900 hover:bg-primary text-white rounded-xl font-bold text-sm transition-all shadow-lg flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-          Dashboard
-        </a>
-      </nav>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 flex items-center gap-2">
+          <span class="text-xs text-slate-500 font-bold">Target Session:</span>
+          <select id="adminSessionSelect" onchange="onAdminSessionChange()" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer">
+            <option value="July – December 2026">July – December 2026</option>
+            <option value="January – June 2026">January – June 2026</option>
+            <option value="July – December 2025">July – December 2025</option>
+          </select>
+        </div>
+        <nav class="flex items-center gap-2">
+          <a href="/data.html" class="px-4 py-2.5 rounded-xl text-slate-500 hover:text-primary hover:bg-blue-50 font-semibold text-sm transition-all flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+            Manage Data
+          </a>
+          <a href="/dashboard.html" class="px-5 py-2.5 bg-slate-900 hover:bg-primary text-white rounded-xl font-bold text-sm transition-all shadow-lg flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Dashboard
+          </a>
+        </nav>
+      </div>
     </div>
   </header>
 
@@ -323,9 +333,19 @@
   </footer>
 
   <script>
+    let currentSession = sessionStorage.getItem('cie_session') || 'July – December 2026';
+    const sSel = document.getElementById('adminSessionSelect');
+    if (sSel) sSel.value = currentSession;
+
+    function onAdminSessionChange() {
+      currentSession = document.getElementById('adminSessionSelect').value;
+      sessionStorage.setItem('cie_session', currentSession);
+      loadStats();
+    }
+
     async function loadStats() {
       try {
-        const r = await fetch('/api/data/stats');
+        const r = await fetch(`/api/data/stats?session=${encodeURIComponent(currentSession)}`);
         const d = await r.json();
         document.getElementById('sPrograms').textContent = d.programs ?? '–';
         document.getElementById('sCourses').textContent = d.courses ?? '–';
@@ -385,6 +405,7 @@
       const iv = setInterval(() => { pct = Math.min(pct+8,85); bar.style.width=pct+'%'; }, 100);
       const fd = new FormData();
       fd.append('file', file);
+      fd.append('session', currentSession);
       try {
         const r = await fetch('/api/schedule/upload', { method:'POST', body:fd });
         const d = await r.json();
@@ -402,12 +423,12 @@
     }
 
     async function clearSchedule() {
-      if (!confirm('Delete ALL schedule data? This action cannot be undone.')) return;
+      if (!confirm(`Delete schedule data for session "${currentSession}"? This action cannot be undone.`)) return;
       try {
-        const r = await fetch('/api/schedule/clear', {method:'DELETE'});
+        const r = await fetch(`/api/schedule/clear?session=${encodeURIComponent(currentSession)}`, {method:'DELETE'});
         const d = await r.json();
         document.getElementById('scheduleResult').innerHTML = d.success
-          ? `<div class="text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">✓ Schedule data cleared successfully.</div>`
+          ? `<div class="text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">✓ Schedule data cleared successfully for ${currentSession}.</div>`
           : `<div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">✗ ${d.error}</div>`;
         document.getElementById('scheduleResult').classList.remove('hidden');
       } catch(e) { alert('Error: '+e.message); }
@@ -435,6 +456,7 @@
 
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('session', currentSession);
 
       try {
         const r = await fetch(`/api/upload/${endpoint}`, { method: 'POST', body: formData });

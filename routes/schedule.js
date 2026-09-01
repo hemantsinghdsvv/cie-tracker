@@ -11,6 +11,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 
 // Announcement Date, Submission Date, Conduction Date, Show Marks Date, Faculty Name
 router.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+  const session = (req.body.session || req.headers['x-session'] || 'July – December 2026').toString().trim();
   const client = await pool.connect();
   try {
     const workbook = XLSX.read(req.file.buffer, { type: 'buffer', cellDates: true });
@@ -35,14 +36,14 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       if (!program || !semester || !course || !examName) continue;
 
       await client.query(
-        `INSERT INTO schedule (program_name, semester, course_name, faculty_name, exam_name, announcement_date, submission_date, conduction_date, show_marks_date)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [program, semester, course, faculty, examName, annDate, subDate, condDate, showDate]
+        `INSERT INTO schedule (program_name, semester, course_name, faculty_name, exam_name, announcement_date, submission_date, conduction_date, show_marks_date, session)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [program, semester, course, faculty, examName, annDate, subDate, condDate, showDate, session]
       );
       count++;
     }
     await client.query('COMMIT');
-    res.json({ success: true, message: `Imported ${count} schedule entries.` });
+    res.json({ success: true, message: `Imported ${count} schedule entries for session: ${session}.` });
   } catch (err) {
     await client.query('ROLLBACK');
     res.status(500).json({ success: false, message: err.message });
@@ -57,24 +58,37 @@ function formatDate(val) {
   return val.toString().trim();
 }
 
-// DELETE /api/schedule/clear — clear all schedule data
+// DELETE /api/schedule/clear — clear schedule data (scoped to session if provided)
 router.delete('/clear', async (req, res) => {
+  const session = req.query.session || (req.body && req.body.session);
   try {
-    await pool.query('DELETE FROM schedule');
+    if (session) {
+      await pool.query('DELETE FROM schedule WHERE session = $1', [session]);
+    } else {
+      await pool.query('DELETE FROM schedule');
+    }
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// GET /api/schedule?program=&semester= — fetch schedule grouped by course
+// GET /api/schedule?program=&semester=&session= — fetch schedule grouped by course
 router.get('/', async (req, res) => {
-  const { program, semester } = req.query;
+  const { program, semester, session } = req.query;
   try {
     let query = `SELECT program_name, semester, course_name, faculty_name, exam_name, announcement_date, submission_date, conduction_date, show_marks_date
                  FROM schedule`;
     const params = [];
+    const wheres = [];
     if (program && semester) {
-      query += ` WHERE program_name = $1 AND semester = $2`;
       params.push(program, semester);
+      wheres.push(`program_name = $1 AND semester = $2`);
+    }
+    if (session) {
+      params.push(session);
+      wheres.push(`session = $${params.length}`);
+    }
+    if (wheres.length) {
+      query += ` WHERE ` + wheres.join(' AND ');
     }
     query += ` ORDER BY program_name, semester, course_name, id`;
 

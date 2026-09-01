@@ -82,6 +82,7 @@
     const program   = params.get('program')  || '';
     const semester  = params.get('semester') || '';
     const type      = params.get('type')     || 'signature'; // 'signature' | 'marks'
+    const session   = params.get('session')  || sessionStorage.getItem('cie_session') || 'July – December 2026';
 
     const isMarks   = type === 'marks';
     const typeLabel = isMarks ? 'Marks Award Sheet' : 'Signature Sheet';
@@ -189,7 +190,7 @@
             <div class="sheet-header-text">
               <h1>Department of Computer Science</h1>
               <h2 class="mt-1 font-semibold">${headerLabel}</h2>
-              <h3>Session: Jan – June 2026</h3>
+              <h3>Session: ${session}</h3>
             </div>
             <div class="header-flex-balance"></div>
           </div>

@@ -140,9 +140,11 @@
     const courseCode= params.get('courseCode') || '';
     const courseName= params.get('courseName') || '';
     const faculty   = params.get('faculty') || '';
-    const type      = params.get('type') || 'signature'; // 'signature' | 'marks'
+    const session   = params.get('session') || sessionStorage.getItem('cie_session') || 'July – December 2026';
 
     // Set header info
+    const sessionEl = document.getElementById('sessionLabel');
+    if (sessionEl) sessionEl.textContent = 'Session: ' + session;
     document.getElementById('metaCourseCode').textContent = courseCode;
     document.getElementById('metaCourseName').textContent = courseName;
     document.getElementById('metaProgSem').textContent = `${program} / Semester ${semester}`;

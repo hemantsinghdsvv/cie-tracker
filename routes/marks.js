@@ -2,30 +2,33 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../database');
 
-// GET /api/marks?program=&semester=&courseCode=
+// GET /api/marks?program=&semester=&courseCode=&session=
 // Returns marks for all students in a given course
 router.get('/', async (req, res) => {
-  const { program, semester, courseCode } = req.query;
+  const { program, semester, courseCode, session } = req.query;
   if (!program || !semester || !courseCode)
     return res.status(400).json({ error: 'program, semester, courseCode are required' });
   try {
-    const result = await pool.query(
-      `SELECT m.scholar_id, s.student_name, m.component, m.marks_obtained, m.updated_at
+    let sql = `SELECT m.scholar_id, COALESCE(s.student_name, m.scholar_id) AS student_name, m.component, m.marks_obtained, m.updated_at
        FROM marks m
-       JOIN students s ON s.scholar_id = m.scholar_id
-       WHERE m.program_name = $1 AND m.semester = $2 AND m.course_code = $3
-       ORDER BY s.student_name, m.component`,
-      [program, semester, courseCode]
-    );
+       LEFT JOIN students s ON s.scholar_id = m.scholar_id AND s.session = m.session
+       WHERE m.program_name = $1 AND m.semester = $2 AND m.course_code = $3`;
+    const params = [program, semester, courseCode];
+    if (session) {
+      sql += ' AND m.session = $4';
+      params.push(session);
+    }
+    sql += ' ORDER BY s.student_name, m.component';
+    const result = await pool.query(sql, params);
     res.json(result.rows);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // POST /api/marks/save
-// Body: { program, semester, courseCode, entries: [{ scholar_id, component, marks_obtained }] }
+// Body: { program, semester, courseCode, entries: [{ scholar_id, component, marks_obtained }], session }
 // Upserts all marks for a course in one transaction
 router.post('/save', async (req, res) => {
-  const { program, semester, courseCode, entries } = req.body;
+  const { program, semester, courseCode, entries, session = 'July – December 2026' } = req.body;
   if (!program || !semester || !courseCode || !Array.isArray(entries))
     return res.status(400).json({ error: 'program, semester, courseCode, entries[] are required' });
 
@@ -36,11 +39,11 @@ router.post('/save', async (req, res) => {
       const { scholar_id, component, marks_obtained } = entry;
       if (!scholar_id || !component) continue;
       await client.query(
-        `INSERT INTO marks (scholar_id, course_code, program_name, semester, component, marks_obtained, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, NOW())
-         ON CONFLICT (scholar_id, course_code, program_name, semester, component)
+        `INSERT INTO marks (scholar_id, course_code, program_name, semester, component, marks_obtained, session, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+         ON CONFLICT (scholar_id, course_code, program_name, semester, component, session)
          DO UPDATE SET marks_obtained = EXCLUDED.marks_obtained, updated_at = NOW()`,
-        [scholar_id, courseCode, program, semester, component, marks_obtained ?? null]
+        [scholar_id, courseCode, program, semester, component, marks_obtained ?? null, session]
       );
     }
     await client.query('COMMIT');
