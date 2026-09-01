@@ -10,6 +10,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 
 // Upload Course Master Excel
 router.post('/courses', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+  const session = (req.body.session || req.headers['x-session'] || 'July – December 2026').toString().trim();
   const client = await pool.connect();
   try {
     const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
@@ -32,16 +33,16 @@ router.post('/courses', upload.single('file'), async (req, res) => {
         [program]
       );
       await client.query(
-        `INSERT INTO courses (course_code, course_name, program_name, faculty_name, semester)
-         VALUES ($1, $2, $3, $4, $5)
-         ON CONFLICT (course_code, program_name) DO UPDATE
+        `INSERT INTO courses (course_code, course_name, program_name, faculty_name, semester, session)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (course_code, program_name, session) DO UPDATE
            SET course_name=$2, faculty_name=$4, semester=$5`,
-        [code, name, program, faculty, semester]
+        [code, name, program, faculty, semester, session]
       );
       count++;
     }
     await client.query('COMMIT');
-    res.json({ success: true, message: `Imported ${count} courses successfully.` });
+    res.json({ success: true, message: `Imported ${count} courses successfully for session: ${session}.` });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Course upload error:', err);
@@ -54,6 +55,7 @@ router.post('/courses', upload.single('file'), async (req, res) => {
 // Upload Student Enrollment Excel
 router.post('/students', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+  const session = (req.body.session || req.headers['x-session'] || 'July – December 2026').toString().trim();
   const client = await pool.connect();
   try {
     const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
@@ -71,16 +73,16 @@ router.post('/students', upload.single('file'), async (req, res) => {
       if (!id || !name || !program || !semester) continue;
 
       await client.query(
-        `INSERT INTO students (scholar_id, student_name, program_name, semester)
-         VALUES ($1, $2, $3, $4)
-         ON CONFLICT (scholar_id) DO UPDATE
+        `INSERT INTO students (scholar_id, student_name, program_name, semester, session)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (scholar_id, session) DO UPDATE
            SET student_name=$2, program_name=$3, semester=$4`,
-        [id, name, program, semester]
+        [id, name, program, semester, session]
       );
       count++;
     }
     await client.query('COMMIT');
-    res.json({ success: true, message: `Imported ${count} students successfully.` });
+    res.json({ success: true, message: `Imported ${count} students successfully for session: ${session}.` });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Student upload error:', err);

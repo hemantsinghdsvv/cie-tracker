@@ -129,12 +129,16 @@
       <h2 style="font-size:20px;font-weight:800;color:#1e293b;margin-bottom:6px">Select Academic Session</h2>
       <p style="font-size:13px;color:#64748b;margin-bottom:24px">Choose the session you are working on. This will apply to all modules.</p>
       <div style="display:grid;gap:10px;margin-bottom:20px">
+        <button class="session-btn" onclick="selectSession('July – December 2026')">
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#16a34a;font-weight:700;display:block;margin-bottom:2px">Current Session (New)</span>
+          📅 July – December 2026
+        </button>
         <button class="session-btn" onclick="selectSession('January – June 2026')">
-          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;display:block;margin-bottom:2px">Current Session</span>
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;display:block;margin-bottom:2px">Previous Session</span>
           📅 January – June 2026
         </button>
         <button class="session-btn" onclick="selectSession('July – December 2025')">
-          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;display:block;margin-bottom:2px">Previous Session</span>
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;display:block;margin-bottom:2px">Archive Session</span>
           📅 July – December 2025
         </button>
       </div>
@@ -605,6 +609,11 @@
       sessionStorage.setItem('cie_session', s);
       document.getElementById('sessionLabel').textContent = s;
       document.getElementById('sessionModal').style.display = 'none';
+
+      // Reset section initialization flags and reload current section
+      sigInited = false; maInited = false; marksInited = false; scheduleInited = false;
+      const activeSec = SECTIONS.find(sec => document.getElementById('section-' + sec)?.classList.contains('active')) || 'notice';
+      switchSection(activeSec);
     }
 
     function changeSession() {
@@ -691,7 +700,7 @@
 
     async function loadSheetStats(p) {
       try {
-        const d = await (await fetch('/api/data/stats')).json();
+        const d = await (await fetch(`/api/data/stats?session=${encodeURIComponent(currentSession)}`)).json();
         document.getElementById(`${p}-statPrograms`).textContent = d.programs ?? '–';
         document.getElementById(`${p}-statCourses`).textContent  = d.courses  ?? '–';
         document.getElementById(`${p}-statStudents`).textContent = d.students ?? '–';
@@ -700,8 +709,9 @@
 
     async function initSheetSection(p) {
       const sel = document.getElementById(`${p}-program`);
+      sel.innerHTML = '<option value="">— Select Program —</option>';
       try {
-        const data = await (await fetch('/api/data/programs')).json();
+        const data = await (await fetch(`/api/data/programs?session=${encodeURIComponent(currentSession)}`)).json();
         data.forEach(prog => sel.add(new Option(prog.program_name, prog.program_name)));
       } catch {}
     }
@@ -717,7 +727,7 @@
       sheetClearStudents(p);
       if (!program) return;
       try {
-        const sems = await (await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}`)).json();
+        const sems = await (await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}&session=${encodeURIComponent(currentSession)}`)).json();
         sems.forEach(s => semSel.add(new Option(s.semester, s.semester)));
         semSel.disabled = false;
       } catch {}
@@ -733,7 +743,7 @@
       await sheetFetchStudents(p);
       if (!semester) return;
       try {
-        const courses = await (await fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`)).json();
+        const courses = await (await fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(currentSession)}`)).json();
         courses.forEach(c => {
           const o = new Option(`${c.course_code} – ${c.course_name}`, c.course_code);
           o.dataset.faculty = c.faculty_name || '';
@@ -758,7 +768,7 @@
       const semester = document.getElementById(`${p}-semester`).value;
       if (!program || !semester) { sheetClearStudents(p); return; }
       try {
-        sheetStudents[p] = await (await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`)).json();
+        sheetStudents[p] = await (await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(currentSession)}`)).json();
         sheetRenderStudents(p);
       } catch {}
       sheetUpdateButtons(p);
@@ -805,14 +815,14 @@
       const courseCode = document.getElementById(`${p}-course`).value;
       const cOpt = document.getElementById(`${p}-course`).options[document.getElementById(`${p}-course`).selectedIndex];
       const faculty = document.getElementById(`${p}-facultyName`).textContent;
-      const params = new URLSearchParams({ program, semester, courseCode, courseName: cOpt.dataset.courseName || courseCode, faculty, type });
+      const params = new URLSearchParams({ program, semester, courseCode, courseName: cOpt.dataset.courseName || courseCode, faculty, type, session: currentSession });
       window.open(`/generate.html?${params}`, '_blank');
     }
 
     function bulkSheet(p, type) {
       const program  = document.getElementById(`${p}-program`).value;
       const semester = document.getElementById(`${p}-semester`).value;
-      window.open(`/bulk.html?${new URLSearchParams({program,semester,type})}`, '_blank');
+      window.open(`/bulk.html?${new URLSearchParams({program,semester,type,session:currentSession})}`, '_blank');
     }
 
     // ── MARKS ENTRY ──────────────────────────────────────────
@@ -834,8 +844,9 @@
 
     async function mLoadPrograms() {
       const sel = document.getElementById('mProgramSelect');
+      sel.innerHTML = '<option value="">— Select Program —</option>';
       try {
-        const data = await (await fetch('/api/data/programs')).json();
+        const data = await (await fetch(`/api/data/programs?session=${encodeURIComponent(currentSession)}`)).json();
         data.forEach(p => sel.add(new Option(p.program_name, p.program_name)));
       } catch {}
     }
@@ -850,7 +861,7 @@
       mHideTable();
       if (!program) return;
       try {
-        const sems = await (await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}`)).json();
+        const sems = await (await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}&session=${encodeURIComponent(currentSession)}`)).json();
         sems.forEach(s => semSel.add(new Option(s.semester, s.semester)));
         semSel.disabled = false;
       } catch {}
@@ -864,7 +875,7 @@
       cSel.disabled = !semester; mHideTable();
       if (!semester) return;
       try {
-        const courses = await (await fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`)).json();
+        const courses = await (await fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(currentSession)}`)).json();
         courses.forEach(c => {
           const o = new Option(`${c.course_code} – ${c.course_name}`, c.course_code);
           o.dataset.courseName = c.course_name;
@@ -887,8 +898,8 @@
       document.getElementById('mTableWrap').style.display  = 'none';
       try {
         const [sRes, mRes] = await Promise.all([
-          fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`),
-          fetch(`/api/marks?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&courseCode=${encodeURIComponent(courseCode)}`)
+          fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(currentSession)}`),
+          fetch(`/api/marks?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&courseCode=${encodeURIComponent(courseCode)}&session=${encodeURIComponent(currentSession)}`)
         ]);
         mStudents = await sRes.json();
         const saved = await mRes.json();
@@ -958,7 +969,7 @@
       }));
       try {
         const r = await fetch('/api/marks/save', { method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ program:mCurrentProgram, semester:mCurrentSemester, courseCode:mCurrentCourse, entries }) });
+          body: JSON.stringify({ program:mCurrentProgram, semester:mCurrentSemester, courseCode:mCurrentCourse, entries, session:currentSession }) });
         const d = await r.json();
         if (d.success) {
           status.style.color = '#16a34a';
@@ -972,11 +983,10 @@
 
     function printMarks() {
       const params = new URLSearchParams({
-        program: mCurrentProgram, semester: mCurrentSemester, courseCode: mCurrentCourse
+        program: mCurrentProgram, semester: mCurrentSemester, courseCode: mCurrentCourse, session: currentSession
       });
       window.open(`/marks-print.html?${params}`, '_blank');
     }
-
 
     function mHideTable() {
       document.getElementById('mTableWrap').style.display  = 'none';
@@ -987,8 +997,9 @@
     // ── FORMATIVE SCHEDULE ───────────────────────────────────
     async function schLoadPrograms() {
       const sel = document.getElementById('schProgramSelect');
+      sel.innerHTML = '<option value="">— Select Program —</option>';
       try {
-        const data = await (await fetch('/api/data/programs')).json();
+        const data = await (await fetch(`/api/data/programs?session=${encodeURIComponent(currentSession)}`)).json();
         data.forEach(p => sel.add(new Option(p.program_name, p.program_name)));
       } catch {}
     }
@@ -1002,7 +1013,7 @@
       document.getElementById('schEmpty').style.display   = 'none';
       if (!program) return;
       try {
-        const sems = await (await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}`)).json();
+        const sems = await (await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}&session=${encodeURIComponent(currentSession)}`)).json();
         sems.forEach(s => semSel.add(new Option(s.semester, s.semester)));
         semSel.disabled = false;
       } catch {}
@@ -1017,9 +1028,9 @@
       document.getElementById('schEmpty').style.display    = 'none';
 
       try {
-        let url = '/api/schedule';
+        let url = `/api/schedule?session=${encodeURIComponent(currentSession)}`;
         if (program && semester) {
-          url += `?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`;
+          url += `&program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`;
         }
         const data = await (await fetch(url)).json();
         document.getElementById('schLoading').style.display = 'none';

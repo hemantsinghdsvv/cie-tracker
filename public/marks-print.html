@@ -141,7 +141,7 @@
     const program = params.get('program')  || '';
     const semester= params.get('semester') || '';
     const courseCode = params.get('courseCode') || '';
-    const session = sessionStorage.getItem('cie_session') || 'Jan – June 2026';
+    const session = params.get('session') || sessionStorage.getItem('cie_session') || 'July – December 2026';
 
     document.getElementById('sheetSession').textContent = 'Session: ' + session;
     document.getElementById('metaProgSem').textContent  = `${program} / Semester ${semester}`;

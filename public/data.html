@@ -85,16 +85,26 @@
         </div>
       </div>
       
-      <nav class="flex items-center gap-2">
-        <a href="/admin.html" class="px-4 py-2 rounded-xl text-slate-500 hover:text-primary hover:bg-blue-50 font-bold text-xs transition-all flex items-center gap-2">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-          Admin
-        </a>
-        <a href="/dashboard.html" class="px-4 py-2 bg-slate-900 hover:bg-primary text-white rounded-xl font-bold text-xs transition-all shadow-lg flex items-center gap-2">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-          Dashboard
-        </a>
-      </nav>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl px-3 py-1.5 flex items-center gap-2">
+          <span class="text-xs text-slate-500 font-bold">Active Session:</span>
+          <select id="dataSessionSelect" onchange="onDataSessionChange()" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer">
+            <option value="July – December 2026">July – December 2026</option>
+            <option value="January – June 2026">January – June 2026</option>
+            <option value="July – December 2025">July – December 2025</option>
+          </select>
+        </div>
+        <nav class="flex items-center gap-2">
+          <a href="/admin.html" class="px-4 py-2 rounded-xl text-slate-500 hover:text-primary hover:bg-blue-50 font-bold text-xs transition-all flex items-center gap-2">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Admin
+          </a>
+          <a href="/dashboard.html" class="px-4 py-2 bg-slate-900 hover:bg-primary text-white rounded-xl font-bold text-xs transition-all shadow-lg flex items-center gap-2">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Dashboard
+          </a>
+        </nav>
+      </div>
     </div>
   </header>
 
@@ -240,11 +250,23 @@
     let searchTimer = null;
     let pendingDeleteId = null;
     let editingId = null;
+    let currentSession = sessionStorage.getItem('cie_session') || 'July – December 2026';
+
+    const dSel = document.getElementById('dataSessionSelect');
+    if (dSel) dSel.value = currentSession;
+
+    function onDataSessionChange() {
+      currentSession = document.getElementById('dataSessionSelect').value;
+      sessionStorage.setItem('cie_session', currentSession);
+      currentPage = 1;
+      fetchData();
+      loadStats();
+    }
 
     // ─── Stats ──────────────────────────────────────────────
     async function loadStats() {
       try {
-        const r = await fetch('/api/data/stats');
+        const r = await fetch(`/api/data/stats?session=${encodeURIComponent(currentSession)}`);
         const d = await r.json();
         document.getElementById('sPrograms').textContent = d.programs ?? '–';
         document.getElementById('sCourses').textContent = d.courses ?? '–';
@@ -269,18 +291,18 @@
         head.innerHTML = `<tr>
           <th style="width:12%">Course Code</th>
           <th style="width:24%">Course Name</th>
-          <th style="width:24%">Program</th>
-          <th style="width:12%">Semester</th>
+          <th style="width:22%">Program</th>
+          <th style="width:10%">Semester</th>
           <th style="width:18%">Faculty</th>
-          <th style="width:10%">Actions</th>
+          <th style="width:14%">Actions</th>
         </tr>`;
       } else {
         head.innerHTML = `<tr>
           <th style="width:14%">Scholar ID</th>
           <th style="width:28%">Student Name</th>
-          <th style="width:32%">Program</th>
+          <th style="width:30%">Program</th>
           <th style="width:14%">Semester</th>
-          <th style="width:12%">Actions</th>
+          <th style="width:14%">Actions</th>
         </tr>`;
       }
     }
@@ -297,14 +319,14 @@
 
       const endpoint = currentTab === 'courses' ? 'all-courses' : 'all-students';
       try {
-        const r = await fetch(`/api/data/${endpoint}?search=${encodeURIComponent(search)}&page=${currentPage}&limit=${PAGE_SIZE}`);
+        const r = await fetch(`/api/data/${endpoint}?search=${encodeURIComponent(search)}&session=${encodeURIComponent(currentSession)}&page=${currentPage}&limit=${PAGE_SIZE}`);
         const data = await r.json();
         loading.classList.add('hidden');
         totalRecords = data.total;
         updatePagination();
 
         document.getElementById('countLabel').textContent =
-          totalRecords > 0 ? `Showing ${(currentPage-1)*PAGE_SIZE+1}–${Math.min(currentPage*PAGE_SIZE, totalRecords)} of ${totalRecords}` : '';
+          totalRecords > 0 ? `Showing ${(currentPage-1)*PAGE_SIZE+1}–${Math.min(currentPage*PAGE_SIZE, totalRecords)} of ${totalRecords} [Session: ${currentSession}]` : `[Session: ${currentSession}]`;
 
         if (!data.rows || data.rows.length === 0) {
           empty.classList.remove('hidden');
@@ -430,7 +452,8 @@
           course_name: document.getElementById('f_course_name').value.trim(),
           program_name: document.getElementById('f_course_program_name').value.trim(),
           semester: document.getElementById('f_course_semester').value.trim(),
-          faculty_name: document.getElementById('f_faculty_name').value.trim()
+          faculty_name: document.getElementById('f_faculty_name').value.trim(),
+          session: currentSession
         };
         if (!body.course_name || !body.program_name || !body.semester) { showToast('Course Name, Program, and Semester are required', 'error'); return; }
       } else {
@@ -438,7 +461,8 @@
         body = {
           student_name: document.getElementById('f_student_name').value.trim(),
           program_name: document.getElementById('f_student_program_name').value.trim(),
-          semester: document.getElementById('f_student_semester').value.trim()
+          semester: document.getElementById('f_student_semester').value.trim(),
+          session: currentSession
         };
         if (!body.student_name || !body.program_name || !body.semester) { showToast('All fields are required', 'error'); return; }
       }
@@ -467,13 +491,13 @@
       deleteType = type;
       pendingDeleteId = id;
       pendingDeleteProgram = program;
-      document.getElementById('confirmMsg').textContent = `Delete "${name}" (${id})? This cannot be undone.`;
+      document.getElementById('confirmMsg').textContent = `Delete "${name}" (${id}) for session "${currentSession}"? This cannot be undone.`;
       document.getElementById('confirmModal').classList.remove('hidden');
     }
     async function confirmDelete() {
       const url = deleteType === 'course'
-        ? `/api/data/courses/${encodeURIComponent(pendingDeleteId)}/${encodeURIComponent(pendingDeleteProgram)}`
-        : `/api/data/students/${encodeURIComponent(pendingDeleteId)}`;
+        ? `/api/data/courses/${encodeURIComponent(pendingDeleteId)}/${encodeURIComponent(pendingDeleteProgram)}?session=${encodeURIComponent(currentSession)}`
+        : `/api/data/students/${encodeURIComponent(pendingDeleteId)}?session=${encodeURIComponent(currentSession)}`;
       try {
         const r = await fetch(url, { method: 'DELETE' });
         const d = await r.json();
@@ -508,10 +532,10 @@
     // ─── Delete All ───────────────────────────────────────
     function askDeleteAll() {
       const isCourses = currentTab === 'courses';
-      document.getElementById('clearTabLabel').textContent = isCourses ? 'Courses & Programs' : 'Students';
+      document.getElementById('clearTabLabel').textContent = `${isCourses ? 'Courses' : 'Students'} (${currentSession})`;
       document.getElementById('clearDesc').innerHTML = isCourses
-        ? 'This will permanently remove <strong>all courses and programs</strong>. You can reimport a new Excel after. Type <strong>DELETE</strong> to confirm.'
-        : 'This will permanently remove <strong>all students</strong>. You can reimport a new Excel after. Type <strong>DELETE</strong> to confirm.';
+        ? `This will permanently remove <strong>all courses</strong> for session <strong>"${currentSession}"</strong>. Records in other sessions will remain untouched. Type <strong>DELETE</strong> to confirm.`
+        : `This will permanently remove <strong>all students</strong> for session <strong>"${currentSession}"</strong>. Records in other sessions will remain untouched. Type <strong>DELETE</strong> to confirm.`;
       document.getElementById('clearConfirmInput').value = '';
       document.getElementById('btnConfirmClear').disabled = true;
       document.getElementById('clearModal').classList.remove('hidden');
@@ -521,7 +545,7 @@
     async function confirmClearAll() {
       const endpoint = currentTab === 'courses' ? 'courses/clear' : 'students/clear';
       try {
-        const r = await fetch(`/api/data/${endpoint}`, { method: 'DELETE' });
+        const r = await fetch(`/api/data/${endpoint}?session=${encodeURIComponent(currentSession)}`, { method: 'DELETE' });
         const d = await r.json();
         closeClearModal();
         if (d.success) {
