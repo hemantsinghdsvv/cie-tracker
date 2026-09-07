@@ -3,629 +3,799 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Faculty Dashboard – CIE Tracker</title>
+  <title>Faculty Workspace – CIE Tracker | DSVV</title>
+  <meta name="description" content="Department of Computer Science CIE Management, Digital Marks Entry, and Assessment Sheet Generator." />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
   <style>
-    * { box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #f0f4f8; margin: 0; display: flex; height: 100dvh; overflow: hidden; }
+    body {
+      display: flex;
+      height: 100dvh;
+      overflow: hidden;
+      background: #f8fafc;
+    }
 
-    /* ── Sidebar ─────────────────────────────────────── */
-    .sidebar {
-      width: 240px;
+    /* ── SIDEBAR ────────────────────────────────────────────── */
+    .app-sidebar {
+      width: 260px;
       flex-shrink: 0;
-      background: linear-gradient(180deg, #1c4c94 0%, #0d2854 100%);
+      background: linear-gradient(180deg, #091a36 0%, #0d2854 45%, #133973 100%);
       display: flex;
       flex-direction: column;
       height: 100dvh;
       position: fixed;
       left: 0; top: 0; bottom: 0;
-      z-index: 40;
-      transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+      z-index: 50;
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 4px 0 24px rgba(9, 26, 54, 0.15);
       overflow-y: auto;
     }
+
     .sidebar-overlay {
       display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 39;
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 26, 54, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 45;
     }
     .sidebar-overlay.show { display: block; }
 
-    /* ── Nav item ─────────────────────────────────────── */
-    .nav-item {
-      display: flex; align-items: center; gap: 11px;
-      padding: 10px 14px; border-radius: 10px; cursor: pointer;
-      color: rgba(255,255,255,0.65); font-size: 14px; font-weight: 500;
-      transition: all 0.18s; border-left: 3px solid transparent;
-      text-decoration: none; margin: 2px 0;
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.86rem;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      margin: 3px 0;
+      position: relative;
     }
-    .nav-item:hover { background: rgba(253,200,44,0.12); color: #fff; }
-    .nav-item.active {
-      background: rgba(253,200,44,0.18);
-      border-left-color: #fdc82c;
-      color: #fdc82c;
-    }
-    .nav-item .icon { font-size: 17px; width: 22px; text-align: center; }
 
-    /* ── Main content ─────────────────────────────────── */
-    .main-wrap {
-      margin-left: 240px;
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      transform: translateX(3px);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(245, 158, 11, 0.1) 100%);
+      color: #fcd34d;
+      font-weight: 700;
+      border-left: 3.5px solid #f59e0b;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ── MAIN LAYOUT ────────────────────────────────────────── */
+    .app-main {
+      margin-left: 260px;
       flex: 1;
       display: flex;
       flex-direction: column;
       height: 100dvh;
       overflow: hidden;
+      min-width: 0;
     }
-    .topbar {
-      background: #fff;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 0 20px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-      position: sticky; top: 0; z-index: 30;
-    }
-    .content-area {
+
+    .app-content {
       flex: 1;
       overflow-y: auto;
-      padding: 24px 20px;
+      padding: 24px;
     }
 
-    /* ── Tab Content ──────────────────────────────────── */
-    .section { display: none; animation: fadeIn 0.22s ease; }
-    .section.active { display: block; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+    /* ── TABS / SECTIONS ────────────────────────────────────── */
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
 
-    /* ── Form Controls ────────────────────────────────── */
-    select {
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      padding-right: 36px;
+    /* ── MARKS MATRIX ───────────────────────────────────────── */
+    .marks-matrix-input {
+      width: 68px;
+      height: 38px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--text-main);
+      transition: all 0.15s ease;
+      outline: none;
     }
-    select:focus { outline: none; border-color: #1c4c94; box-shadow: 0 0 0 3px rgba(28,76,148,0.1); }
-    input[type=number]:focus { outline: none; }
-    .input-sm { border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 14px; width: 100%; background: #fff; }
-    .btn-primary { background: linear-gradient(135deg,#1c4c94,#0d2854); color:#fff; border-radius:10px; padding:10px 18px; font-size:14px; font-weight:600; border:none; cursor:pointer; display:inline-flex;align-items:center;gap:6px; transition:all 0.18s; }
-    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.2); }
-    .btn-primary:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
-    .btn-gold { background: linear-gradient(135deg,#e6b115,#fdc82c); color:#0d2854; border-radius:10px; padding:10px 18px; font-size:14px; font-weight:600; border:none; cursor:pointer; display:inline-flex;align-items:center;gap:6px; transition:all 0.18s; }
-    .btn-gold:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.15); }
-    .btn-gold:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
-    .card { background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px; margin-bottom:16px; }
-
-    /* notice table */
-    .notice-table td,.notice-table th { border:1px solid #aaa; padding:6px 10px; font-size:12.5px; }
-    .notice-table { border-collapse:collapse; width:100%; }
-
-    /* marks input */
-    .marks-input {
-      width:70px; border:1px solid #e2e8f0; border-radius:8px; padding:6px 4px;
-      text-align:center; font-size:13px;
+    .marks-matrix-input:focus {
+      border-color: var(--primary-600);
+      box-shadow: 0 0 0 3px rgba(28, 76, 148, 0.15);
+      background: #eff6ff;
     }
-    .marks-input:focus { border-color:#1c4c94; outline:none; }
 
-    /* Mobile header hamburger */
-    @media (max-width: 767px) {
-      .sidebar { transform: translateX(-100%); }
-      .sidebar.open { transform: translateX(0); }
-      .main-wrap { margin-left: 0; }
+    /* Responsive Mobile Rules */
+    @media (max-width: 768px) {
+      .app-sidebar { transform: translateX(-100%); }
+      .app-sidebar.open { transform: translateX(0); }
+      .app-main { margin-left: 0; }
+      .app-content { padding: 16px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Sidebar Overlay (mobile) -->
-  <!-- Session Picker Modal -->
-  <div id="sessionModal" style="position:fixed;inset:0;z-index:100;background:linear-gradient(135deg,#0d2854 0%,#1c4c94 100%);display:flex;align-items:center;justify-content:center;padding:20px">
-    <div style="background:#fff;border-radius:24px;padding:32px 28px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,0.3);text-align:center">
-      <div style="width:56px;height:56px;background:#eff6ff;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-        <svg width="28" height="28" fill="none" stroke="#1c4c94" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+  <!-- ── SESSION SELECTOR MODAL ──────────────────────────────── -->
+  <div id="sessionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+    <div class="card-modern max-w-md w-full p-6 sm:p-8 text-center animate-pop-in bg-white shadow-2xl">
+      <div class="w-14 h-14 bg-blue-50 border border-blue-100 text-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
       </div>
-      <h2 style="font-size:20px;font-weight:800;color:#1e293b;margin-bottom:6px">Select Academic Session</h2>
-      <p style="font-size:13px;color:#64748b;margin-bottom:24px">Choose the session you are working on. This will apply to all modules.</p>
-      <div style="display:grid;gap:10px;margin-bottom:20px">
-        <button class="session-btn" onclick="selectSession('July – December 2026')">
-          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#16a34a;font-weight:700;display:block;margin-bottom:2px">Current Session (New)</span>
-          📅 July – December 2026
+      <h3 class="text-xl font-extrabold text-slate-900 mb-1.5">Select Academic Session</h3>
+      <p class="text-xs text-slate-500 mb-6">Choose the active academic term to view, enter marks, and generate evaluation sheets.</p>
+      
+      <div class="space-y-3 mb-6">
+        <button class="w-full text-left p-4 rounded-2xl border-2 border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 hover:border-emerald-500 transition-all group"
+                onclick="selectSession('July – December 2026')">
+          <span class="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest block mb-1">Active Session</span>
+          <span class="text-sm font-black text-slate-800 group-hover:text-emerald-900">📅 July – December 2026</span>
         </button>
-        <button class="session-btn" onclick="selectSession('January – June 2026')">
-          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;display:block;margin-bottom:2px">Previous Session</span>
-          📅 January – June 2026
+
+        <button class="w-full text-left p-4 rounded-2xl border-2 border-slate-200 bg-slate-50/60 hover:bg-blue-50 hover:border-primary-600 transition-all group"
+                onclick="selectSession('January – June 2026')">
+          <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">Previous Term</span>
+          <span class="text-sm font-black text-slate-800 group-hover:text-primary-700">📅 January – June 2026</span>
         </button>
-        <button class="session-btn" onclick="selectSession('July – December 2025')">
-          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;display:block;margin-bottom:2px">Archive Session</span>
-          📅 July – December 2025
+
+        <button class="w-full text-left p-4 rounded-2xl border-2 border-slate-200 bg-slate-50/60 hover:bg-blue-50 hover:border-primary-600 transition-all group"
+                onclick="selectSession('July – December 2025')">
+          <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">Archive</span>
+          <span class="text-sm font-black text-slate-800 group-hover:text-primary-700">📅 July – December 2025</span>
         </button>
       </div>
-      <p style="font-size:11px;color:#94a3b8">You can change the session anytime from the sidebar</p>
+
+      <p class="text-[11px] text-slate-400">You can switch sessions anytime from the sidebar banner.</p>
     </div>
   </div>
-  <style>
-    .session-btn { background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; padding:12px 16px; font-size:14px; font-weight:600; color:#1e293b; cursor:pointer; text-align:left; transition:all 0.18s; }
-    .session-btn:hover { border-color:#1c4c94; background:#eff6ff; color:#1c4c94; transform:translateX(3px); }
-  </style>
 
+  <!-- Sidebar Overlay for Mobile -->
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-  <!-- ── SIDEBAR ────────────────────────────────────────────── -->
-  <aside class="sidebar" id="sidebar">
-    <!-- Logo -->
-    <div style="padding:18px 16px 14px; border-bottom:1px solid rgba(255,255,255,0.08)">
-      <div style="display:flex;align-items:center;gap:10px">
-        
+  <!-- ── APP SIDEBAR ──────────────────────────────────────────── -->
+  <aside class="app-sidebar" id="sidebar">
+    
+    <!-- Brand Header -->
+    <div class="p-5 border-b border-white/10 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-white/10 rounded-xl border border-white/15 backdrop-blur-md">
+          <img src="/logo_white.png" alt="DSVV Logo" class="h-8 w-auto object-contain" onerror="this.src='/logo.png'" />
+        </div>
         <div>
-          <div style="color:#fff;font-weight:700;font-size:14px;line-height:1.2">CIE Tracker</div>
-          <div style="color:rgba(255,255,255,0.45);font-size:11px">Department of Computer Science</div>
+          <div class="text-white font-extrabold text-sm tracking-tight">CIE Tracker</div>
+          <div class="text-[10px] text-amber-400 font-bold uppercase tracking-widest">DSVV Computer Science</div>
         </div>
       </div>
-    </div>
-
-    <!-- Session Banner -->
-    <div id="sessionBanner" onclick="changeSession()" style="margin:8px 10px 0;background:rgba(253,200,44,0.15);border:1px solid rgba(253,200,44,0.3);border-radius:10px;padding:7px 12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:11px;color:rgba(255,255,255,0.55)">Session</div>
-      <div style="font-size:12px;font-weight:700;color:#fdc82c" id="sessionLabel">—</div>
-      <svg width="12" height="12" fill="none" stroke="#fdc82c" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-    </div>
-    <div style="padding:12px 10px;flex:1">
-      <div style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:8px 6px 4px">Overview</div>
-      <a class="nav-item active" id="nav-notice" onclick="switchSection('notice')">
-        <span class="icon">📢</span> Official Notice
-      </a>
-      <a class="nav-item" id="nav-examplan" onclick="switchSection('examplan')">
-        <span class="icon">📋</span> Exam Plan
-      </a>
-
-      <div style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:14px 6px 4px">Faculty Tools</div>
-      <a class="nav-item" id="nav-signature" onclick="switchSection('signature')">
-        <span class="icon">✍️</span> Signature Sheet
-      </a>
-      <a class="nav-item" id="nav-marksaward" onclick="switchSection('marksaward')">
-        <span class="icon">📝</span> Marks Award Sheet
-      </a>
-      <a class="nav-item" id="nav-marks" onclick="switchSection('marks')">
-        <span class="icon">✏️</span> Marks Entry
-      </a>
-      <a class="nav-item" id="nav-schedule" onclick="switchSection('schedule')">
-        <span class="icon">📅</span> Formative Schedule
-      </a>
-
-      <div id="adminNav">
-        <div style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:14px 6px 4px">Administration</div>
-        <a class="nav-item" href="/admin.html">
-          <span class="icon">⬆️</span> Upload Data
-        </a>
-        <a class="nav-item" href="/data.html">
-          <span class="icon">🗃️</span> Manage Data
-        </a>
-      </div>
-    </div>
-
-    <!-- Bottom user info -->
-    <div style="padding:14px 16px;border-top:1px solid rgba(255,255,255,0.08)">
-      <div style="color:rgba(255,255,255,0.5);font-size:11px;margin-bottom:6px">Logged in as</div>
-      <div style="color:#fff;font-size:13px;font-weight:600" id="userDisplay">–</div>
-      <div id="roleTag" style="display:inline-block;margin-top:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(253,200,44,0.2);color:#fdc82c;letter-spacing:.06em"></div>
-      <button onclick="logout()" style="margin-top:10px;width:100%;background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:7px;color:rgba(255,255,255,0.75);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-        Logout
+      <button onclick="closeSidebar()" class="md:hidden text-white/60 hover:text-white p-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
-    
-    <!-- Powered by -->
-    <div style="padding: 12px 16px; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
-      <div style="color: rgba(255,255,255,0.3); font-size: 10px; line-height: 1.4;">
-        Powered by:<br/>
-        <span style="color: rgba(255,255,255,0.5); font-weight: 600;">Software Development Cell</span><br/>
-        DSVV, Haridwar
+
+    <!-- Active Session Pill -->
+    <div class="mx-3 mt-3">
+      <div onclick="changeSession()"
+           class="p-2.5 rounded-xl bg-amber-400/10 border border-amber-400/25 hover:bg-amber-400/20 cursor-pointer transition-all flex items-center justify-between group">
+        <div>
+          <div class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Active Session</div>
+          <div class="text-xs font-bold text-amber-300 truncate" id="sessionLabel">—</div>
+        </div>
+        <div class="p-1 rounded-lg bg-amber-400/20 text-amber-300 group-hover:scale-110 transition-transform">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+        </div>
       </div>
     </div>
+
+    <!-- Nav Items -->
+    <div class="p-3 flex-1 space-y-1">
+      <div id="navGroupOverview" class="text-[10px] font-extrabold uppercase tracking-widest text-white/40 px-3 pt-3 pb-1">Overview</div>
+      <a class="nav-btn active" id="nav-notice" onclick="switchSection('notice')">
+        <span class="text-base">📢</span> Official Notice
+      </a>
+      <a class="nav-btn" id="nav-examplan" onclick="switchSection('examplan')">
+        <span class="text-base">📋</span> Exam Plan
+      </a>
+
+      <div class="text-[10px] font-extrabold uppercase tracking-widest text-white/40 px-3 pt-4 pb-1">Faculty Tools</div>
+      <a class="nav-btn" id="nav-signature" onclick="switchSection('signature')">
+        <span class="text-base">✍️</span> Signature Sheet
+      </a>
+      <a class="nav-btn" id="nav-marksaward" onclick="switchSection('marksaward')">
+        <span class="text-base">📝</span> Marks Award Sheet
+      </a>
+      <a class="nav-btn" id="nav-marks" onclick="switchSection('marks')">
+        <span class="text-base">✏️</span> Digital Marks Entry
+      </a>
+      <a class="nav-btn" id="nav-schedule" onclick="switchSection('schedule')">
+        <span class="text-base">📅</span> Formative Schedule
+      </a>
+
+      <!-- Admin Nav link -->
+      <div id="adminNav" class="pt-2">
+        <div class="text-[10px] font-extrabold uppercase tracking-widest text-white/40 px-3 pt-3 pb-1">Administration</div>
+        <a class="nav-btn" href="/admin.html">
+          <span class="text-base">⬆️</span> Upload & Config
+        </a>
+        <a class="nav-btn" href="/data.html">
+          <span class="text-base">🗂️</span> Data Manager
+        </a>
+      </div>
+    </div>
+
+    <!-- User Profile & Logout -->
+    <div class="p-3 border-t border-white/10 bg-black/15">
+      <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/10">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-full bg-amber-400 text-slate-900 font-black text-xs flex items-center justify-center flex-shrink-0">
+            <span id="userInitial">U</span>
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-bold text-white truncate" id="userDisplay">Faculty</div>
+            <div class="text-[10px] font-semibold text-amber-300 tracking-wider" id="roleTag">FACULTY</div>
+          </div>
+        </div>
+        <button onclick="logout()" title="Logout" class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-white/10 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+
   </aside>
 
-  <!-- ── MAIN ──────────────────────────────────────────────── -->
-  <div class="main-wrap">
-
+  <!-- ── MAIN WRAPPER ─────────────────────────────────────────── -->
+  <div class="app-main">
+    
     <!-- Topbar -->
-    <div class="topbar">
-      <div style="display:flex;align-items:center;gap:12px">
-        <!-- Hamburger (mobile) -->
-        <button onclick="toggleSidebar()" class="md:hidden" style="background:none;border:none;cursor:pointer;padding:4px;display:none" id="hamburger">
-          <svg width="22" height="22" fill="none" stroke="#1c4c94" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    <header class="glass-header px-6 py-3.5 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors" id="hamburger">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <div>
-          <span id="pageTitle" style="font-size:16px;font-weight:700;color:#1e293b">Official Notice</span>
-          <span style="color:#94a3b8;font-size:12px;margin-left:8px" id="pageSubtitle">Formative Exam Guidelines</span>
+          <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight" id="pageTitle">Official Notice</h2>
+          <p class="text-xs text-slate-400 hidden sm:block" id="pageSubtitle">Formative Examination Guidelines & Schedule</p>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;color:#64748b;display:none" class="sm:inline" id="userDisplayTop">–</span>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-primary-700 text-xs font-bold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="userDisplayTop">Faculty</span>
+        </div>
+        <button onclick="changeSession()" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition-all flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span class="hidden md:inline">Session:</span> <span id="topSessionText">2026</span>
+        </button>
       </div>
-    </div>
+    </header>
 
-    <!-- Content -->
-    <div class="content-area">
+    <!-- Content Workspace -->
+    <main class="app-content">
 
-      <!-- ── NOTICE ──────────────────────────────────────── -->
+      <!-- ── 01. NOTICE SECTION ───────────────────────────────── -->
       <div id="section-notice" class="section active">
-        <div class="card" style="max-width:720px;margin:0 auto">
-          <div style="display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:2px solid #1c4c94;margin-bottom:16px">
-            <img src="/logo.png" alt="DSVV" style="height:52px;width:auto" />
-            <div class="hidden sm:block">
-              <div style="color:#1c4c94;font-weight:700;font-size:15px">Dev Sanskriti Vishwavidyalaya</div>
-              <div style="color:#64748b;font-size:11px">Gayatrikunj–Shantikunj, Haridwar (Uttarakhand) 249411</div>
+        <div class="card-modern max-w-4xl mx-auto p-6 sm:p-10 bg-white">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b-2 border-primary-600 mb-6">
+            <div class="flex items-center gap-4">
+              <img src="/logo.png" alt="DSVV Logo" class="h-14 w-auto object-contain" />
+              <div>
+                <h1 class="text-lg font-black text-primary-700">Dev Sanskriti Vishwavidyalaya</h1>
+                <p class="text-xs text-slate-500">Gayatrikunj–Shantikunj, Haridwar (Uttarakhand) 249411</p>
+              </div>
             </div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-            <div style="font-weight:700;letter-spacing:.05em;color:#1e293b">NOTICE</div>
-            <div style="color:#64748b;font-size:11px">Date: 19th February 2026</div>
-          </div>
-          <p style="font-size:13px;color:#334155;line-height:1.7;margin-bottom:14px">
-            This is to inform all Students, Faculty Members, HoDs and Deans about the upcoming academic activities, including Mid-Term Examinations, Assignments, Seminars and Viva/Group Discussions (GD). The detailed schedule and guidelines are as follows:
-          </p>
-          <p style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:8px">1. Schedule of Academic Activities</p>
-          <p style="font-weight:600;font-size:12px;color:#1c4c94;margin-bottom:8px">UG Major Courses: PG/Minor/SEC/Multidisciplinary/AEC</p>
-          <div style="overflow-x:auto;margin-bottom:16px">
-            <table class="notice-table">
-              <tbody>
-                <tr style="background:#f8fafc">
-                  <td style="width:45%"><strong style="color:#1c4c94">UG</strong> – Assignment (15 Marks) &amp; Seminar (15 Marks)<br/><strong style="color:#7c3aed">PG</strong> – Assignment (10 Marks) &amp; Seminar (10 Marks)</td>
-                  <td>Date to be decided by instructor</td>
-                  <td><strong>Timing:</strong> During class / As per instructor</td>
-                </tr>
-                <tr>
-                  <td>Marks Uploading in ERP for Assignment-1 and Seminar-1</td>
-                  <td colspan="2"><strong>By 15th May 2026</strong></td>
-                </tr>
-                <tr style="background:#f8fafc">
-                  <td>Viva / Group Discussion (GD) / Other Assessments (10 Marks)</td>
-                  <td>Date to be decided by instructor</td>
-                  <td>During class / As per instructor</td>
-                </tr>
-                <tr>
-                  <td>Marks Uploading in ERP for Viva / GD / Other Assessments</td>
-                  <td colspan="2"><strong>By 15th May 2026</strong></td>
-                </tr>
-                <tr style="background:#f8fafc">
-                  <td><strong>UG Mid-Term Examinations / PG</strong></td>
-                  <td><strong>23rd – 30th April 2026</strong></td>
-                  <td>During class / As per instructor</td>
-                </tr>
-                <tr>
-                  <td>Marks Uploading for UG Mid-Term / PG</td>
-                  <td colspan="2"><strong>By 19th July 2026</strong></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <p style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:8px">2. Guidelines for Mid-Term Examinations</p>
-          <ul style="font-size:13px;color:#334155;line-height:1.8;padding-left:20px;margin-bottom:12px">
-            <li>Mid-Term Examinations will be conducted by the respective instructors during their classes.</li>
-            <li>Instructors are required to prepare their own question papers.</li>
-            <li>Examination Cell will observe the examination in their respective classes.</li>
-          </ul>
-          <p style="font-size:13px;color:#334155;line-height:1.7">
-            <strong>3. Notice to Students:</strong> All students are required to adhere to the examination schedule and guidelines issued by their respective Departments / Instructors.
-          </p>
-          <div style="text-align:right;margin-top:24px;font-size:13px;font-weight:600;color:#1e293b">Registrar</div>
-        </div>
-      </div>
-
-      <!-- ── EXAM PLAN ────────────────────────────────────── -->
-      <div id="section-examplan" class="section">
-        <div style="display:grid;gap:16px;grid-template-columns:1fr;max-width:720px">
-
-          <div class="card">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-              <span style="background:#dbeafe;color:#1c4c94;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px">UG Programs</span>
-              <span style="color:#94a3b8;font-size:12px">BCA, BIT, MINOR, SEC, MULTI, AEC</span>
-            </div>
-            <div style="overflow-x:auto">
-              <table style="width:100%;border-collapse:collapse;font-size:13.5px">
-                <thead>
-                  <tr style="background:#1c4c94;color:#fff">
-                    <th style="padding:10px 14px;text-align:left;border-radius:8px 0 0 0">Component</th>
-                    <th style="padding:10px 14px;text-align:center">Max Marks</th>
-                    <th style="padding:10px 14px;text-align:left;border-radius:0 8px 0 0">Schedule</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr style="border-bottom:1px solid #f1f5f9">
-                    <td style="padding:10px 14px;font-weight:500">Assignment</td>
-                    <td style="padding:10px 14px;text-align:center"><span style="background:#dcfce7;color:#16a34a;font-weight:700;padding:2px 10px;border-radius:8px">15</span></td>
-                    <td style="padding:10px 14px;color:#64748b;font-size:12px">Date decided by instructor</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #f1f5f9;background:#f8fafc">
-                    <td style="padding:10px 14px;font-weight:500">Seminar</td>
-                    <td style="padding:10px 14px;text-align:center"><span style="background:#dcfce7;color:#16a34a;font-weight:700;padding:2px 10px;border-radius:8px">15</span></td>
-                    <td style="padding:10px 14px;color:#64748b;font-size:12px">Date decided by instructor</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #f1f5f9">
-                    <td style="padding:10px 14px;font-weight:500">Viva / Quiz / Group Discussion</td>
-                    <td style="padding:10px 14px;text-align:center"><span style="background:#fef3c7;color:#d97706;font-weight:700;padding:2px 10px;border-radius:8px">10</span></td>
-                    <td style="padding:10px 14px;color:#64748b;font-size:12px">Date decided by instructor</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #f1f5f9;background:#f8fafc">
-                    <td style="padding:10px 14px;font-weight:500">Mid-Term Examination</td>
-                    <td style="padding:10px 14px;text-align:center"><span style="background:#fee2e2;color:#dc2626;font-weight:700;padding:2px 10px;border-radius:8px">20</span></td>
-                    <td style="padding:10px 14px;color:#64748b;font-size:12px">23rd – 30th April 2026</td>
-                  </tr>
-                  <tr style="background:#eff6ff">
-                    <td style="padding:10px 14px;font-weight:700;color:#1c4c94">Total</td>
-                    <td style="padding:10px 14px;text-align:center"><span style="background:#1c4c94;color:#fff;font-weight:700;padding:2px 12px;border-radius:8px">60</span></td>
-                    <td style="padding:10px 14px;color:#94a3b8;font-size:12px">Upload deadline: 19th July 2026</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="text-left sm:text-right">
+              <span class="badge-pill badge-gold">Official Circular</span>
+              <div class="text-xs font-semibold text-slate-400 mt-1">Date: 19th February 2026</div>
             </div>
           </div>
 
-          <div class="card">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-              <span style="background:#f3e8ff;color:#7c3aed;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px">PG Programs</span>
-              <span style="color:#94a3b8;font-size:12px">MCA-DS and other PG courses</span>
-            </div>
-            <div style="overflow-x:auto">
-              <table style="width:100%;border-collapse:collapse;font-size:13.5px">
-                <thead>
-                  <tr style="background:#7c3aed;color:#fff">
-                    <th style="padding:10px 14px;text-align:left;border-radius:8px 0 0 0">Component</th>
-                    <th style="padding:10px 14px;text-align:center">Max Marks</th>
-                    <th style="padding:10px 14px;text-align:left;border-radius:0 8px 0 0">Schedule</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr style="border-bottom:1px solid #f1f5f9">
-                    <td style="padding:10px 14px;font-weight:500">Assignment</td>
-                    <td style="padding:10px 14px;text-align:center"><span style="background:#dcfce7;color:#16a34a;font-weight:700;padding:2px 10px;border-radius:8px">10</span></td>
-                    <td style="padding:10px 14px;color:#64748b;font-size:12px">Date decided by instructor</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #f1f5f9;background:#f8fafc">
-                    <td style="padding:10px 14px;font-weight:500">Seminar</td>
-                    <td style="padding:10px 14px;text-align:center"><span style="background:#dcfce7;color:#16a34a;font-weight:700;padding:2px 10px;border-radius:8px">10</span></td>
-                    <td style="padding:10px 14px;color:#64748b;font-size:12px">Date decided by instructor</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #f1f5f9">
-                    <td style="padding:10px 14px;font-weight:500">Mid-Term Examination</td>
-                    <td style="padding:10px 14px;text-align:center"><span style="background:#fee2e2;color:#dc2626;font-weight:700;padding:2px 10px;border-radius:8px">20</span></td>
-                    <td style="padding:10px 14px;color:#64748b;font-size:12px">23rd – 30th April 2026</td>
-                  </tr>
-                  <tr style="background:#faf5ff">
-                    <td style="padding:10px 14px;font-weight:700;color:#7c3aed">Total</td>
-                    <td style="padding:10px 14px;text-align:center"><span style="background:#7c3aed;color:#fff;font-weight:700;padding:2px 12px;border-radius:8px">40</span></td>
-                    <td style="padding:10px 14px;color:#94a3b8;font-size:12px">Upload deadline: 19th July 2026</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+          <div class="space-y-6 text-sm text-slate-700 leading-relaxed">
+            <p class="font-medium text-slate-800">
+              This is to inform all Students, Faculty Members, HoDs and Deans about the upcoming academic activities, including Mid-Term Examinations, Assignments, Seminars, and Viva / Group Discussions (GD). The detailed schedule and guidelines are as follows:
+            </p>
 
-      <!-- ── SIGNATURE SHEET ────────────────────────────────── -->
-      <div id="section-signature" class="section">
-        <div class="card" style="max-width:680px">
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
-            <div style="text-align:center;padding:12px;background:#eff6ff;border-radius:12px">
-              <div style="font-size:24px;font-weight:800;color:#1c4c94" id="sig-statPrograms">–</div>
-              <div style="font-size:11px;color:#64748b;margin-top:2px">Programs</div>
-            </div>
-            <div style="text-align:center;padding:12px;background:#fffbeb;border-radius:12px">
-              <div style="font-size:24px;font-weight:800;color:#d97706" id="sig-statCourses">–</div>
-              <div style="font-size:11px;color:#64748b;margin-top:2px">Courses</div>
-            </div>
-            <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:12px">
-              <div style="font-size:24px;font-weight:800;color:#16a34a" id="sig-statStudents">–</div>
-              <div style="font-size:11px;color:#64748b;margin-top:2px">Students</div>
-            </div>
-          </div>
-          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:10px">Step 1 — Select Course</div>
-          <div style="display:grid;gap:10px;margin-bottom:14px">
-            <select id="sig-program" class="input-sm" style="color:#334155" onchange="sheetOnProgram('sig')">
-              <option value="">— Select Program —</option>
-            </select>
-            <select id="sig-semester" class="input-sm" disabled style="color:#334155" onchange="sheetOnSemester('sig')">
-              <option value="">— Select Semester —</option>
-            </select>
-            <select id="sig-course" class="input-sm" disabled style="color:#334155" onchange="sheetOnCourse('sig')">
-              <option value="">— Select Course —</option>
-            </select>
-          </div>
-          <div id="sig-faculty" style="display:none;background:#eff6ff;border-radius:10px;padding:9px 14px;font-size:13px;color:#1c4c94;margin-bottom:14px">
-            👤 Faculty: <strong id="sig-facultyName">–</strong>
-          </div>
-          <div id="sig-studentPreview" style="display:none;margin-bottom:14px">
-            <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:8px">Step 2 — Students (<span id="sig-count">0</span>)</div>
-            <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;max-height:160px;overflow-y:auto">
-              <ul id="sig-list" style="list-style:none;margin:0;padding:0"></ul>
-            </div>
-          </div>
-          <div id="sig-noStudents" style="display:none;text-align:center;color:#94a3b8;padding:14px;font-size:13px">No students found.</div>
-          <hr style="border:none;border-top:1px solid #f1f5f9;margin:14px 0"/>
-          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:10px">Step 3 — Generate</div>
-          <button id="sig-btn" onclick="openSheet('sig','signature')" disabled class="btn-primary" style="width:100%;justify-content:center;margin-bottom:14px">
-            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-            Generate Signature Sheet
-          </button>
-          <hr style="border:none;border-top:1px solid #f1f5f9;margin-bottom:12px"/>
-          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:4px">⭐ Bulk Download</div>
-          <div style="font-size:12px;color:#94a3b8;margin-bottom:10px">Download all signature sheets for a program + semester at once</div>
-          <button id="sig-bulk" onclick="bulkSheet('sig','signature')" disabled
-            style="background:#7c3aed;color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;width:100%;opacity:0.4">
-            📥 All Signature Sheets
-          </button>
-        </div>
-      </div>
-
-      <!-- ── MARKS AWARD SHEET ───────────────────────────────── -->
-      <div id="section-marksaward" class="section">
-        <div class="card" style="max-width:680px">
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
-            <div style="text-align:center;padding:12px;background:#eff6ff;border-radius:12px">
-              <div style="font-size:24px;font-weight:800;color:#1c4c94" id="ma-statPrograms">–</div>
-              <div style="font-size:11px;color:#64748b;margin-top:2px">Programs</div>
-            </div>
-            <div style="text-align:center;padding:12px;background:#fffbeb;border-radius:12px">
-              <div style="font-size:24px;font-weight:800;color:#d97706" id="ma-statCourses">–</div>
-              <div style="font-size:11px;color:#64748b;margin-top:2px">Courses</div>
-            </div>
-            <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:12px">
-              <div style="font-size:24px;font-weight:800;color:#16a34a" id="ma-statStudents">–</div>
-              <div style="font-size:11px;color:#64748b;margin-top:2px">Students</div>
-            </div>
-          </div>
-          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:10px">Step 1 — Select Course</div>
-          <div style="display:grid;gap:10px;margin-bottom:14px">
-            <select id="ma-program" class="input-sm" style="color:#334155" onchange="sheetOnProgram('ma')">
-              <option value="">— Select Program —</option>
-            </select>
-            <select id="ma-semester" class="input-sm" disabled style="color:#334155" onchange="sheetOnSemester('ma')">
-              <option value="">— Select Semester —</option>
-            </select>
-            <select id="ma-course" class="input-sm" disabled style="color:#334155" onchange="sheetOnCourse('ma')">
-              <option value="">— Select Course —</option>
-            </select>
-          </div>
-          <div id="ma-faculty" style="display:none;background:#eff6ff;border-radius:10px;padding:9px 14px;font-size:13px;color:#1c4c94;margin-bottom:14px">
-            👤 Faculty: <strong id="ma-facultyName">–</strong>
-          </div>
-          <div id="ma-studentPreview" style="display:none;margin-bottom:14px">
-            <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:8px">Step 2 — Students (<span id="ma-count">0</span>)</div>
-            <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;max-height:160px;overflow-y:auto">
-              <ul id="ma-list" style="list-style:none;margin:0;padding:0"></ul>
-            </div>
-          </div>
-          <div id="ma-noStudents" style="display:none;text-align:center;color:#94a3b8;padding:14px;font-size:13px">No students found.</div>
-          <hr style="border:none;border-top:1px solid #f1f5f9;margin:14px 0"/>
-          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:10px">Step 3 — Generate</div>
-          <button id="ma-btn" onclick="openSheet('ma','marks')" disabled class="btn-gold" style="width:100%;justify-content:center;margin-bottom:14px">
-            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            Generate Marks Award Sheet
-          </button>
-          <hr style="border:none;border-top:1px solid #f1f5f9;margin-bottom:12px"/>
-          <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:4px">⭐ Bulk Download</div>
-          <div style="font-size:12px;color:#94a3b8;margin-bottom:10px">Download all marks award sheets for a program + semester at once</div>
-          <button id="ma-bulk" onclick="bulkSheet('ma','marks')" disabled
-            style="background:#4f46e5;color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;width:100%;opacity:0.4">
-            📥 All Marks Award Sheets
-          </button>
-        </div>
-      </div>
-
-
-
-      <!-- ── FORMATIVE SCHEDULE ──────────────────────────────── -->
-      <div id="section-schedule" class="section">
-        <div class="card" style="max-width:720px">
-          <p style="color:#64748b;font-size:13px;margin-bottom:14px">Select program and semester to view the formative exam schedule for all courses.</p>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-            <select id="schProgramSelect" class="input-sm" style="color:#334155" onchange="schOnProgramChange()">
-              <option value="">— Select Program —</option>
-            </select>
-            <select id="schSemesterSelect" class="input-sm" disabled style="color:#334155" onchange="loadSchedule()">
-              <option value="">— Select Semester —</option>
-            </select>
-          </div>
-          <div id="schLoading" style="display:none;text-align:center;padding:24px;color:#64748b;font-size:13px">
-            <div style="width:24px;height:24px;border:2px solid #e9d5ff;border-top-color:#7c3aed;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px"></div>
-            Loading schedule...
-          </div>
-          <div id="schEmpty" style="display:none;text-align:center;padding:24px;color:#94a3b8;font-size:13px">No schedule found. Upload from <a href="/admin.html" style="color:#7c3aed">Admin Panel</a>.</div>
-        </div>
-        <div id="schContent" style="display:none;max-width:900px;margin-top:16px"></div>
-      </div>
-
-      <!-- ── MARKS ENTRY ──────────────────────────────────── -->
-      <div id="section-marks" class="section">
-        <div class="card" style="max-width:720px">
-          <p style="color:#64748b;font-size:13px;margin-bottom:14px">Select program, semester and course to enter marks for each student digitally.</p>
-          <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px">
-            <select id="mProgramSelect" class="input-sm" style="color:#334155" onchange="mOnProgramChange()">
-              <option value="">— Select Program —</option>
-            </select>
-            <select id="mSemesterSelect" class="input-sm" disabled style="color:#334155" onchange="mOnSemesterChange()">
-              <option value="">— Select Semester —</option>
-            </select>
-            <select id="mCourseSelect" class="input-sm" disabled style="color:#334155" onchange="mOnCourseChange()">
-              <option value="">— Select Course —</option>
-            </select>
-          </div>
-          <div id="mLoadingMsg" style="display:none;text-align:center;padding:24px;color:#64748b;font-size:13px">
-            <div style="width:24px;height:24px;border:2px solid #bfdbfe;border-top-color:#1c4c94;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px"></div>
-            Loading...
-          </div>
-          <div id="mNoData" style="display:none;text-align:center;padding:24px;color:#94a3b8;font-size:13px">No students found. Upload student data first.</div>
-        </div>
-
-        <div id="mTableWrap" style="display:none;max-width:900px">
-          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">
             <div>
-              <div style="font-size:15px;font-weight:700;color:#1e293b" id="mCourseLabel">—</div>
-              <div style="font-size:12px;margin-top:2px" id="mSaveStatus">No changes yet</div>
+              <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-primary-600"></span> 1. Schedule of Academic Activities
+              </h3>
+              
+              <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
+                <table class="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr class="bg-slate-900 text-white font-extrabold">
+                      <th class="p-3.5">Assessment Component</th>
+                      <th class="p-3.5">Conduction Window</th>
+                      <th class="p-3.5">ERP Marks Upload Deadline</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100">
+                    <tr class="hover:bg-slate-50">
+                      <td class="p-3.5 font-bold text-primary-700">
+                        UG: Assignment (15 Marks) & Seminar (15 Marks)<br/>
+                        <span class="text-purple-700 font-normal">PG: Assignment (10 Marks) & Seminar (10 Marks)</span>
+                      </td>
+                      <td class="p-3.5">During regular classes as scheduled by instructor</td>
+                      <td class="p-3.5 font-extrabold text-emerald-600">By 15th May 2026</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50 bg-slate-50/50">
+                      <td class="p-3.5 font-bold text-amber-700">Viva / Quiz / Group Discussion (10 Marks)</td>
+                      <td class="p-3.5">During class / continuous evaluation</td>
+                      <td class="p-3.5 font-extrabold text-emerald-600">By 15th May 2026</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50">
+                      <td class="p-3.5 font-bold text-rose-700">UG & PG Mid-Term Written Examination (20 Marks)</td>
+                      <td class="p-3.5 font-bold text-slate-800">23rd – 30th April 2026</td>
+                      <td class="p-3.5 font-extrabold text-rose-600">By 19th July 2026</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button onclick="printMarks()" style="background:#f1f5f9;color:#334155;border:1.5px solid #e2e8f0;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                Print / PDF
-              </button>
-              <button onclick="saveAllMarks()" class="btn-primary">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                Save All Marks
-              </button>
+
+            <div class="p-4 rounded-2xl bg-blue-50 border border-blue-100 text-xs space-y-2 text-primary-900">
+              <h4 class="font-bold uppercase tracking-wider text-primary-700">2. Mid-Term Examination Guidelines</h4>
+              <ul class="list-disc pl-5 space-y-1">
+                <li>Examinations are conducted by respective course instructors during regular scheduled class hours.</li>
+                <li>Question papers are set by respective subject teachers maintaining Bloom's taxonomy standards.</li>
+                <li>Examination Cell representatives may monitor and audit classes during conduction.</li>
+              </ul>
             </div>
+
+            <div class="flex justify-between items-end pt-4">
+              <div class="text-xs text-slate-400">Office of the Examination Superintendent</div>
+              <div class="text-right">
+                <div class="text-xs font-black text-slate-900">Registrar / HoD</div>
+                <div class="text-[11px] text-slate-500">Dev Sanskriti Vishwavidyalaya</div>
+              </div>
+            </div>
+
           </div>
-          <div class="card" style="overflow-x:auto;padding:0">
-            <table style="width:100%;border-collapse:collapse;font-size:13px" id="marksTable">
-              <thead id="marksTableHead"></thead>
-              <tbody id="marksTableBody"></tbody>
-            </table>
-          </div>
-          <p style="text-align:center;font-size:11px;color:#94a3b8;margin-top:8px">Click "Save All Marks" to persist changes to the database</p>
         </div>
       </div>
 
-    </div><!-- /content-area -->
-  </div><!-- /main-wrap -->
+      <!-- ── 02. EXAM PLAN SECTION ────────────────────────────── -->
+      <div id="section-examplan" class="section">
+        <div class="max-w-4xl mx-auto space-y-6">
+          
+          <!-- UG Plan Card -->
+          <div class="card-modern p-6 sm:p-8 bg-white">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <span class="badge-pill badge-blue text-xs">Undergraduate (UG)</span>
+                <span class="text-xs text-slate-400">BCA, BSc, Minor, SEC, AEC</span>
+              </div>
+              <span class="text-xs font-black text-primary-700">Total CIE: 60 Marks</span>
+            </div>
 
-  <style>
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
+            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="bg-primary-700 text-white font-extrabold">
+                    <th class="p-3.5">Component</th>
+                    <th class="p-3.5 text-center">Max Marks</th>
+                    <th class="p-3.5">Conduction Details</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                  <tr class="hover:bg-slate-50">
+                    <td class="p-3.5 font-bold">Assignment (CIE 1)</td>
+                    <td class="p-3.5 text-center"><span class="badge-pill badge-green">15</span></td>
+                    <td class="p-3.5 text-slate-500">Individual problem solving / case study</td>
+                  </tr>
+                  <tr class="hover:bg-slate-50 bg-slate-50/50">
+                    <td class="p-3.5 font-bold">Seminar / PPT Presentation</td>
+                    <td class="p-3.5 text-center"><span class="badge-pill badge-green">15</span></td>
+                    <td class="p-3.5 text-slate-500">Topic presentation in class</td>
+                  </tr>
+                  <tr class="hover:bg-slate-50">
+                    <td class="p-3.5 font-bold">Viva / Quiz / GD</td>
+                    <td class="p-3.5 text-center"><span class="badge-pill badge-gold">10</span></td>
+                    <td class="p-3.5 text-slate-500">Interactive oral assessment</td>
+                  </tr>
+                  <tr class="hover:bg-slate-50 bg-slate-50/50">
+                    <td class="p-3.5 font-bold text-rose-700">Mid-Term Written Examination</td>
+                    <td class="p-3.5 text-center"><span class="badge-pill badge-purple">20</span></td>
+                    <td class="p-3.5 text-slate-500">Written test (23rd – 30th April 2026)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PG Plan Card -->
+          <div class="card-modern p-6 sm:p-8 bg-white">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <span class="badge-pill badge-purple text-xs">Postgraduate (PG)</span>
+                <span class="text-xs text-slate-400">MCA-DS and other PG Programs</span>
+              </div>
+              <span class="text-xs font-black text-purple-700">Total CIE: 40 Marks</span>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="bg-purple-800 text-white font-extrabold">
+                    <th class="p-3.5">Component</th>
+                    <th class="p-3.5 text-center">Max Marks</th>
+                    <th class="p-3.5">Conduction Details</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                  <tr class="hover:bg-slate-50">
+                    <td class="p-3.5 font-bold">Assignment (Research Based)</td>
+                    <td class="p-3.5 text-center"><span class="badge-pill badge-green">10</span></td>
+                    <td class="p-3.5 text-slate-500">Report & implementation submission</td>
+                  </tr>
+                  <tr class="hover:bg-slate-50 bg-slate-50/50">
+                    <td class="p-3.5 font-bold">Seminar / Paper Discussion</td>
+                    <td class="p-3.5 text-center"><span class="badge-pill badge-green">10</span></td>
+                    <td class="p-3.5 text-slate-500">Technical presentation & viva</td>
+                  </tr>
+                  <tr class="hover:bg-slate-50">
+                    <td class="p-3.5 font-bold text-rose-700">Mid-Term Written Examination</td>
+                    <td class="p-3.5 text-center"><span class="badge-pill badge-purple">20</span></td>
+                    <td class="p-3.5 text-slate-500">Written test (23rd – 30th April 2026)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── 03. SIGNATURE SHEET GENERATOR ────────────────────── -->
+      <div id="section-signature" class="section">
+        <div class="card-modern max-w-2xl mx-auto p-6 sm:p-8 bg-white">
+          
+          <!-- Stat Bar -->
+          <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 text-center">
+              <div class="text-2xl font-black text-primary-700" id="sig-statPrograms">–</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Programs</div>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-100 text-center">
+              <div class="text-2xl font-black text-amber-600" id="sig-statCourses">–</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Courses</div>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-100 text-center">
+              <div class="text-2xl font-black text-emerald-600" id="sig-statStudents">–</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Students</div>
+            </div>
+          </div>
+
+          <div class="space-y-4 mb-6">
+            <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Step 1 — Choose Course</h3>
+            
+            <div class="space-y-3">
+              <select id="sig-program" class="select-modern" onchange="sheetOnProgram('sig')">
+                <option value="">— Select Program —</option>
+              </select>
+              <select id="sig-semester" class="select-modern" disabled onchange="sheetOnSemester('sig')">
+                <option value="">— Select Semester —</option>
+              </select>
+              <select id="sig-course" class="select-modern" disabled onchange="sheetOnCourse('sig')">
+                <option value="">— Select Course —</option>
+              </select>
+            </div>
+
+            <div id="sig-faculty" class="hidden p-3 rounded-xl bg-blue-50 border border-blue-100 text-xs text-primary-800 flex items-center gap-2">
+              <span class="text-base">👤</span> Faculty In-Charge: <strong id="sig-facultyName">–</strong>
+            </div>
+          </div>
+
+          <!-- Step 2: Student Preview -->
+          <div id="sig-studentPreview" class="hidden mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Step 2 — Enrolled Candidates</h3>
+              <span class="badge-pill badge-green text-xs font-mono" id="sig-count">0</span>
+            </div>
+            <div class="max-h-48 overflow-y-auto rounded-2xl border border-slate-200 divide-y divide-slate-100 text-xs">
+              <ul id="sig-list" class="divide-y divide-slate-100"></ul>
+            </div>
+          </div>
+          <div id="sig-noStudents" class="hidden p-4 rounded-xl bg-slate-50 text-center text-xs text-slate-400 mb-6">No enrolled candidates found.</div>
+
+          <!-- Step 3: Action Buttons -->
+          <div class="pt-4 border-t border-slate-100 space-y-3">
+            <button id="sig-btn" onclick="openSheet('sig','signature')" disabled class="btn-core btn-primary-grad w-full py-3.5 shadow-lg">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              <span>Generate Course Signature Sheet</span>
+            </button>
+
+            <button id="sig-bulk" onclick="bulkSheet('sig','signature')" disabled class="btn-core w-full py-3 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200">
+              <span>📥 Download All Program Signature Sheets (Bulk)</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── 04. MARKS AWARD SHEET GENERATOR ──────────────────── -->
+      <div id="section-marksaward" class="section">
+        <div class="card-modern max-w-2xl mx-auto p-6 sm:p-8 bg-white">
+          
+          <!-- Stat Bar -->
+          <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 text-center">
+              <div class="text-2xl font-black text-primary-700" id="ma-statPrograms">–</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Programs</div>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-100 text-center">
+              <div class="text-2xl font-black text-amber-600" id="ma-statCourses">–</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Courses</div>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-100 text-center">
+              <div class="text-2xl font-black text-emerald-600" id="ma-statStudents">–</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Students</div>
+            </div>
+          </div>
+
+          <div class="space-y-4 mb-6">
+            <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Step 1 — Choose Course</h3>
+            
+            <div class="space-y-3">
+              <select id="ma-program" class="select-modern" onchange="sheetOnProgram('ma')">
+                <option value="">— Select Program —</option>
+              </select>
+              <select id="ma-semester" class="select-modern" disabled onchange="sheetOnSemester('ma')">
+                <option value="">— Select Semester —</option>
+              </select>
+              <select id="ma-course" class="select-modern" disabled onchange="sheetOnCourse('ma')">
+                <option value="">— Select Course —</option>
+              </select>
+            </div>
+
+            <div id="ma-faculty" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-100 text-xs text-amber-900 flex items-center gap-2">
+              <span class="text-base">👤</span> Faculty In-Charge: <strong id="ma-facultyName">–</strong>
+            </div>
+          </div>
+
+          <!-- Step 2: Student Preview -->
+          <div id="ma-studentPreview" class="hidden mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Step 2 — Enrolled Candidates</h3>
+              <span class="badge-pill badge-gold text-xs font-mono" id="ma-count">0</span>
+            </div>
+            <div class="max-h-48 overflow-y-auto rounded-2xl border border-slate-200 divide-y divide-slate-100 text-xs">
+              <ul id="ma-list" class="divide-y divide-slate-100"></ul>
+            </div>
+          </div>
+          <div id="ma-noStudents" class="hidden p-4 rounded-xl bg-slate-50 text-center text-xs text-slate-400 mb-6">No enrolled candidates found.</div>
+
+          <!-- Step 3: Action Buttons -->
+          <div class="pt-4 border-t border-slate-100 space-y-3">
+            <button id="ma-btn" onclick="openSheet('ma','marks')" disabled class="btn-core btn-gold-grad w-full py-3.5 shadow-lg">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+              <span>Generate Marks Award Register</span>
+            </button>
+
+            <button id="ma-bulk" onclick="bulkSheet('ma','marks')" disabled class="btn-core w-full py-3 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200">
+              <span>📥 Download All Marks Award Registers (Bulk)</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── 05. DIGITAL MARKS ENTRY ──────────────────────────── -->
+      <div id="section-marks" class="section">
+        
+        <!-- Course Selection Card -->
+        <div class="card-modern max-w-4xl mx-auto p-6 bg-white mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Evaluation Workspace</h3>
+              <p class="text-xs text-slate-500">Select course to input, recalculate, and publish digital CIE marks.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <select id="mProgramSelect" class="select-modern" onchange="mOnProgramChange()">
+              <option value="">— Select Program —</option>
+            </select>
+            <select id="mSemesterSelect" class="select-modern" disabled onchange="mOnSemesterChange()">
+              <option value="">— Select Semester —</option>
+            </select>
+            <select id="mCourseSelect" class="select-modern" disabled onchange="mOnCourseChange()">
+              <option value="">— Select Course —</option>
+            </select>
+          </div>
+
+          <div id="mLoadingMsg" class="hidden text-center py-6 text-slate-500 text-xs">
+            <div class="w-6 h-6 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-2"></div>
+            Loading course registry & marks…
+          </div>
+          <div id="mNoData" class="hidden text-center py-6 text-slate-400 text-xs">No students registered in this course.</div>
+        </div>
+
+        <!-- Marks Matrix Table Wrap -->
+        <div id="mTableWrap" class="hidden max-w-5xl mx-auto space-y-4">
+          
+          <div class="card-modern p-4 bg-white flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h4 class="text-sm font-black text-slate-900" id="mCourseLabel">—</h4>
+              <div class="text-xs font-semibold mt-0.5" id="mSaveStatus">Ready</div>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+              <button onclick="printMarks()" class="btn-core btn-secondary text-xs py-2 px-3.5">
+                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>Print Register</span>
+              </button>
+              <button onclick="saveAllMarks()" class="btn-core btn-primary-grad text-xs py-2 px-4 shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>Save All Marks</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="card-modern overflow-hidden bg-white border border-slate-200">
+            <div class="overflow-x-auto max-h-[560px] overflow-y-auto">
+              <table class="w-full text-left text-xs border-collapse" id="marksTable">
+                <thead id="marksTableHead" class="sticky top-0 z-20"></thead>
+                <tbody id="marksTableBody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <p class="text-center text-[11px] text-slate-400 font-medium">💡 Tip: Marks auto-save after editing. You can also click "Save All Marks" anytime.</p>
+        </div>
+
+      </div>
+
+      <!-- ── 06. FORMATIVE SCHEDULE ───────────────────────────── -->
+      <div id="section-schedule" class="section">
+        
+        <div class="card-modern max-w-4xl mx-auto p-6 bg-white mb-6">
+          <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider mb-2">Formative Assessment Timelines</h3>
+          <p class="text-xs text-slate-500 mb-4">View unified submission, announcement, conduction and marks display deadlines.</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <select id="schProgramSelect" class="select-modern" onchange="schOnProgramChange()">
+              <option value="">— Select Program —</option>
+            </select>
+            <select id="schSemesterSelect" class="select-modern" disabled onchange="loadSchedule()">
+              <option value="">— Select Semester —</option>
+            </select>
+          </div>
+
+          <div id="schLoading" class="hidden text-center py-6 text-slate-500 text-xs">
+            <div class="w-6 h-6 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-2"></div>
+            Loading examination schedules…
+          </div>
+          <div id="schEmpty" class="hidden text-center py-6 text-slate-400 text-xs">No examination schedules found for selected parameters.</div>
+        </div>
+
+        <div id="schContent" class="hidden max-w-4xl mx-auto space-y-4"></div>
+
+      </div>
+
+    </main>
+
+  </div>
 
   <script>
-    // Auth
     const user = sessionStorage.getItem('cie_user');
     if (!user) window.location.href = '/';
+
     document.getElementById('userDisplay').textContent = user || '–';
     document.getElementById('userDisplayTop').textContent = user || '–';
+    document.getElementById('userInitial').textContent = (user || 'U').charAt(0).toUpperCase();
 
-    // ── Session picker ───────────────────────────────────────
-    let currentSession = sessionStorage.getItem('cie_session') || '';
+    let currentSession = sessionStorage.getItem('cie_session') || 'July – December 2026';
+
+    const SECTIONS = ['notice', 'examplan', 'signature', 'marksaward', 'schedule', 'marks'];
+    const TITLES = {
+      notice:     ['Official Notice',       'Formative Examination Guidelines & Deadlines'],
+      examplan:   ['Exam Component Plan',   'UG & PG CIE Marks Weightage Breakdown'],
+      signature:  ['Signature Sheet',       'Generate Assessment Attendance Signature Sheets'],
+      marksaward: ['Marks Award Sheet',     'Generate Official Marks Award Registers'],
+      schedule:   ['Formative Schedule',    'Course-wise Examination Timelines & Deadlines'],
+      marks:      ['Digital Marks Entry',   'Interactive Evaluation & Gradebook Workspace']
+    };
+    let sigInited = false, maInited = false, marksInited = false, scheduleInited = false;
+
+    function isJuly2026(s) {
+      if (!s) return false;
+      const str = s.toLowerCase();
+      return str.includes('july') && str.includes('2026');
+    }
+
+    function updateSessionVisibility() {
+      const isJuly = isJuly2026(currentSession);
+      const navOverview = document.getElementById('navGroupOverview');
+      const navNotice   = document.getElementById('nav-notice');
+      const navExamplan = document.getElementById('nav-examplan');
+      const secNotice   = document.getElementById('section-notice');
+      const secExamplan = document.getElementById('section-examplan');
+
+      if (navOverview) navOverview.style.display = isJuly ? 'none' : '';
+      if (navNotice)   navNotice.style.display   = isJuly ? 'none' : '';
+      if (navExamplan) navExamplan.style.display = isJuly ? 'none' : '';
+
+      if (isJuly) {
+        if (secNotice) {
+          secNotice.classList.remove('active');
+          secNotice.style.display = 'none';
+        }
+        if (secExamplan) {
+          secExamplan.classList.remove('active');
+          secExamplan.style.display = 'none';
+        }
+      } else {
+        if (secNotice)   secNotice.style.display   = '';
+        if (secExamplan) secExamplan.style.display = '';
+      }
+    }
+
+    function switchSection(id) {
+      if (isJuly2026(currentSession) && (id === 'notice' || id === 'examplan')) {
+        id = 'signature';
+      }
+      SECTIONS.forEach(s => {
+        const secEl = document.getElementById('section-' + s);
+        if (secEl) {
+          secEl.classList.toggle('active', s === id);
+          if (isJuly2026(currentSession) && (s === 'notice' || s === 'examplan')) {
+            secEl.style.display = 'none';
+          } else {
+            secEl.style.display = '';
+          }
+        }
+        const navEl = document.getElementById('nav-' + s);
+        if (navEl) navEl.classList.toggle('active', s === id);
+      });
+      if (TITLES[id]) {
+        document.getElementById('pageTitle').textContent    = TITLES[id][0];
+        document.getElementById('pageSubtitle').textContent = TITLES[id][1];
+      }
+      
+      if (id === 'signature'  && !sigInited)      { initSheetSection('sig');  loadSheetStats('sig'); sigInited = true; }
+      if (id === 'marksaward' && !maInited)       { initSheetSection('ma');   loadSheetStats('ma');  maInited  = true; }
+      if (id === 'marks'      && !marksInited)    { mLoadPrograms(); marksInited = true; }
+      if (id === 'schedule'   && !scheduleInited) { schLoadPrograms(); loadSchedule(); scheduleInited = true; }
+      if (window.innerWidth < 768) closeSidebar();
+    }
 
     function selectSession(s) {
       currentSession = s;
       sessionStorage.setItem('cie_session', s);
       document.getElementById('sessionLabel').textContent = s;
-      document.getElementById('sessionModal').style.display = 'none';
+      document.getElementById('topSessionText').textContent = s.split(' ')[0] + ' ' + s.split(' ').slice(-1)[0];
+      document.getElementById('sessionModal').classList.add('hidden');
 
-      // Reset section initialization flags and reload current section
       sigInited = false; maInited = false; marksInited = false; scheduleInited = false;
-      const activeSec = SECTIONS.find(sec => document.getElementById('section-' + sec)?.classList.contains('active')) || 'notice';
-      switchSection(activeSec);
+      updateSessionVisibility();
+
+      let activeSec = SECTIONS.find(sec => document.getElementById('section-' + sec)?.classList.contains('active'));
+      if (isJuly2026(currentSession) && (!activeSec || activeSec === 'notice' || activeSec === 'examplan')) {
+        activeSec = 'signature';
+      } else if (!isJuly2026(currentSession) && !activeSec) {
+        activeSec = 'notice';
+      }
+      switchSection(activeSec || (isJuly2026(currentSession) ? 'signature' : 'notice'));
     }
 
     function changeSession() {
-      document.getElementById('sessionModal').style.display = 'flex';
+      document.getElementById('sessionModal').classList.remove('hidden');
     }
 
-    // Show modal on load if no session chosen
-    if (!currentSession) {
-      document.getElementById('sessionModal').style.display = 'flex';
-    } else {
-      document.getElementById('sessionModal').style.display = 'none';
-      document.getElementById('sessionLabel').textContent = currentSession;
+    document.getElementById('sessionLabel').textContent = currentSession;
+    document.getElementById('topSessionText').textContent = currentSession.split(' ')[0] + ' ' + currentSession.split(' ').slice(-1)[0];
+    updateSessionVisibility();
+    if (isJuly2026(currentSession)) {
+      switchSection('signature');
     }
 
     function logout() {
@@ -635,67 +805,26 @@
       window.location.href = '/';
     }
 
-    // Role-based access
     const role = sessionStorage.getItem('cie_role') || 'user';
     const roleTag = document.getElementById('roleTag');
     if (role === 'admin') {
       roleTag.textContent = 'ADMIN';
+      roleTag.className = 'text-[10px] font-black text-emerald-400 tracking-wider';
     } else {
       roleTag.textContent = 'FACULTY';
-      roleTag.style.background = 'rgba(255,255,255,0.1)';
-      roleTag.style.color = 'rgba(255,255,255,0.55)';
       document.getElementById('adminNav').style.display = 'none';
     }
 
-    // Mobile sidebar
     function toggleSidebar() {
-      const s = document.getElementById('sidebar');
-      const o = document.getElementById('sidebarOverlay');
-      s.classList.toggle('open');
-      o.classList.toggle('show');
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('show');
     }
     function closeSidebar() {
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('sidebarOverlay').classList.remove('show');
     }
 
-    // Show hamburger on mobile
-    function checkMobile() {
-      const hb = document.getElementById('hamburger');
-      if (window.innerWidth < 768) hb.style.display = 'block';
-      else { hb.style.display = 'none'; closeSidebar(); }
-    }
-    window.addEventListener('resize', checkMobile);
-    checkMobile(); // Initial check
-
-    // ── Section switching ────────────────────────────────────
-    const SECTIONS = ['notice','examplan','signature','marksaward','schedule','marks'];
-    const TITLES = {
-      notice:     ['Official Notice',       'Formative Exam Guidelines'],
-      examplan:   ['Exam Component Plan',   'UG & PG marks breakdown'],
-      signature:  ['Signature Sheet',       'Generate attendance signature sheets'],
-      marksaward: ['Marks Award Sheet',     'Generate marks award sheets for submission'],
-      schedule:   ['Formative Schedule',    'Exam dates per course'],
-      marks:      ['Digital Marks Entry',   'Enter & save student marks']
-    };
-    let sigInited = false, maInited = false, marksInited = false, scheduleInited = false;
-
-    function switchSection(id) {
-      SECTIONS.forEach(s => {
-        document.getElementById('section-' + s).classList.toggle('active', s === id);
-        const n = document.getElementById('nav-' + s);
-        if (n) n.classList.toggle('active', s === id);
-      });
-      document.getElementById('pageTitle').textContent    = TITLES[id][0];
-      document.getElementById('pageSubtitle').textContent = TITLES[id][1];
-      if (id === 'signature'  && !sigInited)      { initSheetSection('sig');  loadSheetStats('sig'); sigInited = true; }
-      if (id === 'marksaward' && !maInited)       { initSheetSection('ma');   loadSheetStats('ma');  maInited  = true; }
-      if (id === 'marks'      && !marksInited)    { mLoadPrograms(); marksInited = true; }
-      if (id === 'schedule'   && !scheduleInited) { schLoadPrograms(); loadSchedule(); scheduleInited = true; }
-      if (window.innerWidth < 768) closeSidebar();
-    }
-
-    // ── SIGNATURE + MARKS AWARD SHEETS (shared factory) ─────────
+    // ── SHEET SECTION (Signature + Marks Award) ──────────────
     const sheetStudents = { sig: [], ma: [] };
 
     async function loadSheetStats(p) {
@@ -723,7 +852,7 @@
       semSel.innerHTML = '<option value="">— Select Semester —</option>';
       cSel.innerHTML   = '<option value="">— Select Course —</option>';
       semSel.disabled = !program; cSel.disabled = true;
-      document.getElementById(`${p}-faculty`).style.display = 'none';
+      document.getElementById(`${p}-faculty`).classList.add('hidden');
       sheetClearStudents(p);
       if (!program) return;
       try {
@@ -739,7 +868,7 @@
       const cSel = document.getElementById(`${p}-course`);
       cSel.innerHTML = '<option value="">— Select Course —</option>';
       cSel.disabled = !semester;
-      document.getElementById(`${p}-faculty`).style.display = 'none';
+      document.getElementById(`${p}-faculty`).classList.add('hidden');
       await sheetFetchStudents(p);
       if (!semester) return;
       try {
@@ -758,8 +887,10 @@
       const opt = document.getElementById(`${p}-course`).options[document.getElementById(`${p}-course`).selectedIndex];
       if (opt && opt.dataset.faculty) {
         document.getElementById(`${p}-facultyName`).textContent = opt.dataset.faculty;
-        document.getElementById(`${p}-faculty`).style.display = 'flex';
-      } else { document.getElementById(`${p}-faculty`).style.display = 'none'; }
+        document.getElementById(`${p}-faculty`).classList.remove('hidden');
+      } else { 
+        document.getElementById(`${p}-faculty`).classList.add('hidden'); 
+      }
       sheetUpdateButtons(p);
     }
 
@@ -779,22 +910,29 @@
       const preview = document.getElementById(`${p}-studentPreview`);
       const noMsg   = document.getElementById(`${p}-noStudents`);
       const list    = document.getElementById(`${p}-list`);
-      if (!st.length) { preview.style.display='none'; noMsg.style.display='block'; return; }
-      noMsg.style.display='none'; list.innerHTML='';
-      st.forEach((s,i)=>{
-        const li=document.createElement('li');
-        li.style.cssText='padding:8px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f8fafc;font-size:13px';
-        li.innerHTML=`<span style="color:#94a3b8;font-size:11px;width:20px">${i+1}</span><span style="font-family:monospace;color:#1c4c94;font-size:12px">${s.scholar_id}</span><span style="color:#334155">${s.student_name}</span>`;
+      if (!st.length) { preview.classList.add('hidden'); noMsg.classList.remove('hidden'); return; }
+      noMsg.classList.add('hidden'); list.innerHTML = '';
+      st.forEach((s, i) => {
+        const li = document.createElement('li');
+        li.className = 'p-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors';
+        li.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-slate-400 font-mono text-[10px] w-5 text-right">${i+1}</span>
+            <span class="font-mono text-xs font-bold text-primary-700">${s.scholar_id}</span>
+            <span class="text-slate-800 font-medium">${s.student_name}</span>
+          </div>
+          <span class="badge-pill badge-slate text-[10px]">Sem ${s.semester}</span>
+        `;
         list.appendChild(li);
       });
-      document.getElementById(`${p}-count`).textContent = st.length;
-      preview.style.display='block';
+      document.getElementById(`${p}-count`).textContent = `${st.length} Candidates`;
+      preview.classList.remove('hidden');
     }
 
     function sheetClearStudents(p) {
-      sheetStudents[p]=[];
-      document.getElementById(`${p}-studentPreview`).style.display='none';
-      document.getElementById(`${p}-noStudents`).style.display='none';
+      sheetStudents[p] = [];
+      document.getElementById(`${p}-studentPreview`).classList.add('hidden');
+      document.getElementById(`${p}-noStudents`).classList.add('hidden');
       sheetUpdateButtons(p);
     }
 
@@ -806,7 +944,7 @@
       document.getElementById(`${p}-btn`).disabled = !ok;
       const bulk = document.getElementById(`${p}-bulk`);
       const masterOk = !!(program && semester);
-      bulk.disabled = !masterOk; bulk.style.opacity = masterOk ? '1' : '0.4';
+      bulk.disabled = !masterOk;
     }
 
     function openSheet(p, type) {
@@ -825,7 +963,7 @@
       window.open(`/bulk.html?${new URLSearchParams({program,semester,type,session:currentSession})}`, '_blank');
     }
 
-    // ── MARKS ENTRY ──────────────────────────────────────────
+    // ── MARKS ENTRY LOGIC ────────────────────────────────────
     let mStudents = [], mComponents = [], mCurrentProgram = '', mCurrentSemester = '', mCurrentCourse = '';
 
     function getComponents(prog) {
@@ -835,10 +973,10 @@
         { key:'midterm',    label:'Mid Term',   max:20 }
       ];
       return [
-        { key:'assignment', label:'Assignment',      max:15 },
-        { key:'seminar',    label:'Seminar',          max:15 },
-        { key:'quiz',       label:'Quiz / Viva',      max:10 },
-        { key:'midterm',    label:'Mid Term',         max:20 }
+        { key:'assignment', label:'Assignment',  max:15 },
+        { key:'seminar',    label:'Seminar',     max:15 },
+        { key:'quiz',       label:'Quiz / Viva', max:10 },
+        { key:'midterm',    label:'Mid Term',    max:20 }
       ];
     }
 
@@ -893,9 +1031,11 @@
       if (!courseCode) { mHideTable(); return; }
       mCurrentProgram = program; mCurrentSemester = semester; mCurrentCourse = courseCode;
       mComponents = getComponents(program);
-      document.getElementById('mLoadingMsg').style.display = 'block';
-      document.getElementById('mNoData').style.display     = 'none';
-      document.getElementById('mTableWrap').style.display  = 'none';
+
+      document.getElementById('mLoadingMsg').classList.remove('hidden');
+      document.getElementById('mNoData').classList.add('hidden');
+      document.getElementById('mTableWrap').classList.add('hidden');
+
       try {
         const [sRes, mRes] = await Promise.all([
           fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(currentSession)}`),
@@ -905,43 +1045,57 @@
         const saved = await mRes.json();
         const map = {};
         saved.forEach(m => { if (!map[m.scholar_id]) map[m.scholar_id] = {}; map[m.scholar_id][m.component] = m.marks_obtained; });
-        document.getElementById('mLoadingMsg').style.display = 'none';
-        if (!mStudents.length) { document.getElementById('mNoData').style.display = 'block'; return; }
-        document.getElementById('mCourseLabel').textContent = (cOpt.dataset.courseName||courseCode) + ' (' + courseCode + ')';
-        document.getElementById('mSaveStatus').textContent  = saved.length ? '✓ Loaded saved marks' : 'No marks saved yet';
+
+        document.getElementById('mLoadingMsg').classList.add('hidden');
+        if (!mStudents.length) { document.getElementById('mNoData').classList.remove('hidden'); return; }
+
+        document.getElementById('mCourseLabel').textContent = `${cOpt.dataset.courseName || courseCode} (${courseCode})`;
+        document.getElementById('mSaveStatus').innerHTML = saved.length
+          ? '<span class="text-emerald-600">✓ Loaded database records</span>'
+          : '<span class="text-slate-400">Ready for data entry</span>';
+
         const thead = document.getElementById('marksTableHead');
         const tbody = document.getElementById('marksTableBody');
-        thead.innerHTML = `<tr style="background:#1c4c94;color:#fff;font-size:12px">
-          <th style="padding:10px 12px;text-align:left">#</th>
-          <th style="padding:10px 12px;text-align:left">Scholar ID</th>
-          <th style="padding:10px 12px;text-align:left">Student Name</th>
-          ${mComponents.map(c=>`<th style="padding:10px 12px;text-align:center">${c.label}<br/><span style="opacity:.7;font-weight:400">(max ${c.max})</span></th>`).join('')}
-          <th style="padding:10px 12px;text-align:center">Total</th>
-        </tr>`;
+        
+        thead.innerHTML = `
+          <tr class="bg-slate-900 text-white font-extrabold text-xs">
+            <th class="p-3.5 text-center w-12">#</th>
+            <th class="p-3.5 text-left w-32">Scholar ID</th>
+            <th class="p-3.5 text-left min-w-[160px]">Student Name</th>
+            ${mComponents.map(c => `<th class="p-3 text-center min-w-[90px]">${c.label}<br/><span class="font-normal text-[10px] text-slate-300">(Max ${c.max})</span></th>`).join('')}
+            <th class="p-3.5 text-center w-20">Total</th>
+          </tr>
+        `;
+
         tbody.innerHTML = '';
-        mStudents.forEach((s,i)=>{
+        mStudents.forEach((s, i) => {
           const tr = document.createElement('tr');
-          tr.style.cssText = `border-bottom:1px solid #f1f5f9;${i%2?'background:#f8fafc':''}`;
+          tr.className = 'hover:bg-blue-50/40 transition-colors';
           tr.innerHTML = `
-            <td style="padding:8px 12px;color:#94a3b8;font-size:12px">${i+1}</td>
-            <td style="padding:8px 12px;font-family:monospace;font-size:12px;color:#1c4c94">${s.scholar_id}</td>
-            <td style="padding:8px 12px;font-size:13px;font-weight:500;color:#1e293b">${s.student_name}</td>
-            ${mComponents.map(c=>{
+            <td class="p-3 text-center text-slate-400 font-mono text-xs">${i+1}</td>
+            <td class="p-3 font-mono font-bold text-primary-700 text-xs">${s.scholar_id}</td>
+            <td class="p-3 font-bold text-slate-800 text-xs">${s.student_name}</td>
+            ${mComponents.map(c => {
               const val = map[s.scholar_id]?.[c.key] ?? '';
-              return `<td style="padding:6px 8px;text-align:center">
-                <input type="number" min="0" max="${c.max}" step="0.5" class="marks-input"
-                  data-scholar="${s.scholar_id}" data-component="${c.key}" data-max="${c.max}"
-                  value="${val}" placeholder="–" oninput="updateRowTotal(this)" />
-              </td>`;
+              return `
+                <td class="p-2 text-center">
+                  <input type="number" min="0" max="${c.max}" step="0.5" class="marks-matrix-input"
+                    data-scholar="${s.scholar_id}" data-component="${c.key}" data-max="${c.max}"
+                    value="${val}" placeholder="–" oninput="updateRowTotal(this)" />
+                </td>
+              `;
             }).join('')}
-            <td style="padding:8px 12px;text-align:center;font-weight:700;color:#1e293b;font-size:13px" id="total-${s.scholar_id}">–</td>`;
+            <td class="p-3 text-center font-black text-sm text-slate-900" id="total-${s.scholar_id}">–</td>
+          `;
           tbody.appendChild(tr);
-          updateRowTotal(tr.querySelector('.marks-input'));
+          const firstInput = tr.querySelector('.marks-matrix-input');
+          if (firstInput) updateRowTotal(firstInput);
         });
-        document.getElementById('mTableWrap').style.display = 'block';
-      } catch(err) {
-        document.getElementById('mLoadingMsg').style.display = 'none';
-        document.getElementById('mNoData').style.display = 'block';
+
+        document.getElementById('mTableWrap').classList.remove('hidden');
+      } catch (err) {
+        document.getElementById('mLoadingMsg').classList.add('hidden');
+        document.getElementById('mNoData').classList.remove('hidden');
         document.getElementById('mNoData').textContent = 'Error: ' + err.message;
       }
     }
@@ -949,36 +1103,53 @@
     let autoSaveTimer = null;
 
     function updateRowTotal(inp) {
-      const inputs = inp.closest('tr').querySelectorAll('.marks-input');
+      const row = inp.closest('tr');
+      const inputs = row.querySelectorAll('.marks-matrix-input');
       let total = 0, has = false;
-      inputs.forEach(i => { const v = parseFloat(i.value); if (!isNaN(v)) { total+=v; has=true; } });
+      inputs.forEach(i => {
+        const v = parseFloat(i.value);
+        if (!isNaN(v)) { total += v; has = true; }
+      });
       const cell = document.getElementById('total-' + inp.dataset.scholar);
       if (cell) cell.textContent = has ? total : '–';
+
       const status = document.getElementById('mSaveStatus');
-      status.style.color = '#f59e0b'; status.textContent = '● Unsaved changes';
+      status.innerHTML = '<span class="text-amber-500 animate-pulse">● Unsaved edits…</span>';
       clearTimeout(autoSaveTimer);
       autoSaveTimer = setTimeout(() => saveAllMarks(true), 1500);
     }
 
     async function saveAllMarks(silent = false) {
       const status = document.getElementById('mSaveStatus');
-      if (!silent) { status.style.color = '#64748b'; status.textContent = 'Saving…'; }
-      const entries = [...document.querySelectorAll('.marks-input')].map(inp => ({
-        scholar_id: inp.dataset.scholar, component: inp.dataset.component,
+      if (!silent) status.innerHTML = '<span class="text-slate-500">Syncing with database…</span>';
+
+      const entries = [...document.querySelectorAll('.marks-matrix-input')].map(inp => ({
+        scholar_id: inp.dataset.scholar,
+        component: inp.dataset.component,
         marks_obtained: inp.value !== '' ? parseFloat(inp.value) : null
       }));
+
       try {
-        const r = await fetch('/api/marks/save', { method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ program:mCurrentProgram, semester:mCurrentSemester, courseCode:mCurrentCourse, entries, session:currentSession }) });
+        const r = await fetch('/api/marks/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            program: mCurrentProgram,
+            semester: mCurrentSemester,
+            courseCode: mCurrentCourse,
+            entries,
+            session: currentSession
+          })
+        });
         const d = await r.json();
         if (d.success) {
-          status.style.color = '#16a34a';
-          status.textContent = `✓ Auto-saved at ${new Date().toLocaleTimeString()}`;
+          status.innerHTML = `<span class="text-emerald-600 font-bold">✓ Synced at ${new Date().toLocaleTimeString()}</span>`;
         } else {
-          status.style.color = '#dc2626';
-          status.textContent = '✗ Save failed: ' + d.error;
+          status.innerHTML = `<span class="text-rose-600">✗ Sync failed: ${d.error}</span>`;
         }
-      } catch(err) { status.style.color='#dc2626'; status.textContent = '✗ Error: ' + err.message; }
+      } catch (err) {
+        status.innerHTML = `<span class="text-rose-600">✗ Network error: ${err.message}</span>`;
+      }
     }
 
     function printMarks() {
@@ -989,12 +1160,12 @@
     }
 
     function mHideTable() {
-      document.getElementById('mTableWrap').style.display  = 'none';
-      document.getElementById('mNoData').style.display     = 'none';
-      document.getElementById('mLoadingMsg').style.display = 'none';
+      document.getElementById('mTableWrap').classList.add('hidden');
+      document.getElementById('mNoData').classList.add('hidden');
+      document.getElementById('mLoadingMsg').classList.add('hidden');
     }
 
-    // ── FORMATIVE SCHEDULE ───────────────────────────────────
+    // ── SCHEDULE VIEWER ──────────────────────────────────────
     async function schLoadPrograms() {
       const sel = document.getElementById('schProgramSelect');
       sel.innerHTML = '<option value="">— Select Program —</option>';
@@ -1009,8 +1180,8 @@
       const semSel  = document.getElementById('schSemesterSelect');
       semSel.innerHTML = '<option value="">— Select Semester —</option>';
       semSel.disabled = !program;
-      document.getElementById('schContent').style.display = 'none';
-      document.getElementById('schEmpty').style.display   = 'none';
+      document.getElementById('schContent').classList.add('hidden');
+      document.getElementById('schEmpty').classList.add('hidden');
       if (!program) return;
       try {
         const sems = await (await fetch(`/api/data/semesters?program=${encodeURIComponent(program)}&session=${encodeURIComponent(currentSession)}`)).json();
@@ -1022,10 +1193,10 @@
     async function loadSchedule() {
       const program  = document.getElementById('schProgramSelect').value;
       const semester = document.getElementById('schSemesterSelect').value;
-      
-      document.getElementById('schLoading').style.display  = 'block';
-      document.getElementById('schContent').style.display  = 'none';
-      document.getElementById('schEmpty').style.display    = 'none';
+
+      document.getElementById('schLoading').classList.remove('hidden');
+      document.getElementById('schContent').classList.add('hidden');
+      document.getElementById('schEmpty').classList.add('hidden');
 
       try {
         let url = `/api/schedule?session=${encodeURIComponent(currentSession)}`;
@@ -1033,29 +1204,28 @@
           url += `&program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`;
         }
         const data = await (await fetch(url)).json();
-        document.getElementById('schLoading').style.display = 'none';
-        
+        document.getElementById('schLoading').classList.add('hidden');
+
         const groupKeys = Object.keys(data);
-        if (!groupKeys.length) { 
-          document.getElementById('schEmpty').style.display = 'block'; 
-          return; 
+        if (!groupKeys.length) {
+          document.getElementById('schEmpty').classList.remove('hidden');
+          return;
         }
         renderSchedule(data, groupKeys);
-      } catch(err) {
-        document.getElementById('schLoading').style.display = 'none';
-        document.getElementById('schEmpty').style.display   = 'block';
-        document.getElementById('schEmpty').textContent     = 'Error loading schedule: ' + err.message;
+      } catch (err) {
+        document.getElementById('schLoading').classList.add('hidden');
+        document.getElementById('schEmpty').classList.remove('hidden');
+        document.getElementById('schEmpty').textContent = 'Error loading schedule: ' + err.message;
       }
     }
 
     function renderSchedule(data, groupKeys) {
       const container = document.getElementById('schContent');
       container.innerHTML = '';
-      
+
       groupKeys.forEach(groupKey => {
-        // Add Program/Semester Header
         const groupHeader = document.createElement('div');
-        groupHeader.style.cssText = 'font-weight:700; font-size:14px; color:#475569; margin:20px 0 10px; border-left:4px solid #1c4c94; padding-left:12px;';
+        groupHeader.className = 'text-xs font-black text-primary-800 uppercase tracking-wider mt-6 mb-3 border-l-4 border-primary-600 pl-3';
         groupHeader.textContent = groupKey;
         container.appendChild(groupHeader);
 
@@ -1065,38 +1235,41 @@
         courses.forEach((courseName, idx) => {
           const { faculty_name, exams } = groupData[courseName];
           const card = document.createElement('div');
-          card.className = 'card';
-          card.style.cssText = 'margin-bottom:12px; overflow-x:auto; padding:0; border:1px solid #e2e8f0;';
+          card.className = 'card-modern p-0 overflow-hidden bg-white mb-4 border border-slate-200';
           card.innerHTML = `
-            <div style="background:#1c4c94; color:#fff; padding:8px 14px; display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-weight:700; font-size:12px">${idx+1}. ${courseName}</span>
-              ${faculty_name ? `<span style="font-size:10.5px; opacity:.9">👤 ${faculty_name}</span>` : ''}
+            <div class="bg-gradient-to-r from-primary-800 to-primary-700 text-white p-3.5 flex items-center justify-between">
+              <span class="font-bold text-xs">${idx+1}. ${courseName}</span>
+              ${faculty_name ? `<span class="badge-pill bg-white/10 text-amber-300 text-[10px]">👤 ${faculty_name}</span>` : ''}
             </div>
-            <table style="width:100%; border-collapse:collapse; font-size:12px;">
-              <thead>
-                <tr style="background:#f8fafc; color:#475569;">
-                  <th style="padding:6px 12px; text-align:left; font-weight:600; border-bottom:1px solid #e2e8f0;">Exam Name</th>
-                  <th style="padding:6px 8px; text-align:center; font-weight:600; border-bottom:1px solid #e2e8f0;">Announcement<br/><span style="font-weight:400; color:#94a3b8; font-size:9px">(Topic)</span></th>
-                  <th style="padding:6px 8px; text-align:center; font-weight:600; border-bottom:1px solid #e2e8f0;">Submission<br/><span style="font-weight:400; color:#94a3b8; font-size:9px">(Draft/PPT)</span></th>
-                  <th style="padding:6px 8px; text-align:center; font-weight:600; border-bottom:1px solid #e2e8f0;">Conduction</th>
-                  <th style="padding:6px 8px; text-align:center; font-weight:600; border-bottom:1px solid #e2e8f0;">Show Marks</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${exams.map((e, i) => `
-                  <tr style="${i%2?'background:#fafafa':''}">
-                    <td style="padding:6px 14px; font-weight:500; color:#1e293b; border-bottom:1px solid #f1f5f9;">${e.exam_name}</td>
-                    <td style="padding:6px 8px; text-align:center; color:${e.announcement_date==='NA'?'#f59e0b':'#334155'}; border-bottom:1px solid #f1f5f9;">${e.announcement_date||'—'}</td>
-                    <td style="padding:6px 8px; text-align:center; color:${e.submission_date==='NA'?'#f59e0b':'#334155'}; border-bottom:1px solid #f1f5f9;">${e.submission_date||'—'}</td>
-                    <td style="padding:6px 8px; text-align:center; color:${e.conduction_date==='NA'?'#f59e0b':'#334155'}; border-bottom:1px solid #f1f5f9;">${e.conduction_date||'—'}</td>
-                    <td style="padding:6px 8px; text-align:center; color:${e.show_marks_date==='NA'?'#f59e0b':'#334155'}; border-bottom:1px solid #f1f5f9;">${e.show_marks_date||'—'}</td>
-                  </tr>`).join('')}
-              </tbody>
-            </table>`;
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 text-slate-600 font-extrabold border-b border-slate-200">
+                    <th class="p-3">Exam Component</th>
+                    <th class="p-3 text-center">Announcement</th>
+                    <th class="p-3 text-center">Submission</th>
+                    <th class="p-3 text-center">Conduction</th>
+                    <th class="p-3 text-center">Marks Display</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                  ${exams.map((e, i) => `
+                    <tr class="hover:bg-slate-50 ${i%2?'bg-slate-50/40':''}">
+                      <td class="p-3 font-bold text-slate-800">${e.exam_name}</td>
+                      <td class="p-3 text-center ${e.announcement_date==='NA'?'text-amber-600 font-bold':'text-slate-600'}">${e.announcement_date||'—'}</td>
+                      <td class="p-3 text-center ${e.submission_date==='NA'?'text-amber-600 font-bold':'text-slate-600'}">${e.submission_date||'—'}</td>
+                      <td class="p-3 text-center ${e.conduction_date==='NA'?'text-amber-600 font-bold':'text-slate-600'}">${e.conduction_date||'—'}</td>
+                      <td class="p-3 text-center ${e.show_marks_date==='NA'?'text-amber-600 font-bold':'text-slate-600'}">${e.show_marks_date||'—'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
           container.appendChild(card);
         });
       });
-      container.style.display = 'block';
+      container.classList.remove('hidden');
     }
   </script>
 </body>

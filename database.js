@@ -1,12 +1,16 @@
-const { Pool } = require('pg');
+require('dotenv').config();
+const { Pool, neonConfig } = require('@neondatabase/serverless');
+const ws = require('ws');
+
+// Configure WebSocket constructor for Node.js environment
+neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
   console.warn('⚠️  DATABASE_URL not set — database queries will fail. Set it in your environment.');
 }
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  connectionString: process.env.DATABASE_URL
 });
 
 pool.on('error', (err) => {

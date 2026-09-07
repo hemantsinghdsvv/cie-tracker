@@ -3,332 +3,353 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CIE Tracker – Admin Panel</title>
-  <meta name="description" content="Manage your CIE data with a professional and secure administration portal." />
+  <title>Admin Console – CIE Tracker | DSVV</title>
+  <meta name="description" content="Manage CIE course catalog, student registry, and examination schedule data streams." />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
   <style>
-    :root {
-      --primary: #1c4c94;
-      --primary-dark: #0d2854;
-      --accent: #fdc82c;
-      --bg: #f8fafc;
-    }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: #1e293b; overflow-x: hidden; }
-    
-    .glass-header {
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-    }
-    
-    .card { 
-      background: #fff; border-radius: 20px; 
-      box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05), 0 4px 12px -4px rgba(0,0,0,0.02);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid rgba(226, 232, 240, 0.5);
-    }
-    .card:hover { transform: translateY(-2px); box-shadow: 0 20px 50px -12px rgba(0,0,0,0.08); border-color: rgba(28, 76, 148, 0.1); }
-    
-    .stat-card { position: relative; overflow: hidden; }
-    .stat-card::after {
-      content: ''; position: absolute; top: -50%; right: -50%; width: 150px; height: 150px;
-      background: currentColor; opacity: 0.03; border-radius: 50%;
-    }
-
-    .dropzone {
+    .dropzone-box {
       border: 2px dashed #cbd5e1;
-      border-radius: 16px;
-      transition: all 0.25s;
+      border-radius: 20px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
       background: #fafcfe;
     }
-    .dropzone:hover, .dropzone.dragover {
-      border-color: var(--primary);
-      background: rgba(28, 76, 148, 0.03);
-      transform: scale(1.005);
+    .dropzone-box:hover, .dropzone-box.dragover {
+      border-color: var(--primary-600);
+      background: rgba(28, 76, 148, 0.04);
+      transform: scale(1.008);
     }
-    .dropzone svg { transition: transform 0.3s; }
-    .dropzone:hover svg { transform: translateY(-4px) scale(1.1); color: var(--primary); }
-
-    .btn-action {
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(28, 76, 148, 0.15);
+    .progress-bar-fill {
+      transition: width 0.4s ease;
     }
-    .btn-action:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(28, 76, 148, 0.25); }
-    .btn-action:active { transform: translateY(0); }
-    
-    .progress-bar { transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-    .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    @keyframes fadeIn { 
-      from { opacity: 0; transform: translateY(10px); } 
-      to { opacity: 1; transform: translateY(0); } 
-    }
-
-    .logo-container {
-      position: relative;
-      background: #fff;
-      padding: 8px;
-      border-radius: 18px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-      transition: all 0.3s;
-    }
-    .logo-container:hover { transform: rotate(-2deg) scale(1.05); }
   </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="min-h-screen pb-16 bg-slate-50">
 
-  <!-- Premium Header -->
-  <header class="glass-header sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-6 py-5 flex flex-col md:flex-row md:items-center justify-between gap-6">
-      <div class="flex items-center gap-6">
-        <div class="logo-container">
-          <img src="/logo.png" alt="DSVV Logo" class="h-16 w-auto object-contain" onerror="this.style.display='none'" />
+  <!-- ── GLASS HEADER ─────────────────────────────────────────── -->
+  <header class="glass-header sticky top-0 z-50 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      
+      <!-- Brand Title -->
+      <div class="flex items-center gap-4">
+        <div class="p-2 bg-white rounded-2xl border border-slate-200 shadow-md">
+          <img src="/logo.png" alt="DSVV Logo" class="h-10 sm:h-12 w-auto object-contain" onerror="this.style.display='none'" />
         </div>
-        <div class="h-12 w-px bg-slate-200 hidden md:block"></div>
         <div>
-          <h1 class="text-slate-900 font-extrabold text-2xl tracking-tight">Admin Console</h1>
-          <p class="text-slate-400 text-xs font-medium uppercase letter-spacing-wide flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-            Dev Sanskriti Vishwavidyalaya – CIE Tracker
-          </p>
+          <div class="flex items-center gap-2">
+            <h1 class="text-slate-900 font-black text-lg sm:text-xl tracking-tight">Admin Console</h1>
+            <span class="badge-pill badge-gold text-[10px]">Data Operations</span>
+          </div>
+          <p class="text-slate-400 text-xs font-semibold">Dev Sanskriti Vishwavidyalaya – CIE Tracker</p>
         </div>
       </div>
-      
+
+      <!-- Session & Navigation -->
       <div class="flex flex-wrap items-center gap-3">
-        <div class="bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 flex items-center gap-2">
-          <span class="text-xs text-slate-500 font-bold">Target Session:</span>
-          <select id="adminSessionSelect" onchange="onAdminSessionChange()" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer">
+        <div class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 flex items-center gap-2 shadow-sm">
+          <span class="text-[11px] text-slate-400 font-extrabold uppercase tracking-wider">Session:</span>
+          <select id="adminSessionSelect" onchange="onAdminSessionChange()" class="bg-transparent text-xs font-bold text-primary-700 focus:outline-none cursor-pointer">
             <option value="July – December 2026">July – December 2026</option>
             <option value="January – June 2026">January – June 2026</option>
             <option value="July – December 2025">July – December 2025</option>
           </select>
         </div>
+
         <nav class="flex items-center gap-2">
-          <a href="/data.html" class="px-4 py-2.5 rounded-xl text-slate-500 hover:text-primary hover:bg-blue-50 font-semibold text-sm transition-all flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-            Manage Data
+          <a href="/data.html" class="btn-core btn-secondary text-xs py-2 px-3.5 shadow-sm">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+            <span>Manage Records</span>
           </a>
-          <a href="/dashboard.html" class="px-5 py-2.5 bg-slate-900 hover:bg-primary text-white rounded-xl font-bold text-sm transition-all shadow-lg flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-            Dashboard
+          <a href="/dashboard.html" class="btn-core btn-primary-grad text-xs py-2 px-4 shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span>Faculty Workspace</span>
           </a>
         </nav>
       </div>
+
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-6 mt-10 space-y-10">
+  <!-- ── MAIN CONTENT ─────────────────────────────────────────── -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 mt-8 space-y-8">
 
-    <!-- Database Insights -->
-    <section class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-      <div class="stat-card card p-6 border-l-4 border-blue-500 text-blue-500">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Programs</span>
-          <div class="bg-blue-50 p-2 rounded-lg">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-          </div>
-        </div>
-        <p id="sPrograms" class="text-3xl font-black text-slate-800">–</p>
-      </div>
+    <!-- Database Stats Grid -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
       
-      <div class="stat-card card p-6 border-l-4 border-amber-500 text-amber-600">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Course Catalog</span>
-          <div class="bg-amber-50 p-2 rounded-lg">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-          </div>
-        </div>
-        <p id="sCourses" class="text-3xl font-black text-slate-800">–</p>
-      </div>
-
-      <div class="stat-card card p-6 border-l-4 border-emerald-500 text-emerald-600">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Enrollments</span>
-          <div class="bg-emerald-50 p-2 rounded-lg">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          </div>
-        </div>
-        <p id="sStudents" class="text-3xl font-black text-slate-800">–</p>
-      </div>
-    </section>
-
-    <!-- Schema Reference -->
-    <section class="card p-8 bg-slate-900 border-none">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl">📘</div>
+      <div class="card-modern p-5 sm:p-6 bg-white border-l-4 border-primary-600 flex items-center justify-between">
         <div>
-          <h2 class="text-white font-bold text-lg">Excel Data Standards</h2>
-          <p class="text-slate-400 text-xs">Ensure your files match these columns for precise data mapping.</p>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total Programs</span>
+          <p id="sPrograms" class="text-3xl font-black text-slate-800 mt-1">–</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-blue-50 text-primary-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
         </div>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="bg-white/5 rounded-2xl p-5 border border-white/10">
-          <p class="text-blue-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-blue-400"></span> Course Master
-          </p>
-          <div class="flex flex-wrap gap-2 text-[11px] font-mono text-slate-300">
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">S.N.</span>
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Program</span>
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Semester</span>
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Course Code</span>
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Course Name</span>
-            <span class="bg-white/10 border border-blue-400/30 px-2 py-1 rounded text-blue-300">Allocation</span>
+
+      <div class="card-modern p-5 sm:p-6 bg-white border-l-4 border-amber-500 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Courses Mastered</span>
+          <p id="sCourses" class="text-3xl font-black text-slate-800 mt-1">–</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-amber-50 text-amber-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        </div>
+      </div>
+
+      <div class="card-modern p-5 sm:p-6 bg-white border-l-4 border-emerald-500 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total Enrollments</span>
+          <p id="sStudents" class="text-3xl font-black text-slate-800 mt-1">–</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-emerald-50 text-emerald-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Schema Mapping Reference Card -->
+    <section class="card-modern p-6 sm:p-8 bg-slate-900 text-white">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-lg">📘</div>
+        <div>
+          <h2 class="text-white font-extrabold text-base sm:text-lg">Excel & CSV Data Schema Guide</h2>
+          <p class="text-slate-400 text-xs">Ensure uploaded spreadsheets contain matching column headers for automatic ingestion.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div class="bg-white/5 rounded-2xl p-4 border border-white/10">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-blue-400 font-extrabold text-xs uppercase tracking-wider flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span> Course Master
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">6 Required Columns</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 text-[11px] font-mono text-slate-300">
+            <span class="bg-white/10 px-2 py-1 rounded">S.N.</span>
+            <span class="bg-white/10 px-2 py-1 rounded">Program</span>
+            <span class="bg-white/10 px-2 py-1 rounded">Semester</span>
+            <span class="bg-white/10 px-2 py-1 rounded">Course Code</span>
+            <span class="bg-white/10 px-2 py-1 rounded">Course Name</span>
+            <span class="bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-1 rounded font-bold">Allocation</span>
           </div>
         </div>
-        <div class="bg-white/5 rounded-2xl p-5 border border-white/10">
-          <p class="text-emerald-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Student Enrollment
-          </p>
-          <div class="flex flex-wrap gap-2 text-[11px] font-mono text-slate-300">
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded font-bold text-emerald-300">Scholar ID</span>
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Student Name</span>
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Program</span>
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Semester</span>
+
+        <div class="bg-white/5 rounded-2xl p-4 border border-white/10">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-emerald-400 font-extrabold text-xs uppercase tracking-wider flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Student Registry
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">4 Required Columns</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 text-[11px] font-mono text-slate-300">
+            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-1 rounded font-bold">Scholar ID</span>
+            <span class="bg-white/10 px-2 py-1 rounded">Student Name</span>
+            <span class="bg-white/10 px-2 py-1 rounded">Program</span>
+            <span class="bg-white/10 px-2 py-1 rounded">Semester</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Upload Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    <!-- Upload Grid: Courses & Students -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
       
-      <!-- 01. Course Master -->
-      <section class="card p-8">
-        <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-primary font-black text-sm border border-blue-100 shadow-sm">01</div>
-          <div>
-            <h2 class="text-slate-900 font-extrabold text-xl">Course Master</h2>
-            <p class="text-slate-400 text-xs">Import Programs, Courses & Faculty Allocation</p>
+      <!-- 01. Course Master Upload -->
+      <section class="card-modern p-6 sm:p-8 bg-white">
+        
+        <div class="flex items-center justify-between gap-4 mb-6">
+          <div class="flex items-center gap-3.5">
+            <div class="w-10 h-10 bg-blue-50 text-primary-700 rounded-2xl flex items-center justify-center font-black text-sm border border-blue-100 shadow-sm">01</div>
+            <div>
+              <h2 class="text-slate-900 font-extrabold text-lg">Course Master</h2>
+              <p class="text-slate-400 text-xs">Import Programs, Courses & Faculty Allocation</p>
+            </div>
+          </div>
+
+          <!-- Template Download Chips -->
+          <div class="flex items-center gap-1.5">
+            <a href="/templates/courses_template.xlsx" download="courses_template.xlsx"
+               class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-primary-700 border border-blue-200 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Excel
+            </a>
+            <a href="/templates/courses_template.csv" download="courses_template.csv"
+               class="px-2 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-[11px] font-semibold transition-all">
+              CSV
+            </a>
           </div>
         </div>
-        
-        <div class="dropzone p-12 text-center mb-6" id="courseDrop" onclick="document.getElementById('courseFile').click()">
-          <div class="mb-4 inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full text-blue-300">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+
+        <div class="dropzone-box p-8 sm:p-10 text-center mb-5" id="courseDrop" onclick="document.getElementById('courseFile').click()">
+          <div class="mb-3 inline-flex items-center justify-center w-14 h-14 bg-blue-50 rounded-full text-primary-600">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
           </div>
-          <p class="text-slate-700 font-bold text-base mb-1">Upload Data Stream</p>
-          <p class="text-slate-400 text-xs mt-1">Drag and drop or select file (.xlsx, .csv)</p>
-          <p id="courseFileName" class="text-primary text-sm font-bold mt-4 p-2 bg-blue-50 rounded-lg border border-blue-100 hidden"></p>
+          <p class="text-slate-800 font-bold text-sm">Choose Course Master File</p>
+          <p class="text-slate-400 text-xs mt-1">Drag & drop or click to browse (.xlsx, .csv)</p>
+          <p id="courseFileName" class="text-primary-700 font-mono text-xs font-bold mt-3 p-2 bg-blue-50 rounded-xl border border-blue-100 hidden"></p>
         </div>
 
         <input type="file" id="courseFile" accept=".xlsx,.xls,.csv" class="hidden" onchange="previewFile('course', this)" />
-        
-        <div id="courseProgress" class="hidden mb-6">
-          <div class="flex justify-between text-[10px] font-black uppercase text-slate-400 mb-2"><span>Processing Data...</span><span id="coursePct">0%</span></div>
-          <div class="bg-slate-100 rounded-full h-2.5 p-0.5 overflow-hidden"><div id="courseBar" class="progress-bar bg-primary h-full rounded-full" style="width:0%"></div></div>
+
+        <div id="courseProgress" class="hidden mb-4">
+          <div class="flex justify-between text-[10px] font-extrabold uppercase text-slate-400 mb-1.5">
+            <span>Ingesting Courses…</span>
+            <span id="coursePct">0%</span>
+          </div>
+          <div class="bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div id="courseBar" class="progress-bar-fill bg-primary-600 h-full rounded-full" style="width:0%"></div>
+          </div>
         </div>
 
-        <div id="courseResult" class="hidden mb-6 fade-in"></div>
-        
-        <button id="courseUploadBtn" onclick="uploadFile('courses', 'courseFile', 'courseResult', 'courseProgress', 'courseBar', 'sPrograms', 'sCourses')"
-          class="btn-action w-full bg-primary hover:bg-primary-dark text-white font-black text-sm py-4 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-          disabled>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          Process Course Records
+        <div id="courseResult" class="hidden mb-4 animate-fade-in"></div>
+
+        <button id="courseUploadBtn" onclick="uploadFile('courses', 'courseFile', 'courseResult', 'courseProgress', 'courseBar')"
+          class="btn-core btn-primary-grad w-full py-3.5 shadow-md" disabled>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <span>Process Course Records</span>
         </button>
+
       </section>
 
-      <!-- 02. Student Enrollment -->
-      <section class="card p-8">
-        <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 font-black text-sm border border-emerald-100 shadow-sm">02</div>
-          <div>
-            <h2 class="text-slate-900 font-extrabold text-xl">Student Registry</h2>
-            <p class="text-slate-400 text-xs">Import Scholar IDs, Names & Program details</p>
+      <!-- 02. Student Registry Upload -->
+      <section class="card-modern p-6 sm:p-8 bg-white">
+        
+        <div class="flex items-center justify-between gap-4 mb-6">
+          <div class="flex items-center gap-3.5">
+            <div class="w-10 h-10 bg-emerald-50 text-emerald-700 rounded-2xl flex items-center justify-center font-black text-sm border border-emerald-100 shadow-sm">02</div>
+            <div>
+              <h2 class="text-slate-900 font-extrabold text-lg">Student Registry</h2>
+              <p class="text-slate-400 text-xs">Import Scholar IDs, Names & Programs</p>
+            </div>
+          </div>
+
+          <!-- Template Download Chips -->
+          <div class="flex items-center gap-1.5">
+            <a href="/templates/students_template.xlsx" download="students_template.xlsx"
+               class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Excel
+            </a>
+            <a href="/templates/students_template.csv" download="students_template.csv"
+               class="px-2 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-[11px] font-semibold transition-all">
+              CSV
+            </a>
           </div>
         </div>
-        
-        <div class="dropzone p-12 text-center mb-6" id="studentDrop" onclick="document.getElementById('studentFile').click()">
-          <div class="mb-4 inline-flex items-center justify-center w-16 h-16 bg-emerald-50 rounded-full text-emerald-300">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+
+        <div class="dropzone-box p-8 sm:p-10 text-center mb-5" id="studentDrop" onclick="document.getElementById('studentFile').click()">
+          <div class="mb-3 inline-flex items-center justify-center w-14 h-14 bg-emerald-50 rounded-full text-emerald-600">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           </div>
-          <p class="text-slate-700 font-bold text-base mb-1">Upload Registry</p>
-          <p class="text-slate-400 text-xs mt-1">Drag and drop or select file (.xlsx, .csv)</p>
-          <p id="studentFileName" class="text-emerald-600 text-sm font-bold mt-4 p-2 bg-emerald-50 rounded-lg border border-emerald-100 hidden"></p>
+          <p class="text-slate-800 font-bold text-sm">Choose Student Registry File</p>
+          <p class="text-slate-400 text-xs mt-1">Drag & drop or click to browse (.xlsx, .csv)</p>
+          <p id="studentFileName" class="text-emerald-700 font-mono text-xs font-bold mt-3 p-2 bg-emerald-50 rounded-xl border border-emerald-100 hidden"></p>
         </div>
 
         <input type="file" id="studentFile" accept=".xlsx,.xls,.csv" class="hidden" onchange="previewFile('student', this)" />
-        
-        <div id="studentProgress" class="hidden mb-6">
-          <div class="flex justify-between text-[10px] font-black uppercase text-slate-400 mb-2"><span>Indexing Records...</span><span id="studentPct">0%</span></div>
-          <div class="bg-slate-100 rounded-full h-2.5 p-0.5 overflow-hidden"><div id="studentBar" class="progress-bar bg-emerald-500 h-full rounded-full" style="width:0%"></div></div>
+
+        <div id="studentProgress" class="hidden mb-4">
+          <div class="flex justify-between text-[10px] font-extrabold uppercase text-slate-400 mb-1.5">
+            <span>Updating Registry…</span>
+            <span id="studentPct">0%</span>
+          </div>
+          <div class="bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div id="studentBar" class="progress-bar-fill bg-emerald-600 h-full rounded-full" style="width:0%"></div>
+          </div>
         </div>
 
-        <div id="studentResult" class="hidden mb-6 fade-in"></div>
-        
-        <button id="studentUploadBtn" onclick="uploadFile('students', 'studentFile', 'studentResult', 'studentProgress', 'studentBar', null, null)"
-          class="btn-action w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm py-4 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-          disabled>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-          Update Student Registry
+        <div id="studentResult" class="hidden mb-4 animate-fade-in"></div>
+
+        <button id="studentUploadBtn" onclick="uploadFile('students', 'studentFile', 'studentResult', 'studentProgress', 'studentBar')"
+          class="btn-core w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md" disabled>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+          <span>Update Student Registry</span>
         </button>
+
       </section>
+
     </div>
 
-    <!-- 03. Formative Schedule -->
-    <section class="card p-8 bg-white overflow-hidden relative border-none">
-      <div class="absolute top-0 right-0 p-8 h-full opacity-[0.03] select-none pointer-events-none">
-        <svg class="h-full w-auto" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>
-      </div>
+    <!-- 03. Formative Schedule Upload -->
+    <section class="card-modern p-6 sm:p-8 bg-white">
       
-      <div class="flex items-center gap-4 mb-8">
-        <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 font-black text-sm border border-purple-100 shadow-sm">03</div>
-        <div>
-          <h2 class="text-slate-900 font-extrabold text-xl">Examination Schedule</h2>
-          <p class="text-slate-400 text-xs">Manage dates and submission deadlines for all courses</p>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 bg-purple-50 text-purple-700 rounded-2xl flex items-center justify-center font-black text-sm border border-purple-100 shadow-sm">03</div>
+          <div>
+            <h2 class="text-slate-900 font-extrabold text-lg">Examination Schedule Stream</h2>
+            <p class="text-slate-400 text-xs">Manage dates and submission deadlines across courses</p>
+          </div>
+        </div>
+
+        <!-- Template Download Chips -->
+        <div class="flex items-center gap-1.5">
+          <a href="/templates/schedule_template.xlsx" download="schedule_template.xlsx"
+             class="px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Excel
+          </a>
+          <a href="/templates/schedule_template.csv" download="schedule_template.csv"
+             class="px-2 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-[11px] font-semibold transition-all">
+            CSV
+          </a>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-10">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+        
         <div class="md:col-span-3">
-          <div class="dropzone p-12 text-center" id="scheduleDrop" onclick="document.getElementById('scheduleFile').click()">
-            <div class="mb-4 inline-flex items-center justify-center w-16 h-16 bg-purple-50 rounded-full text-purple-300">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <div class="dropzone-box p-8 text-center" id="scheduleDrop" onclick="document.getElementById('scheduleFile').click()">
+            <div class="mb-3 inline-flex items-center justify-center w-12 h-12 bg-purple-50 rounded-full text-purple-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
-            <p class="text-slate-700 font-bold text-base mb-1">Upload New Schedule</p>
-            <p id="scheduleFileName" class="text-purple-600 text-sm font-bold mt-4 p-2 bg-purple-50 rounded-lg border border-purple-100 hidden"></p>
+            <p class="text-slate-800 font-bold text-sm">Upload Exam Timetable File</p>
+            <p class="text-slate-400 text-xs mt-1">Drag & drop or select (.xlsx, .csv)</p>
+            <p id="scheduleFileName" class="text-purple-700 font-mono text-xs font-bold mt-3 p-2 bg-purple-50 rounded-xl border border-purple-100 hidden"></p>
           </div>
           <input type="file" id="scheduleFile" accept=".xlsx,.xls,.csv" class="hidden" onchange="previewSchedule(this)" />
-          
-          <div id="scheduleProgress" class="hidden mt-6 mb-2">
-            <div class="bg-slate-100 rounded-full h-2.5 p-0.5 overflow-hidden"><div id="scheduleBar" class="progress-bar bg-purple-500 h-full rounded-full" style="width:0%"></div></div>
-          </div>
-          <div id="scheduleResult" class="hidden mt-6 fade-in"></div>
-        </div>
 
-        <div class="md:col-span-2 flex flex-col justify-center gap-6">
-          <div class="bg-purple-50 rounded-2xl p-5 border border-purple-100">
-            <h4 class="text-purple-700 font-bold text-xs uppercase tracking-widest mb-3">Sync Parameters</h4>
-            <div class="space-y-2 text-[11px] text-purple-600/80 leading-relaxed font-medium">
-              <p>• Ensures all faculty see uniform dates.</p>
-              <p>• Bridges Course Master with specific exam components.</p>
-              <p>• Supports Announcement, Conduction & Submission dates.</p>
+          <div id="scheduleProgress" class="hidden mt-4">
+            <div class="bg-slate-100 rounded-full h-2 overflow-hidden">
+              <div id="scheduleBar" class="progress-bar-fill bg-purple-600 h-full rounded-full" style="width:0%"></div>
             </div>
           </div>
-          
-          <div class="flex flex-col gap-3">
+          <div id="scheduleResult" class="hidden mt-4 animate-fade-in"></div>
+        </div>
+
+        <div class="md:col-span-2 flex flex-col justify-between gap-4">
+          <div class="p-4 rounded-2xl bg-purple-50/70 border border-purple-100 text-xs text-purple-900 space-y-2">
+            <h4 class="font-bold text-purple-800 uppercase tracking-wider">Sync Parameters</h4>
+            <p>• Ensures all faculty and students view standardized deadlines.</p>
+            <p>• Bridges Course Master codes with formative assessment dates.</p>
+          </div>
+
+          <div class="space-y-2">
             <button id="scheduleUploadBtn" onclick="uploadSchedule()" disabled
-              class="btn-action bg-purple-600 hover:bg-purple-700 text-white font-black text-sm py-4 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-              Upload Schedule
+              class="btn-core w-full py-3.5 bg-purple-700 hover:bg-purple-800 text-white shadow-md" disabled>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              <span>Upload Schedule Records</span>
             </button>
             <button onclick="clearSchedule()"
-              class="text-red-500 hover:text-red-600 font-bold text-xs uppercase tracking-widest py-3 border border-transparent hover:border-red-100 rounded-lg transition-all text-center">
-              Wipe Schedule Records
+              class="w-full text-center text-xs font-bold text-rose-500 hover:text-rose-700 py-2.5 rounded-xl hover:bg-rose-50 transition-colors">
+              Wipe Current Session Schedule
             </button>
           </div>
         </div>
+
       </div>
+
     </section>
 
   </main>
 
-  <footer class="max-w-6xl mx-auto px-6 mt-16 text-center border-t border-slate-200 pt-10">
-    <p class="text-[10px] text-slate-400 leading-relaxed uppercase tracking-[0.2em] font-bold">
-      Powered by:<br/>
-      <span class="text-slate-600 text-[11px] mt-1 block">Software Development Cell</span>
-      <span class="text-slate-400 font-medium normal-case tracking-normal">Dev Sanskriti Vishwavidyalaya, Haridwar</span>
+  <footer class="max-w-6xl mx-auto px-6 mt-16 text-center border-t border-slate-200 pt-8">
+    <p class="text-[11px] text-slate-400 leading-relaxed font-semibold uppercase tracking-wider">
+      Powered by <span class="text-slate-700 font-bold">Software Development Cell</span><br/>
+      <span class="text-slate-400 font-normal normal-case">Dev Sanskriti Vishwavidyalaya, Haridwar</span>
     </p>
   </footer>
 
@@ -357,7 +378,7 @@
       const file = input.files[0];
       if (!file) return;
       const nameEl = document.getElementById(type + 'FileName');
-      nameEl.textContent = `⚡ Ready: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+      nameEl.textContent = `⚡ Selected: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
       nameEl.classList.remove('hidden');
       document.getElementById(type + 'UploadBtn').disabled = false;
     }
@@ -387,7 +408,7 @@
       const file = input.files[0];
       if (!file) return;
       const el = document.getElementById('scheduleFileName');
-      el.textContent = `📅 Ready: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+      el.textContent = `📅 Selected: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
       el.classList.remove('hidden');
       document.getElementById('scheduleUploadBtn').disabled = false;
     }
@@ -412,12 +433,12 @@
         clearInterval(iv); bar.style.width='100%';
         setTimeout(()=>progressDiv.classList.add('hidden'),1000);
         resultDiv.innerHTML = d.success
-          ? `<div class="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">✓ ${d.message}</div>`
-          : `<div class="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">✗ ${d.message}</div>`;
+          ? `<div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">✓ ${d.message}</div>`
+          : `<div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">✗ ${d.message}</div>`;
         resultDiv.classList.remove('hidden');
       } catch(e) {
         clearInterval(iv); progressDiv.classList.add('hidden');
-        resultDiv.innerHTML = `<div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">Upload failed: ${e.message}</div>`;
+        resultDiv.innerHTML = `<div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">Upload failed: ${e.message}</div>`;
         resultDiv.classList.remove('hidden');
       }
     }
@@ -428,13 +449,13 @@
         const r = await fetch(`/api/schedule/clear?session=${encodeURIComponent(currentSession)}`, {method:'DELETE'});
         const d = await r.json();
         document.getElementById('scheduleResult').innerHTML = d.success
-          ? `<div class="text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">✓ Schedule data cleared successfully for ${currentSession}.</div>`
-          : `<div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">✗ ${d.error}</div>`;
+          ? `<div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">✓ Schedule data wiped successfully for ${currentSession}.</div>`
+          : `<div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">✗ ${d.error}</div>`;
         document.getElementById('scheduleResult').classList.remove('hidden');
       } catch(e) { alert('Error: '+e.message); }
     }
 
-    async function uploadFile(endpoint, fileInputId, resultId, progressId, barId, statProg, statCourse) {
+    async function uploadFile(endpoint, fileInputId, resultId, progressId, barId) {
       const fileInput = document.getElementById(fileInputId);
       const file = fileInput.files[0];
       if (!file) return;
@@ -443,7 +464,7 @@
       const bar = document.getElementById(barId);
       const resultDiv = document.getElementById(resultId);
       const pctDisplay = document.getElementById(fileInputId.replace('File', 'Pct'));
-      
+
       progressDiv.classList.remove('hidden');
       resultDiv.classList.add('hidden');
 
@@ -464,16 +485,16 @@
         clearInterval(interval);
         bar.style.width = '100%';
         if (pctDisplay) pctDisplay.textContent = '100%';
-        
+
         setTimeout(() => progressDiv.classList.add('hidden'), 1000);
 
         resultDiv.innerHTML = data.success
-          ? `<div class="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3 shadow-sm">
-               <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          ? `<div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+               <svg class="w-4 h-4 flex-shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                ${data.message}
              </div>`
-          : `<div class="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3 shadow-sm">
-               <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+          : `<div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
+               <svg class="w-4 h-4 flex-shrink-0 text-rose-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
                ${data.message}
              </div>`;
         resultDiv.classList.remove('hidden');
@@ -482,7 +503,7 @@
         clearInterval(interval);
         bar.style.width = '0%';
         progressDiv.classList.add('hidden');
-        resultDiv.innerHTML = `<div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">Upload failed: ${e.message}</div>`;
+        resultDiv.innerHTML = `<div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">Upload failed: ${e.message}</div>`;
         resultDiv.classList.remove('hidden');
       }
     }

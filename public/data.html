@@ -3,244 +3,259 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Manager – CIE Tracker</title>
+  <title>Data Manager – CIE Tracker | DSVV</title>
+  <meta name="description" content="View, search, edit, and manage courses and enrolled student records." />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
   <style>
-    :root {
-      --primary: #1c4c94;
-      --primary-dark: #0d2854;
-      --accent: #fdc82c;
-      --bg: #f8fafc;
+    .tab-nav-btn {
+      padding: 14px 20px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #64748b;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: #1e293b; overflow-x: hidden; }
-    
-    .glass-header {
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    .tab-nav-btn.active {
+      color: var(--primary-700);
+      border-bottom-color: var(--primary-600);
     }
-    
-    .card { 
-      background: #fff; border-radius: 20px; 
-      box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05), 0 4px 12px -4px rgba(0,0,0,0.02);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid rgba(226, 232, 240, 0.5);
+    .tab-nav-btn:hover:not(.active) {
+      color: var(--text-main);
+      border-bottom-color: #cbd5e1;
     }
-    .card:hover { transform: translateY(-2px); box-shadow: 0 20px 50px -12px rgba(0,0,0,0.08); border-color: rgba(28, 76, 148, 0.1); }
-    
-    .tab-btn { border-bottom: 3px solid transparent; transition: all 0.15s; font-weight: 600; }
-    .tab-btn.active { border-color: var(--primary); color: var(--primary); font-weight: 800; }
-    .tab-btn:not(.active):hover { border-color: #cbd5e1; color: #475569; }
 
-    input[type=text], input[type=search], select {
-      border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px;
-      font-size: 0.85rem; color: #334155; width: 100%; outline: none;
-      transition: all 0.2s; background: #fafcfe;
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(9, 26, 54, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
     }
-    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(28,76,148,0.1); background: #fff; }
-
-    .data-table { width: 100%; border-collapse: collapse; font-size: 0.825rem; }
-    .data-table th {
-      background: #1e293b; color: #94a3b8; text-transform: uppercase;
-      font-size: 0.7rem; letter-spacing: 0.05rem; padding: 12px 14px;
-      text-align: left; position: sticky; top: 0; z-index: 10;
-    }
-    .data-table td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #334155; }
-    
-    .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; }
-    
-    .logo-container {
-      position: relative; background: #fff; padding: 6px; border-radius: 14px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.05); transition: all 0.3s;
-    }
-    .logo-container:hover { transform: rotate(-2deg) scale(1.05); }
-
-    /* Modal */
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; }
-    .modal-box { background: #fff; border-radius: 20px; padding: 32px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); position: relative; animation: popIn 0.2s ease; }
-    @keyframes popIn { from { opacity:0; transform:scale(0.95) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
-    .modal-label { font-size: 0.75rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-
-    .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen pb-16 bg-slate-50">
 
-  <!-- Premium Header -->
-  <header class="glass-header sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
-      <div class="flex items-center gap-5">
-        <div class="logo-container">
-          <img src="/logo.png" alt="DSVV Logo" class="h-12 w-auto object-contain" onerror="this.style.display='none'" />
+  <!-- ── GLASS HEADER ─────────────────────────────────────────── -->
+  <header class="glass-header sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      
+      <!-- Brand Title -->
+      <div class="flex items-center gap-4">
+        <div class="p-2 bg-white rounded-2xl border border-slate-200 shadow-md">
+          <img src="/logo.png" alt="DSVV Logo" class="h-10 sm:h-12 w-auto object-contain" onerror="this.style.display='none'" />
         </div>
-        <div class="h-10 w-px bg-slate-200 hidden sm:block"></div>
-        <div class="hidden sm:block">
-          <h1 class="text-slate-900 font-extrabold text-lg tracking-tight">Data Manager</h1>
-          <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-            CIE Tracker Database
-          </p>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-slate-900 font-black text-lg sm:text-xl tracking-tight">Data Manager</h1>
+            <span class="badge-pill badge-blue text-[10px]">Registry CRUD</span>
+          </div>
+          <p class="text-slate-400 text-xs font-semibold">Dev Sanskriti Vishwavidyalaya – Database Records</p>
         </div>
       </div>
-      
+
+      <!-- Session & Navigation -->
       <div class="flex flex-wrap items-center gap-3">
-        <div class="bg-blue-50 border border-blue-200 rounded-xl px-3 py-1.5 flex items-center gap-2">
-          <span class="text-xs text-slate-500 font-bold">Active Session:</span>
-          <select id="dataSessionSelect" onchange="onDataSessionChange()" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer">
+        <div class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 flex items-center gap-2 shadow-sm">
+          <span class="text-[11px] text-slate-400 font-extrabold uppercase tracking-wider">Session:</span>
+          <select id="dataSessionSelect" onchange="onDataSessionChange()" class="bg-transparent text-xs font-bold text-primary-700 focus:outline-none cursor-pointer">
             <option value="July – December 2026">July – December 2026</option>
             <option value="January – June 2026">January – June 2026</option>
             <option value="July – December 2025">July – December 2025</option>
           </select>
         </div>
+
         <nav class="flex items-center gap-2">
-          <a href="/admin.html" class="px-4 py-2 rounded-xl text-slate-500 hover:text-primary hover:bg-blue-50 font-bold text-xs transition-all flex items-center gap-2">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Admin
+          <a href="/admin.html" class="btn-core btn-secondary text-xs py-2 px-3.5 shadow-sm">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            <span>Upload Console</span>
           </a>
-          <a href="/dashboard.html" class="px-4 py-2 bg-slate-900 hover:bg-primary text-white rounded-xl font-bold text-xs transition-all shadow-lg flex items-center gap-2">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-            Dashboard
+          <a href="/dashboard.html" class="btn-core btn-primary-grad text-xs py-2 px-4 shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span>Faculty Workspace</span>
           </a>
         </nav>
       </div>
+
     </div>
   </header>
 
-  <div class="max-w-7xl mx-auto px-6 py-6">
+  <!-- ── MAIN CONTENT ─────────────────────────────────────────── -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-8 space-y-6">
 
-    <!-- Database Insights -->
-    <section class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-      <div class="card p-6 border-l-4 border-blue-500 text-blue-500 flex items-center gap-5">
-        <div class="bg-blue-50 p-3 rounded-xl">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+    <!-- Stats Row -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="card-modern p-4 sm:p-5 bg-white border-l-4 border-primary-600 flex items-center gap-4">
+        <div class="p-3 rounded-2xl bg-blue-50 text-primary-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
         </div>
         <div>
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Programs</span>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Programs</span>
           <p id="sPrograms" class="text-2xl font-black text-slate-800">–</p>
         </div>
       </div>
-      
-      <div class="card p-6 border-l-4 border-amber-500 text-amber-600 flex items-center gap-5">
-        <div class="bg-amber-50 p-3 rounded-xl">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+
+      <div class="card-modern p-4 sm:p-5 bg-white border-l-4 border-amber-500 flex items-center gap-4">
+        <div class="p-3 rounded-2xl bg-amber-50 text-amber-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
         </div>
         <div>
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Course Catalog</span>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Courses Registered</span>
           <p id="sCourses" class="text-2xl font-black text-slate-800">–</p>
         </div>
       </div>
 
-      <div class="card p-6 border-l-4 border-emerald-500 text-emerald-600 flex items-center gap-5">
-        <div class="bg-emerald-50 p-3 rounded-xl">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      <div class="card-modern p-4 sm:p-5 bg-white border-l-4 border-emerald-500 flex items-center gap-4">
+        <div class="p-3 rounded-2xl bg-emerald-50 text-emerald-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         </div>
         <div>
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Registry</span>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Enrolled Students</span>
           <p id="sStudents" class="text-2xl font-black text-slate-800">–</p>
         </div>
       </div>
     </section>
 
-    <!-- Tabs -->
-    <div class="card overflow-hidden">
-      <div class="flex border-b border-slate-100 px-6 gap-6">
-        <button class="tab-btn active py-4 text-sm" id="tabCourses" onclick="switchTab('courses')">📚 Courses</button>
-        <button class="tab-btn py-4 text-sm text-slate-500" id="tabStudents" onclick="switchTab('students')">👥 Students</button>
+    <!-- Table Master Card -->
+    <div class="card-modern overflow-hidden bg-white">
+      
+      <!-- Tab Headers -->
+      <div class="flex border-b border-slate-100 px-4 sm:px-6">
+        <button class="tab-nav-btn active" id="tabCourses" onclick="switchTab('courses')">
+          <span class="text-base">📚</span> Courses Master
+        </button>
+        <button class="tab-nav-btn" id="tabStudents" onclick="switchTab('students')">
+          <span class="text-base">👥</span> Student Registry
+        </button>
       </div>
 
-      <!-- Search + count bar -->
-      <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-50">
-        <div class="relative flex-1 max-w-xs">
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="search" id="searchBox" placeholder="Search…" class="pl-8" oninput="onSearch()" />
+      <!-- Action & Search Toolbar -->
+      <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+        
+        <div class="relative flex-1 min-w-[220px] max-w-sm">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <input type="search" id="searchBox" placeholder="Search by name, code, program…" class="input-modern pl-10 text-xs py-2" oninput="onSearch()" />
         </div>
-        <p id="countLabel" class="text-slate-400 text-xs ml-2"></p>
-        <div class="flex-1"></div>
-        <!-- Delete All -->
-        <button id="btnDeleteAll" onclick="askDeleteAll()"
-          class="flex items-center gap-1.5 text-red-500 hover:text-white hover:bg-red-500 border border-red-200 hover:border-red-500 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all mr-3">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-          Delete All
-        </button>
-        <button id="btnPrev" onclick="prevPage()" class="text-slate-500 hover:text-slate-800 disabled:opacity-30 transition-colors" disabled>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        </button>
-        <span id="pageLabel" class="text-slate-500 text-xs font-medium px-2">Page 1</span>
-        <button id="btnNext" onclick="nextPage()" class="text-slate-500 hover:text-slate-800 disabled:opacity-30 transition-colors" disabled>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        </button>
+
+        <div class="text-xs text-slate-500 font-semibold" id="countLabel">Loading records…</div>
+
+        <div class="flex items-center gap-2">
+          <!-- Template Download -->
+          <a id="btnDownloadTemplate" href="/templates/courses_template.xlsx" download="courses_template.xlsx"
+             class="btn-core btn-subtle text-xs py-1.5 px-3">
+            <svg class="w-3.5 h-3.5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span id="templateBtnText">Courses Template</span>
+          </a>
+
+          <!-- Delete All in Session -->
+          <button id="btnDeleteAll" onclick="askDeleteAll()"
+                  class="btn-core text-xs py-1.5 px-3 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            <span>Delete All</span>
+          </button>
+
+          <!-- Pagination -->
+          <div class="flex items-center gap-1 pl-2 border-l border-slate-200">
+            <button id="btnPrev" onclick="prevPage()" class="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors" disabled>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <span id="pageLabel" class="text-xs font-bold text-slate-700 px-2">Page 1</span>
+            <button id="btnNext" onclick="nextPage()" class="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors" disabled>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Table Container -->
-      <div class="overflow-x-auto" style="max-height: 560px; overflow-y: auto;">
-        <table class="data-table" id="dataTable">
-          <thead id="tableHead"></thead>
-          <tbody id="tableBody"></tbody>
+      <!-- Data Table -->
+      <div class="overflow-x-auto max-h-[580px] overflow-y-auto">
+        <table class="w-full text-left text-xs border-collapse" id="dataTable">
+          <thead id="tableHead" class="sticky top-0 z-20 bg-slate-900 text-white font-extrabold"></thead>
+          <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
         </table>
+
+        <!-- Empty & Loading States -->
         <div id="emptyState" class="hidden text-center py-16 text-slate-400">
-          <svg class="w-10 h-10 mx-auto mb-3 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
-          <p class="text-sm font-medium">No records found</p>
-          <p class="text-xs mt-1">Try a different search term</p>
+          <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+          <p class="text-sm font-bold text-slate-700">No records found</p>
+          <p class="text-xs text-slate-400 mt-1">Try a different search query or upload data from Admin Console.</p>
         </div>
-        <div id="loadingRow" class="text-center py-12 text-slate-400 text-sm">
-          <div class="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
-          Loading…
+
+        <div id="loadingRow" class="text-center py-16 text-slate-400 text-xs">
+          <div class="w-7 h-7 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-3"></div>
+          Loading records…
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- ── EDIT MODAL ── -->
+    </div>
+
+  </main>
+
+  <!-- ── EDIT MODAL ───────────────────────────────────────────── -->
   <div id="editModal" class="modal-backdrop hidden" onclick="closeEditIfBackdrop(event)">
-    <div class="modal-box" id="editModalBox">
-      <h2 class="text-slate-800 font-bold text-lg mb-5" id="modalTitle">Edit Record</h2>
-      <div id="modalFields" class="space-y-4"></div>
-      <div class="flex gap-3 mt-6">
-        <button onclick="saveEdit()" class="flex-1 text-white font-semibold text-sm py-2.5 rounded-xl transition-all" style="background-color: #1c4c94;">Save Changes</button>
-        <button onclick="closeEdit()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm py-2.5 rounded-xl transition-all">Cancel</button>
+    <div class="card-modern max-w-lg w-full p-6 sm:p-8 bg-white shadow-2xl animate-pop-in">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+        <h2 class="text-base font-extrabold text-slate-900" id="modalTitle">✏️ Edit Record</h2>
+        <button onclick="closeEdit()" class="text-slate-400 hover:text-slate-600 p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div id="modalFields" class="space-y-4 text-xs"></div>
+
+      <div class="flex gap-3 pt-6 border-t border-slate-100 mt-6">
+        <button onclick="saveEdit()" class="btn-core btn-primary-grad flex-1 py-3 text-xs font-bold">Save Changes</button>
+        <button onclick="closeEdit()" class="btn-core btn-secondary flex-1 py-3 text-xs">Cancel</button>
       </div>
     </div>
   </div>
 
-  <!-- ── CONFIRM DELETE MODAL ── -->
-  <div id="confirmModal" class="confirm-backdrop hidden">
-    <div class="confirm-box">
-      <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+  <!-- ── CONFIRM DELETE MODAL ─────────────────────────────────── -->
+  <div id="confirmModal" class="modal-backdrop hidden">
+    <div class="card-modern max-w-md w-full p-6 sm:p-8 bg-white shadow-2xl text-center animate-pop-in">
+      <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
       </div>
-      <h3 class="text-slate-800 font-bold text-base mb-2">Delete Record?</h3>
-      <p id="confirmMsg" class="text-slate-500 text-sm mb-6">This action cannot be undone.</p>
+      <h3 class="text-base font-extrabold text-slate-900 mb-1">Delete Record?</h3>
+      <p id="confirmMsg" class="text-xs text-slate-500 mb-6">This action cannot be undone.</p>
       <div class="flex gap-3">
-        <button onclick="confirmDelete()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm py-2.5 rounded-xl transition-all">Delete</button>
-        <button onclick="closeConfirm()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm py-2.5 rounded-xl transition-all">Cancel</button>
+        <button onclick="confirmDelete()" class="btn-core w-full py-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold">Delete Record</button>
+        <button onclick="closeConfirm()" class="btn-core btn-secondary w-full py-3 text-xs">Cancel</button>
       </div>
     </div>
   </div>
 
-  <!-- ── DELETE ALL MODAL ── -->
-  <div id="clearModal" class="confirm-backdrop hidden">
-    <div class="confirm-box" style="width:380px">
-      <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+  <!-- ── CLEAR ALL MODAL ──────────────────────────────────────── -->
+  <div id="clearModal" class="modal-backdrop hidden">
+    <div class="card-modern max-w-md w-full p-6 sm:p-8 bg-white shadow-2xl text-center animate-pop-in">
+      <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
       </div>
-      <h3 class="text-slate-800 font-bold text-base mb-1">Delete All <span id="clearTabLabel">Records</span>?</h3>
-      <p class="text-slate-500 text-xs mb-4 leading-relaxed" id="clearDesc">This will permanently remove all records. Type <strong>DELETE</strong> below to confirm.</p>
-      <input type="text" id="clearConfirmInput" placeholder='Type DELETE to confirm'
-        class="border border-slate-200 rounded-lg px-3 py-2 text-sm w-full text-center tracking-widest font-mono mb-4 outline-none focus:border-red-400"
-        oninput="document.getElementById('btnConfirmClear').disabled = this.value !== 'DELETE'" />
+      <h3 class="text-base font-extrabold text-slate-900 mb-1">Wipe <span id="clearTabLabel">Records</span>?</h3>
+      <p class="text-xs text-slate-500 mb-4" id="clearDesc">Type <strong>DELETE</strong> below to confirm permanent deletion.</p>
+      <input type="text" id="clearConfirmInput" placeholder="Type DELETE to confirm"
+             class="input-modern text-center font-mono tracking-widest text-xs mb-4 uppercase"
+             oninput="document.getElementById('btnConfirmClear').disabled = this.value.trim() !== 'DELETE'" />
       <div class="flex gap-3">
         <button id="btnConfirmClear" onclick="confirmClearAll()"
-          class="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-sm py-2.5 rounded-xl transition-all"
-          disabled>Delete All</button>
-        <button onclick="closeClearModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm py-2.5 rounded-xl transition-all">Cancel</button>
+                class="btn-core w-full py-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold disabled:opacity-40" disabled>Wipe All</button>
+        <button onclick="closeClearModal()" class="btn-core btn-secondary w-full py-3 text-xs">Cancel</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
-  <div id="toast" class="opacity-0 pointer-events-none"></div>
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transition-all duration-300 opacity-0 pointer-events-none"></div>
 
   <script>
     let currentTab = 'courses';
@@ -263,7 +278,6 @@
       loadStats();
     }
 
-    // ─── Stats ──────────────────────────────────────────────
     async function loadStats() {
       try {
         const r = await fetch(`/api/data/stats?session=${encodeURIComponent(currentSession)}`);
@@ -274,13 +288,28 @@
       } catch {}
     }
 
-    // ─── Tab switching ───────────────────────────────────────
     function switchTab(tab) {
       currentTab = tab;
       currentPage = 1;
       document.getElementById('searchBox').value = '';
-      document.getElementById('tabCourses').className = 'tab-btn py-4 text-sm ' + (tab === 'courses' ? 'active' : 'text-slate-500');
-      document.getElementById('tabStudents').className = 'tab-btn py-4 text-sm ' + (tab === 'students' ? 'active' : 'text-slate-500');
+      
+      document.getElementById('tabCourses').classList.toggle('active', tab === 'courses');
+      document.getElementById('tabStudents').classList.toggle('active', tab === 'students');
+
+      const btnTpl = document.getElementById('btnDownloadTemplate');
+      const txtTpl = document.getElementById('templateBtnText');
+      if (btnTpl && txtTpl) {
+        if (tab === 'courses') {
+          btnTpl.href = '/templates/courses_template.xlsx';
+          btnTpl.download = 'courses_template.xlsx';
+          txtTpl.textContent = 'Courses Template';
+        } else {
+          btnTpl.href = '/templates/students_template.xlsx';
+          btnTpl.download = 'students_template.xlsx';
+          txtTpl.textContent = 'Students Template';
+        }
+      }
+
       renderHeader();
       fetchData();
     }
@@ -289,25 +318,24 @@
       const head = document.getElementById('tableHead');
       if (currentTab === 'courses') {
         head.innerHTML = `<tr>
-          <th style="width:12%">Course Code</th>
-          <th style="width:24%">Course Name</th>
-          <th style="width:22%">Program</th>
-          <th style="width:10%">Semester</th>
-          <th style="width:18%">Faculty</th>
-          <th style="width:14%">Actions</th>
+          <th class="p-3.5 w-32">Course Code</th>
+          <th class="p-3.5">Course Name</th>
+          <th class="p-3.5">Program</th>
+          <th class="p-3.5 text-center">Semester</th>
+          <th class="p-3.5">Faculty Allocation</th>
+          <th class="p-3.5 text-right w-28">Actions</th>
         </tr>`;
       } else {
         head.innerHTML = `<tr>
-          <th style="width:14%">Scholar ID</th>
-          <th style="width:28%">Student Name</th>
-          <th style="width:30%">Program</th>
-          <th style="width:14%">Semester</th>
-          <th style="width:14%">Actions</th>
+          <th class="p-3.5 w-36">Scholar ID</th>
+          <th class="p-3.5">Student Full Name</th>
+          <th class="p-3.5">Program</th>
+          <th class="p-3.5 text-center">Semester</th>
+          <th class="p-3.5 text-right w-28">Actions</th>
         </tr>`;
       }
     }
 
-    // ─── Data fetch ──────────────────────────────────────────
     async function fetchData() {
       const search = document.getElementById('searchBox').value;
       const tbody = document.getElementById('tableBody');
@@ -325,8 +353,9 @@
         totalRecords = data.total;
         updatePagination();
 
-        document.getElementById('countLabel').textContent =
-          totalRecords > 0 ? `Showing ${(currentPage-1)*PAGE_SIZE+1}–${Math.min(currentPage*PAGE_SIZE, totalRecords)} of ${totalRecords} [Session: ${currentSession}]` : `[Session: ${currentSession}]`;
+        document.getElementById('countLabel').textContent = totalRecords > 0
+          ? `Showing ${(currentPage-1)*PAGE_SIZE+1}–${Math.min(currentPage*PAGE_SIZE, totalRecords)} of ${totalRecords} Records`
+          : '0 Records';
 
         if (!data.rows || data.rows.length === 0) {
           empty.classList.remove('hidden');
@@ -335,32 +364,34 @@
 
         data.rows.forEach(row => {
           const tr = document.createElement('tr');
-          tr.className = 'fade-in';
+          tr.className = 'hover:bg-blue-50/30 transition-colors';
           if (currentTab === 'courses') {
             tr.innerHTML = `
-              <td><span class="font-mono text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${esc(row.course_code)}</span></td>
-              <td class="font-medium text-slate-800">${esc(row.course_name)}</td>
-              <td><span class="badge bg-blue-50 text-blue-700">${esc(row.program_name)}</span></td>
-              <td class="text-center"><span class="badge bg-purple-50 text-purple-700">Sem ${esc(row.semester)}</span></td>
-              <td class="text-slate-600">${esc(row.faculty_name || '—')}</td>
-              <td>
-                <div class="flex gap-2">
-                  <button class="btn-edit" onclick='openEditCourse(${JSON.stringify(row)})'>Edit</button>
-                  <button class="btn-del" onclick='askDelete("course","${esc(row.course_code)}","${esc(row.course_name)}","${esc(row.program_name)}")'>Delete</button>
+              <td class="p-3.5 font-mono font-bold text-primary-700 text-xs">${esc(row.course_code)}</td>
+              <td class="p-3.5 font-bold text-slate-800 text-xs">${esc(row.course_name)}</td>
+              <td class="p-3.5"><span class="badge-pill badge-blue text-[10px]">${esc(row.program_name)}</span></td>
+              <td class="p-3.5 text-center"><span class="badge-pill badge-slate text-[10px]">Sem ${esc(row.semester)}</span></td>
+              <td class="p-3.5 text-slate-600 font-medium text-xs">${esc(row.faculty_name || '—')}</td>
+              <td class="p-3.5 text-right">
+                <div class="flex items-center justify-end gap-1.5">
+                  <button onclick='openEditCourse(${JSON.stringify(row)})' class="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold text-xs transition-colors">Edit</button>
+                  <button onclick='askDelete("course","${esc(row.course_code)}","${esc(row.course_name)}","${esc(row.program_name)}")' class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 font-semibold text-xs transition-colors">Delete</button>
                 </div>
-              </td>`;
+              </td>
+            `;
           } else {
             tr.innerHTML = `
-              <td><span class="font-mono text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${esc(row.scholar_id)}</span></td>
-              <td class="font-medium text-slate-800">${esc(row.student_name)}</td>
-              <td><span class="badge bg-green-50 text-green-700">${esc(row.program_name)}</span></td>
-              <td class="text-center"><span class="badge bg-purple-50 text-purple-700">Sem ${esc(row.semester)}</span></td>
-              <td>
-                <div class="flex gap-2">
-                  <button class="btn-edit" onclick='openEditStudent(${JSON.stringify(row)})'>Edit</button>
-                  <button class="btn-del" onclick='askDelete("student","${esc(row.scholar_id)}","${esc(row.student_name)}")'>Delete</button>
+              <td class="p-3.5 font-mono font-bold text-primary-700 text-xs">${esc(row.scholar_id)}</td>
+              <td class="p-3.5 font-bold text-slate-800 text-xs">${esc(row.student_name)}</td>
+              <td class="p-3.5"><span class="badge-pill badge-green text-[10px]">${esc(row.program_name)}</span></td>
+              <td class="p-3.5 text-center"><span class="badge-pill badge-slate text-[10px]">Sem ${esc(row.semester)}</span></td>
+              <td class="p-3.5 text-right">
+                <div class="flex items-center justify-end gap-1.5">
+                  <button onclick='openEditStudent(${JSON.stringify(row)})' class="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold text-xs transition-colors">Edit</button>
+                  <button onclick='askDelete("student","${esc(row.scholar_id)}","${esc(row.student_name)}")' class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 font-semibold text-xs transition-colors">Delete</button>
                 </div>
-              </td>`;
+              </td>
+            `;
           }
           tbody.appendChild(tr);
         });
@@ -374,13 +405,11 @@
       return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // ─── Search ──────────────────────────────────────────────
     function onSearch() {
       clearTimeout(searchTimer);
       searchTimer = setTimeout(() => { currentPage = 1; fetchData(); }, 300);
     }
 
-    // ─── Pagination ──────────────────────────────────────────
     function updatePagination() {
       const pages = Math.max(1, Math.ceil(totalRecords / PAGE_SIZE));
       document.getElementById('pageLabel').textContent = `Page ${currentPage} of ${pages}`;
@@ -390,57 +419,58 @@
     function prevPage() { if (currentPage > 1) { currentPage--; fetchData(); } }
     function nextPage() { const pages = Math.ceil(totalRecords / PAGE_SIZE); if (currentPage < pages) { currentPage++; fetchData(); } }
 
-    // ─── Edit Course ─────────────────────────────────────────
-    let editingProgram = null; // store the original program for the composite key
+    // ── EDIT MODALS ──────────────────────────────────────────
+    let editingProgram = null;
     function openEditCourse(row) {
       editingId = row.course_code;
       editingProgram = row.program_name;
-      document.getElementById('modalTitle').textContent = '✏️ Edit Course';
+      document.getElementById('modalTitle').textContent = '✏️ Edit Course Record';
       document.getElementById('modalFields').innerHTML = `
         <div>
-          <label class="modal-label">Course Code <span class="text-slate-400 font-normal">(read-only)</span></label>
-          <input type="text" value="${esc(row.course_code)}" disabled class="bg-slate-50 text-slate-400" />
+          <label class="block text-slate-400 font-bold uppercase mb-1">Course Code</label>
+          <input type="text" value="${esc(row.course_code)}" disabled class="input-modern bg-slate-100 text-slate-400 font-mono" />
         </div>
         <div>
-          <label class="modal-label">Course Name *</label>
-          <input type="text" id="f_course_name" value="${esc(row.course_name)}" />
+          <label class="block text-slate-700 font-bold uppercase mb-1">Course Name *</label>
+          <input type="text" id="f_course_name" value="${esc(row.course_name)}" class="input-modern" />
         </div>
         <div>
-          <label class="modal-label">Program *</label>
-          <input type="text" id="f_course_program_name" value="${esc(row.program_name)}" />
+          <label class="block text-slate-700 font-bold uppercase mb-1">Program *</label>
+          <input type="text" id="f_course_program_name" value="${esc(row.program_name)}" class="input-modern" />
         </div>
         <div>
-          <label class="modal-label">Semester *</label>
-          <input type="text" id="f_course_semester" value="${esc(row.semester)}" placeholder="e.g. 1, 2, 3..." />
+          <label class="block text-slate-700 font-bold uppercase mb-1">Semester *</label>
+          <input type="text" id="f_course_semester" value="${esc(row.semester)}" class="input-modern" />
         </div>
         <div>
-          <label class="modal-label">Faculty</label>
-          <input type="text" id="f_faculty_name" value="${esc(row.faculty_name || '')}" />
-        </div>`;
+          <label class="block text-slate-700 font-bold uppercase mb-1">Faculty Allocation</label>
+          <input type="text" id="f_faculty_name" value="${esc(row.faculty_name || '')}" class="input-modern" />
+        </div>
+      `;
       document.getElementById('editModal').classList.remove('hidden');
     }
 
-    // ─── Edit Student ─────────────────────────────────────────
     function openEditStudent(row) {
       editingId = row.scholar_id;
-      document.getElementById('modalTitle').textContent = '✏️ Edit Student';
+      document.getElementById('modalTitle').textContent = '✏️ Edit Student Enrollment';
       document.getElementById('modalFields').innerHTML = `
         <div>
-          <label class="modal-label">Scholar ID <span class="text-slate-400 font-normal">(read-only)</span></label>
-          <input type="text" value="${esc(row.scholar_id)}" disabled class="bg-slate-50 text-slate-400" />
+          <label class="block text-slate-400 font-bold uppercase mb-1">Scholar ID</label>
+          <input type="text" value="${esc(row.scholar_id)}" disabled class="input-modern bg-slate-100 text-slate-400 font-mono" />
         </div>
         <div>
-          <label class="modal-label">Student Name *</label>
-          <input type="text" id="f_student_name" value="${esc(row.student_name)}" />
+          <label class="block text-slate-700 font-bold uppercase mb-1">Student Full Name *</label>
+          <input type="text" id="f_student_name" value="${esc(row.student_name)}" class="input-modern" />
         </div>
         <div>
-          <label class="modal-label">Program *</label>
-          <input type="text" id="f_student_program_name" value="${esc(row.program_name)}" />
+          <label class="block text-slate-700 font-bold uppercase mb-1">Program *</label>
+          <input type="text" id="f_student_program_name" value="${esc(row.program_name)}" class="input-modern" />
         </div>
         <div>
-          <label class="modal-label">Semester *</label>
-          <input type="text" id="f_student_semester" value="${esc(row.semester)}" placeholder="e.g. 1, 2, 3…" />
-        </div>`;
+          <label class="block text-slate-700 font-bold uppercase mb-1">Semester *</label>
+          <input type="text" id="f_student_semester" value="${esc(row.semester)}" class="input-modern" />
+        </div>
+      `;
       document.getElementById('editModal').classList.remove('hidden');
     }
 
@@ -455,7 +485,7 @@
           faculty_name: document.getElementById('f_faculty_name').value.trim(),
           session: currentSession
         };
-        if (!body.course_name || !body.program_name || !body.semester) { showToast('Course Name, Program, and Semester are required', 'error'); return; }
+        if (!body.course_name || !body.program_name || !body.semester) { showToast('Please fill all required fields', 'error'); return; }
       } else {
         url = `/api/data/students/${encodeURIComponent(editingId)}`;
         body = {
@@ -464,7 +494,7 @@
           semester: document.getElementById('f_student_semester').value.trim(),
           session: currentSession
         };
-        if (!body.student_name || !body.program_name || !body.semester) { showToast('All fields are required', 'error'); return; }
+        if (!body.student_name || !body.program_name || !body.semester) { showToast('Please fill all required fields', 'error'); return; }
       }
       try {
         const r = await fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -483,17 +513,17 @@
     function closeEdit() { document.getElementById('editModal').classList.add('hidden'); }
     function closeEditIfBackdrop(e) { if (e.target.id === 'editModal') closeEdit(); }
 
-    // ─── Delete ──────────────────────────────────────────────
-    let deleteType = null;
-    let pendingDeleteProgram = null;
+    // ── DELETE ───────────────────────────────────────────────
+    let deleteType = null, pendingDeleteProgram = null;
 
     function askDelete(type, id, name, program) {
       deleteType = type;
       pendingDeleteId = id;
       pendingDeleteProgram = program;
-      document.getElementById('confirmMsg').textContent = `Delete "${name}" (${id}) for session "${currentSession}"? This cannot be undone.`;
+      document.getElementById('confirmMsg').textContent = `Permanently delete "${name}" (${id}) for session "${currentSession}"?`;
       document.getElementById('confirmModal').classList.remove('hidden');
     }
+
     async function confirmDelete() {
       const url = deleteType === 'course'
         ? `/api/data/courses/${encodeURIComponent(pendingDeleteId)}/${encodeURIComponent(pendingDeleteProgram)}?session=${encodeURIComponent(currentSession)}`
@@ -505,7 +535,7 @@
         if (d.success) {
           fetchData();
           loadStats();
-          showToast('Record deleted', 'success');
+          showToast('Record deleted successfully', 'success');
         } else {
           showToast(d.error || 'Delete failed', 'error');
         }
@@ -513,33 +543,14 @@
     }
     function closeConfirm() { document.getElementById('confirmModal').classList.add('hidden'); }
 
-    // ─── Toast ───────────────────────────────────────────────
-    let toastTimer;
-    function showToast(msg, type) {
-      const t = document.getElementById('toast');
-      t.innerHTML = `<div class="toast-inner toast-${type}">
-        ${type === 'success'
-          ? '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'
-          : '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>'
-        }
-        ${msg}
-      </div>`;
-      t.classList.remove('opacity-0', 'pointer-events-none');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => { t.classList.add('opacity-0', 'pointer-events-none'); }, 3000);
-    }
-
-    // ─── Delete All ───────────────────────────────────────
+    // ── CLEAR ALL ────────────────────────────────────────────
     function askDeleteAll() {
       const isCourses = currentTab === 'courses';
       document.getElementById('clearTabLabel').textContent = `${isCourses ? 'Courses' : 'Students'} (${currentSession})`;
-      document.getElementById('clearDesc').innerHTML = isCourses
-        ? `This will permanently remove <strong>all courses</strong> for session <strong>"${currentSession}"</strong>. Records in other sessions will remain untouched. Type <strong>DELETE</strong> to confirm.`
-        : `This will permanently remove <strong>all students</strong> for session <strong>"${currentSession}"</strong>. Records in other sessions will remain untouched. Type <strong>DELETE</strong> to confirm.`;
+      document.getElementById('clearDesc').innerHTML = `This will permanently delete all <strong>${isCourses ? 'courses' : 'students'}</strong> for session <strong>"${currentSession}"</strong>. Type <strong>DELETE</strong> to confirm.`;
       document.getElementById('clearConfirmInput').value = '';
       document.getElementById('btnConfirmClear').disabled = true;
       document.getElementById('clearModal').classList.remove('hidden');
-      setTimeout(() => document.getElementById('clearConfirmInput').focus(), 100);
     }
 
     async function confirmClearAll() {
@@ -557,23 +568,25 @@
         }
       } catch (e) { showToast('Error: ' + e.message, 'error'); closeClearModal(); }
     }
+    function closeClearModal() { document.getElementById('clearModal').classList.add('hidden'); }
 
-    function closeClearModal() {
-      document.getElementById('clearModal').classList.add('hidden');
+    // ── TOAST ────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg, type) {
+      const t = document.getElementById('toast');
+      t.innerHTML = `
+        <div class="card-modern py-3 px-4 flex items-center gap-2.5 text-xs font-bold ${type === 'success' ? 'bg-emerald-50 text-emerald-900 border-emerald-200' : 'bg-rose-50 text-rose-900 border-rose-200'} shadow-xl">
+          ${type === 'success' ? '✓' : '✗'} ${msg}
+        </div>
+      `;
+      t.classList.remove('opacity-0', 'pointer-events-none');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.classList.add('opacity-0', 'pointer-events-none'); }, 3200);
     }
 
-    // ─── Init ────────────────────────────────────────────────
     renderHeader();
     fetchData();
     loadStats();
   </script>
-
-  <footer class="max-w-7xl mx-auto px-6 mt-16 text-center border-t border-slate-200 pt-10 pb-12">
-    <p class="text-[10px] text-slate-400 leading-relaxed uppercase tracking-[0.2em] font-bold">
-      Powered by:<br/>
-      <span class="text-slate-600 text-[11px] mt-1 block">Software Development Cell</span>
-      <span class="text-slate-400 font-medium normal-case tracking-normal">Dev Sanskriti Vishwavidyalaya, Haridwar</span>
-    </p>
-  </footer>
 </body>
 </html>

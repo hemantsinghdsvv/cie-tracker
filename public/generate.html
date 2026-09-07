@@ -3,104 +3,142 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CIE Sheet – Print Preview</title>
+  <title>Assessment Sheet – Print Preview | DSVV</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
   <link rel="stylesheet" href="/css/print.css" />
   <style>
-    body { font-family: 'Inter', sans-serif; background: #f0f4f8; }
+    body {
+      background: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
     @media screen {
-      .preview-wrapper { padding: 16px; }
+      .preview-wrapper {
+        padding: 32px 16px;
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+      }
+      .print-container {
+        width: 100%;
+        max-width: 297mm; /* Standard A4 Landscape */
+        min-height: 210mm; /* Standard A4 Landscape height */
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 12px 40px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06);
+        padding: 16mm 18mm;
+        box-sizing: border-box;
+      }
+      .cie-table {
+        width: 100%;
+        table-layout: auto;
+      }
+      .cie-table tbody tr {
+        height: 32px;
+      }
+    }
+    @page {
+      size: landscape;
+      margin: 8mm 10mm;
     }
     @media print {
-      body { background: #fff; }
-      .preview-wrapper { padding: 0; }
-      .print-container { box-shadow: none; max-width: 100%; margin: 0; border-radius: 0; padding: 0; }
+      @page {
+        size: landscape;
+        margin: 8mm 10mm;
+      }
+      *, html, body, .print-container, table, th, td, h1, h2, h3, p, span, div {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      }
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
       .no-print { display: none !important; }
+      .preview-wrapper {
+        padding: 0 !important;
+        display: block !important;
+      }
+      .print-container {
+        box-shadow: none !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        min-height: auto !important;
+      }
+      .cie-table {
+        width: 100% !important;
+        table-layout: fixed !important;
+      }
+      .cie-table tbody tr {
+        height: 26pt;
+      }
     }
-
-    /* ── Action bar responsive ───────────────────── */
-    .action-bar-inner {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      overflow-x: auto;
-    }
-    .action-bar-inner .sheet-title {
-      flex: 1;
-      min-width: 0;
-      font-size: 13px;
-      font-weight: 600;
-      color: #334155;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .action-bar-btns { display: flex; gap: 8px; flex-shrink: 0; }
-
-    /* ── Table scrolls horizontally on mobile ────── */
-    .table-scroll-wrap { 
+    .table-scroll-wrap {
       width: 100%;
-      overflow-x: auto; 
-      -webkit-overflow-scrolling: touch; 
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
-
-    @media (max-width: 600px) {
-      .action-bar-inner .sheet-title { font-size: 12px; }
+    @media (max-width: 768px) {
       .preview-wrapper { padding: 8px; }
+      .print-container { padding: 14px; border-radius: 8px; min-height: auto; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Action Bar (hidden on print) -->
-  <div class="no-print bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50" style="overflow:hidden">
-    <div class="action-bar-inner">
-      <a href="/dashboard.html" class="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 text-sm transition-colors" style="flex-shrink:0">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-        Back
-      </a>
-      <div style="width:1px;height:18px;background:#e2e8f0;flex-shrink:0"></div>
-      <div id="sheetTitle" class="sheet-title">CIE Sheet</div>
-      <div class="action-bar-btns">
-        <span id="sheetTypeBadge" class="text-xs px-2.5 py-1 rounded-full font-semibold">–</span>
-        <button onclick="window.print()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-all">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-          Print Sheet
+  <!-- ── ACTION BAR ───────────────────────────────────────────── -->
+  <div class="no-print glass-header sticky top-0 z-50 shadow-sm border-b border-slate-200">
+    <div class="max-w-[297mm] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      
+      <div class="flex items-center gap-3 min-w-0">
+        <a href="/dashboard.html" class="btn-core btn-secondary text-xs py-1.5 px-3">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span>Workspace</span>
+        </a>
+        <div class="h-4 w-px bg-slate-200"></div>
+        <span id="sheetTitle" class="text-xs sm:text-sm font-extrabold text-slate-800 truncate">CIE Assessment Sheet</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="sheetTypeBadge" class="badge-pill badge-blue text-[10px]">–</span>
+        <button onclick="window.print()" class="btn-core btn-primary-grad text-xs py-2 px-3.5 shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          <span>Print Sheet</span>
         </button>
-        <button onclick="downloadPDF()" class="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-all">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          Download PDF
+        <button onclick="window.print()" class="btn-core btn-gold-grad text-xs py-2 px-3.5 shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span>Save PDF</span>
         </button>
       </div>
+
     </div>
   </div>
 
-  <!-- Loading state -->
+  <!-- Loading State -->
   <div id="loadingState" class="flex items-center justify-center min-h-96 no-print">
     <div class="text-center">
-      <div class="w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3" style="border-width:3px"></div>
-      <p class="text-slate-500 text-sm">Loading students...</p>
+      <div class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-3" style="border-width:3px"></div>
+      <p class="text-slate-500 text-xs font-bold">Generating assessment sheet preview…</p>
     </div>
   </div>
 
-  <!-- Print Preview -->
+  <!-- Print Preview Sheet -->
   <div id="previewWrapper" class="preview-wrapper hidden">
     <div class="print-container" id="printArea">
 
-      <!-- SHEET HEADER (repeated on print via thead) -->
+      <!-- SHEET HEADER -->
       <div class="sheet-header-flex sheet-header">
         <img src="/logo.png" alt="DSVV Logo" class="sheet-header-logo" onerror="this.style.display='none'" />
         <div class="sheet-header-text">
           <h1>Department of Computer Science</h1>
-          <h2 id="sheetTypeLabel" class="mt-1 font-semibold">Formative & Mid Term</h2>
+          <h2 id="sheetTypeLabel" class="mt-1 font-semibold">Formative & Midterm Examination</h2>
           <h3 id="sessionLabel">Session: Jan – June 2026</h3>
         </div>
-        <!-- Empty div for flex balance, size handled by CSS to match logo -->
         <div class="header-flex-balance"></div>
       </div>
 
@@ -111,15 +149,15 @@
         <div><strong>Program / Semester:</strong> <span id="metaProgSem">–</span></div>
       </div>
       <div class="sheet-meta" style="margin-top:-4px; margin-bottom:8px;">
-        <div><strong>Faculty:</strong> <span id="metaFaculty">–</span></div>
-        <div><strong>Total Students:</strong> <span id="metaCount">–</span></div>
+        <div><strong>Faculty In-Charge:</strong> <span id="metaFaculty">–</span></div>
+        <div><strong>Total Enrolled:</strong> <span id="metaCount">–</span></div>
         <div></div>
       </div>
 
-      <!-- TABLE -->
+      <!-- TABLE AREA -->
       <div id="tableArea"></div>
 
-      <!-- Footer -->
+      <!-- SHEET FOOTER SIGNATURES -->
       <div class="sheet-footer">
         <div class="footer-sign">
           <div class="sign-line"></div>
@@ -130,45 +168,40 @@
           <p>HoD's Signature</p>
         </div>
       </div>
+
     </div>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const program   = params.get('program') || '';
-    const semester  = params.get('semester') || '';
-    const courseCode= params.get('courseCode') || '';
-    const courseName= params.get('courseName') || '';
-    const faculty   = params.get('faculty') || '';
-    const session   = params.get('session') || sessionStorage.getItem('cie_session') || 'July – December 2026';
+    const program    = params.get('program') || '';
+    const semester   = params.get('semester') || '';
+    const courseCode = params.get('courseCode') || '';
+    const courseName = params.get('courseName') || '';
+    const faculty    = params.get('faculty') || '';
+    const type       = params.get('type') || 'signature'; // 'signature' | 'marks'
+    const session    = params.get('session') || sessionStorage.getItem('cie_session') || 'July – December 2026';
 
-    // Set header info
     const sessionEl = document.getElementById('sessionLabel');
     if (sessionEl) sessionEl.textContent = 'Session: ' + session;
     document.getElementById('metaCourseCode').textContent = courseCode;
     document.getElementById('metaCourseName').textContent = courseName;
     document.getElementById('metaProgSem').textContent = `${program} / Semester ${semester}`;
     document.getElementById('metaFaculty').textContent = faculty || '–';
-    document.title = `${program} Sem${semester} - ${courseName} - ${type === 'marks' ? 'Marks Award' : 'Signature'} Sheet`;
+    document.title = `${program} Sem ${semester} – ${courseName} (${type === 'marks' ? 'Marks Award' : 'Signature'} Sheet)`;
 
     const badge = document.getElementById('sheetTypeBadge');
     if (type === 'marks') {
       badge.textContent = 'Marks Award Sheet';
-      badge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold mr-2 bg-amber-100 text-amber-700';
+      badge.className = 'badge-pill badge-gold text-[10px]';
       document.getElementById('sheetTypeLabel').innerHTML = 'Formative & Midterm Examination <span class="mx-2 text-slate-300">|</span> Marks Award Sheet';
     } else {
       badge.textContent = 'Signature Sheet';
-      badge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold mr-2 bg-blue-100 text-blue-700';
+      badge.className = 'badge-pill badge-blue text-[10px]';
       document.getElementById('sheetTypeLabel').innerHTML = 'Formative & Midterm Examination <span class="mx-2 text-slate-300">|</span> Signature Sheet';
     }
-    document.getElementById('sheetTitle').textContent = `${courseCode} – ${program} / Semester ${semester}`;
+    document.getElementById('sheetTitle').textContent = `${courseCode} – ${program} / Sem ${semester}`;
 
-    // Download PDF via print dialog
-    function downloadPDF() {
-      window.print();
-    }
-
-    // ── Program-specific subject config ──────────────────────────────────────
     function getSubjects(prog) {
       const p = (prog || '').trim().toUpperCase();
       if (p === 'MCA-DS') {
@@ -178,7 +211,6 @@
           { label: 'Mid Term Exam', max: 20 }
         ];
       }
-      // Default for all other programs
       return [
         { label: 'Assignment',    max: 15 },
         { label: 'Seminar',       max: 15 },
@@ -197,9 +229,9 @@
             <thead>
               <tr>
                 <th style="width:4%">S.No</th>
-                <th style="width:9%">Scholar ID</th>
-                <th style="width:13%">Name</th>
-                ${subjects.map(s => `<th style="width:${subjectW}%">${s.label} (${s.max})<br/><span style="font-size:8pt;font-weight:normal">Sign (Date and Time)</span></th>`).join('')}
+                <th style="width:10%">Scholar ID</th>
+                <th style="width:14%">Candidate Name</th>
+                ${subjects.map(s => `<th style="width:${subjectW}%">${s.label} (${s.max})<br/><span style="font-size:8pt;font-weight:normal">Sign (Date & Time)</span></th>`).join('')}
               </tr>
             </thead>
             <tbody>
@@ -226,8 +258,8 @@
             <thead>
               <tr>
                 <th rowspan="2" style="width:4%">S.No</th>
-                <th rowspan="2" style="width:9%">Scholar ID</th>
-                <th rowspan="2" style="width:13%">Name</th>
+                <th rowspan="2" style="width:10%">Scholar ID</th>
+                <th rowspan="2" style="width:14%">Candidate Name</th>
                 ${subjects.map(s => `<th colspan="2" style="width:${subjectW}%">${s.label}<br/>(${s.max})</th>`).join('')}
               </tr>
               <tr>
@@ -250,7 +282,7 @@
 
     async function load() {
       try {
-        const r = await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}`);
+        const r = await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(session)}`);
         const students = await r.json();
         document.getElementById('metaCount').textContent = students.length;
 
@@ -265,9 +297,9 @@
         document.getElementById('previewWrapper').classList.remove('hidden');
       } catch (e) {
         document.getElementById('loadingState').innerHTML = `
-          <div class="text-center text-red-500">
-            <p class="font-semibold">Failed to load students</p>
-            <p class="text-sm mt-1">${e.message}</p>
+          <div class="text-center text-rose-600 text-xs">
+            <p class="font-bold">Failed to load enrolled candidates</p>
+            <p class="mt-1">${e.message}</p>
           </div>`;
       }
     }
