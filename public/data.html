@@ -137,41 +137,114 @@
       </div>
 
       <!-- Action & Search Toolbar -->
-      <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+      <div class="p-4 sm:p-5 border-b border-slate-100 space-y-3 bg-slate-50/50">
         
-        <div class="relative flex-1 min-w-[220px] max-w-sm">
-          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <!-- Row 1: Search, Filter by Course, Filter by Semester, Sort, Reset -->
+        <div class="flex flex-wrap items-center gap-2.5">
+          
+          <!-- Search Box -->
+          <div class="relative flex-1 min-w-[180px] max-w-xs">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <input type="search" id="searchBox" placeholder="Search keyword…" class="input-modern pl-9 text-xs py-2 h-9" oninput="onSearch()" />
           </div>
-          <input type="search" id="searchBox" placeholder="Search by name, code, program…" class="input-modern pl-10 text-xs py-2" oninput="onSearch()" />
-        </div>
 
-        <div class="text-xs text-slate-500 font-semibold" id="countLabel">Loading records…</div>
+          <!-- Course Filter Dropdown -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              <span>Course:</span>
+            </span>
+            <select id="filterCourse" onchange="onFilterChange('course')" class="select-modern text-xs py-1.5 px-3 h-9 min-w-[200px] max-w-xs font-medium bg-white border-slate-300">
+              <option value="">All Courses</option>
+            </select>
+          </div>
 
-        <div class="flex items-center gap-2">
-          <!-- Template Download -->
-          <a id="btnDownloadTemplate" href="/templates/courses_template.xlsx" download="courses_template.xlsx"
-             class="btn-core btn-subtle text-xs py-1.5 px-3">
-            <svg class="w-3.5 h-3.5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            <span id="templateBtnText">Courses Template</span>
-          </a>
+          <!-- Semester Filter Dropdown -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+              <span>Semester:</span>
+            </span>
+            <select id="filterSemester" onchange="onFilterChange('semester')" class="select-modern text-xs py-1.5 px-3 h-9 min-w-[130px] font-medium bg-white border-slate-300">
+              <option value="">All Semesters</option>
+            </select>
+          </div>
 
-          <!-- Delete All in Session -->
-          <button id="btnDeleteAll" onclick="askDeleteAll()"
-                  class="btn-core text-xs py-1.5 px-3 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            <span>Delete All</span>
+          <!-- Sort Selector Dropdown -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-[11px] font-bold text-slate-600">Sort:</span>
+            <select id="sortSelect" onchange="onSortDropdownChange()" class="select-modern text-xs py-1.5 px-3 h-9 min-w-[160px] font-medium bg-white border-slate-300">
+              <option value="">Default Order</option>
+              <option value="semester_asc">Semester (Ascending 1→8)</option>
+              <option value="semester_desc">Semester (Descending 8→1)</option>
+              <option value="course_name_asc">Course Name (A → Z)</option>
+              <option value="course_name_desc">Course Name (Z → A)</option>
+              <option value="course_code_asc">Course Code (A → Z)</option>
+              <option value="program_name_asc">Program (A → Z)</option>
+            </select>
+          </div>
+
+          <!-- Clear/Reset Filters Button -->
+          <button id="btnResetFilters" onclick="resetFilters()" title="Reset all filters & sorting"
+                  class="btn-core btn-subtle text-xs py-1.5 px-2.5 h-9 text-slate-500 hover:text-slate-800">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span class="hidden sm:inline">Reset</span>
           </button>
 
-          <!-- Pagination -->
-          <div class="flex items-center gap-1 pl-2 border-l border-slate-200">
-            <button id="btnPrev" onclick="prevPage()" class="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors" disabled>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </div>
+
+        <!-- Active Filter Badges/Pills -->
+        <div id="activeFilterPills" class="hidden flex items-center gap-2 flex-wrap pt-0.5">
+          <span class="text-[10px] uppercase font-bold text-slate-400">Active Filters:</span>
+          <span id="pillCourse" class="hidden inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+            <span id="pillCourseText"></span>
+            <button type="button" onclick="clearCourseFilter()" class="hover:text-blue-950 font-bold ml-1 text-sm leading-none">×</button>
+          </span>
+          <span id="pillSemester" class="hidden inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200">
+            <span id="pillSemesterText"></span>
+            <button type="button" onclick="clearSemesterFilter()" class="hover:text-indigo-950 font-bold ml-1 text-sm leading-none">×</button>
+          </span>
+          <button type="button" onclick="resetFilters()" class="text-[11px] text-slate-500 hover:text-rose-600 underline font-semibold ml-1">Clear all</button>
+        </div>
+
+        <!-- Row 2: Record count, Action buttons, Pagination -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+          <div class="text-xs text-slate-500 font-semibold" id="countLabel">Loading records…</div>
+
+          <div class="flex items-center gap-2">
+            <!-- Add Single Button -->
+            <button id="btnAddRecord" onclick="openAddModal()"
+                    class="btn-core btn-primary-grad text-xs py-1.5 px-3.5 shadow-sm">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+              <span id="btnAddText">+ Add Course</span>
             </button>
-            <span id="pageLabel" class="text-xs font-bold text-slate-700 px-2">Page 1</span>
-            <button id="btnNext" onclick="nextPage()" class="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors" disabled>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+
+            <!-- Template Download -->
+            <a id="btnDownloadTemplate" href="/templates/courses_template.xlsx" download="courses_template.xlsx"
+               class="btn-core btn-subtle text-xs py-1.5 px-3">
+              <svg class="w-3.5 h-3.5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <span id="templateBtnText">Courses Template</span>
+            </a>
+
+            <!-- Delete All in Session -->
+            <button id="btnDeleteAll" onclick="askDeleteAll()"
+                    class="btn-core text-xs py-1.5 px-3 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              <span>Delete All</span>
             </button>
+
+            <!-- Pagination -->
+            <div class="flex items-center gap-1 pl-2 border-l border-slate-200">
+              <button id="btnPrev" onclick="prevPage()" class="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors" disabled>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <span id="pageLabel" class="text-xs font-bold text-slate-700 px-2">Page 1</span>
+              <button id="btnNext" onclick="nextPage()" class="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors" disabled>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -200,6 +273,30 @@
     </div>
 
   </main>
+
+  <!-- ── ADD MODAL ────────────────────────────────────────────── -->
+  <div id="addModal" class="modal-backdrop hidden" onclick="closeAddIfBackdrop(event)">
+    <div class="card-modern max-w-lg w-full p-6 sm:p-8 bg-white shadow-2xl animate-pop-in">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900" id="addModalTitle">➕ Add Student</h2>
+          <p class="text-[11px] text-slate-400 mt-0.5" id="addModalSub">Target Academic Session: <span class="font-bold text-amber-600" id="addModalSession">—</span></p>
+        </div>
+        <button onclick="closeAdd()" class="text-slate-400 hover:text-slate-600 p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div id="addModalFields" class="space-y-4 text-xs"></div>
+
+      <datalist id="programList"></datalist>
+
+      <div class="flex gap-3 pt-6 border-t border-slate-100 mt-6">
+        <button onclick="saveAddRecord()" id="btnSaveAdd" class="btn-core btn-primary-grad flex-1 py-3 text-xs font-bold">Save Student</button>
+        <button onclick="closeAdd()" class="btn-core btn-secondary flex-1 py-3 text-xs">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ── EDIT MODAL ───────────────────────────────────────────── -->
   <div id="editModal" class="modal-backdrop hidden" onclick="closeEditIfBackdrop(event)">
@@ -270,10 +367,247 @@
     const dSel = document.getElementById('dataSessionSelect');
     if (dSel) dSel.value = currentSession;
 
+    let currentFilterSemester = '';
+    let currentFilterCourse = '';
+    let currentSortBy = '';
+    let currentSortDir = 'ASC';
+
+    let cachedCoursesList = [];
+
+    async function loadFilterOptions() {
+      try {
+        const [semRes, crsRes] = await Promise.all([
+          fetch(`/api/data/semesters-list?session=${encodeURIComponent(currentSession)}`),
+          fetch(`/api/data/courses-list?session=${encodeURIComponent(currentSession)}`)
+        ]);
+        const semesters = await semRes.json();
+        cachedCoursesList = (await crsRes.json()) || [];
+
+        // Populate semester dropdown
+        const semSel = document.getElementById('filterSemester');
+        const prevSem = semSel.value;
+        semSel.innerHTML = '<option value="">All Semesters</option>';
+        // Combine fetched with 1-8 if empty
+        const allSems = Array.from(new Set([...(semesters || []), '1', '2', '3', '4', '5', '6', '7', '8'])).sort((a,b) => {
+          const na = parseInt(a), nb = parseInt(b);
+          return (!isNaN(na) && !isNaN(nb)) ? na - nb : a.localeCompare(b);
+        });
+        allSems.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s;
+          opt.textContent = `Semester ${s}`;
+          semSel.appendChild(opt);
+        });
+        if (prevSem && allSems.includes(prevSem)) semSel.value = prevSem;
+
+        populateCourseDropdown();
+      } catch (err) {
+        console.error('Error loading filter options:', err);
+      }
+    }
+
+    function populateCourseDropdown() {
+      const crsSel = document.getElementById('filterCourse');
+      if (!crsSel) return;
+      const sem = document.getElementById('filterSemester')?.value || '';
+      const prevCrs = crsSel.value;
+
+      let filtered = cachedCoursesList;
+      if (sem) {
+        filtered = cachedCoursesList.filter(c => String(c.semester) === String(sem));
+        crsSel.innerHTML = `<option value="">All Courses in Sem ${sem}</option>`;
+      } else {
+        crsSel.innerHTML = '<option value="">All Courses</option>';
+      }
+
+      filtered.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.course_code;
+        opt.textContent = `${c.course_code} – ${c.course_name} (${c.program_name} Sem ${c.semester})`;
+        crsSel.appendChild(opt);
+      });
+
+      if (prevCrs && filtered.some(c => c.course_code === prevCrs)) {
+        crsSel.value = prevCrs;
+      } else if (prevCrs && !filtered.some(c => c.course_code === prevCrs)) {
+        crsSel.value = '';
+        currentFilterCourse = '';
+      }
+    }
+
+    function onFilterChange(source) {
+      if (source === 'course') {
+        const crsVal = document.getElementById('filterCourse').value;
+        if (crsVal) {
+          const match = cachedCoursesList.find(c => c.course_code === crsVal);
+          if (match && match.semester) {
+            const semSel = document.getElementById('filterSemester');
+            if (semSel && semSel.value !== String(match.semester)) {
+              semSel.value = String(match.semester);
+            }
+          }
+        }
+      } else if (source === 'semester') {
+        populateCourseDropdown();
+      }
+
+      currentFilterSemester = document.getElementById('filterSemester').value;
+      currentFilterCourse = document.getElementById('filterCourse').value;
+      currentPage = 1;
+      updateFilterPills();
+      fetchData();
+    }
+
+    function updateFilterPills() {
+      const pillsWrap = document.getElementById('activeFilterPills');
+      const pillCrs = document.getElementById('pillCourse');
+      const pillSem = document.getElementById('pillSemester');
+      const pillCrsTxt = document.getElementById('pillCourseText');
+      const pillSemTxt = document.getElementById('pillSemesterText');
+      if (!pillsWrap) return;
+
+      let hasFilters = false;
+
+      if (currentFilterCourse) {
+        hasFilters = true;
+        const match = cachedCoursesList.find(c => c.course_code === currentFilterCourse);
+        pillCrsTxt.textContent = `Course: ${currentFilterCourse}${match ? ' (' + match.course_name + ')' : ''}`;
+        pillCrs.classList.remove('hidden');
+      } else {
+        pillCrs.classList.add('hidden');
+      }
+
+      if (currentFilterSemester) {
+        hasFilters = true;
+        pillSemTxt.textContent = `Semester ${currentFilterSemester}`;
+        pillSem.classList.remove('hidden');
+      } else {
+        pillSem.classList.add('hidden');
+      }
+
+      if (hasFilters) {
+        pillsWrap.classList.remove('hidden');
+      } else {
+        pillsWrap.classList.add('hidden');
+      }
+    }
+
+    function clearCourseFilter() {
+      document.getElementById('filterCourse').value = '';
+      currentFilterCourse = '';
+      currentPage = 1;
+      updateFilterPills();
+      fetchData();
+    }
+
+    function clearSemesterFilter() {
+      document.getElementById('filterSemester').value = '';
+      currentFilterSemester = '';
+      populateCourseDropdown();
+      currentPage = 1;
+      updateFilterPills();
+      fetchData();
+    }
+
+    function onSortDropdownChange() {
+      const val = document.getElementById('sortSelect').value;
+      if (!val) {
+        currentSortBy = '';
+        currentSortDir = 'ASC';
+      } else {
+        const parts = val.split('_');
+        currentSortDir = (parts.pop() || 'asc').toUpperCase();
+        currentSortBy = parts.join('_');
+      }
+      currentPage = 1;
+      fetchData();
+      renderHeader();
+    }
+
+    function setSort(col) {
+      if (currentSortBy === col) {
+        currentSortDir = currentSortDir === 'ASC' ? 'DESC' : 'ASC';
+      } else {
+        currentSortBy = col;
+        currentSortDir = 'ASC';
+      }
+      syncSortDropdown();
+      currentPage = 1;
+      fetchData();
+      renderHeader();
+    }
+
+    function syncSortDropdown() {
+      const sel = document.getElementById('sortSelect');
+      if (!sel) return;
+      if (!currentSortBy) {
+        sel.value = '';
+      } else {
+        const key = `${currentSortBy}_${currentSortDir.toLowerCase()}`;
+        if (Array.from(sel.options).some(o => o.value === key)) {
+          sel.value = key;
+        } else {
+          sel.value = '';
+        }
+      }
+    }
+
+    function updateSortDropdownOptions() {
+      const sel = document.getElementById('sortSelect');
+      if (!sel) return;
+      if (currentTab === 'courses') {
+        sel.innerHTML = `
+          <option value="">Default Order</option>
+          <option value="semester_asc">Semester (Ascending 1→8)</option>
+          <option value="semester_desc">Semester (Descending 8→1)</option>
+          <option value="course_name_asc">Course Name (A → Z)</option>
+          <option value="course_name_desc">Course Name (Z → A)</option>
+          <option value="course_code_asc">Course Code (A → Z)</option>
+          <option value="program_name_asc">Program (A → Z)</option>
+        `;
+      } else {
+        sel.innerHTML = `
+          <option value="">Default Order</option>
+          <option value="semester_asc">Semester (Ascending 1→8)</option>
+          <option value="semester_desc">Semester (Descending 8→1)</option>
+          <option value="student_name_asc">Student Name (A → Z)</option>
+          <option value="student_name_desc">Student Name (Z → A)</option>
+          <option value="scholar_id_asc">Scholar ID (Ascending)</option>
+          <option value="scholar_id_desc">Scholar ID (Descending)</option>
+          <option value="program_name_asc">Program (A → Z)</option>
+        `;
+      }
+      syncSortDropdown();
+    }
+
+    function resetFilters() {
+      document.getElementById('searchBox').value = '';
+      document.getElementById('filterSemester').value = '';
+      populateCourseDropdown();
+      document.getElementById('filterCourse').value = '';
+      document.getElementById('sortSelect').value = '';
+      currentFilterSemester = '';
+      currentFilterCourse = '';
+      currentSortBy = '';
+      currentSortDir = 'ASC';
+      currentPage = 1;
+      updateFilterPills();
+      fetchData();
+      renderHeader();
+    }
+
+    function getSortIndicator(col) {
+      if (currentSortBy !== col) return '<span class="text-slate-400 opacity-40 ml-1 font-mono text-[10px]">↕</span>';
+      return currentSortDir === 'ASC'
+        ? '<span class="text-amber-400 ml-1 font-black text-xs">▲</span>'
+        : '<span class="text-amber-400 ml-1 font-black text-xs">▼</span>';
+    }
+
     function onDataSessionChange() {
       currentSession = document.getElementById('dataSessionSelect').value;
       sessionStorage.setItem('cie_session', currentSession);
       currentPage = 1;
+      loadFilterOptions();
       fetchData();
       loadStats();
     }
@@ -296,6 +630,11 @@
       document.getElementById('tabCourses').classList.toggle('active', tab === 'courses');
       document.getElementById('tabStudents').classList.toggle('active', tab === 'students');
 
+      const btnAddText = document.getElementById('btnAddText');
+      if (btnAddText) {
+        btnAddText.textContent = tab === 'students' ? '+ Add Student' : '+ Add Course';
+      }
+
       const btnTpl = document.getElementById('btnDownloadTemplate');
       const txtTpl = document.getElementById('templateBtnText');
       if (btnTpl && txtTpl) {
@@ -310,6 +649,7 @@
         }
       }
 
+      updateSortDropdownOptions();
       renderHeader();
       fetchData();
     }
@@ -318,26 +658,42 @@
       const head = document.getElementById('tableHead');
       if (currentTab === 'courses') {
         head.innerHTML = `<tr>
-          <th class="p-3.5 w-32">Course Code</th>
-          <th class="p-3.5">Course Name</th>
-          <th class="p-3.5">Program</th>
-          <th class="p-3.5 text-center">Semester</th>
+          <th onclick="setSort('course_code')" class="p-3.5 w-32 cursor-pointer hover:bg-slate-800 transition-colors select-none" title="Sort by Course Code">
+            Course Code ${getSortIndicator('course_code')}
+          </th>
+          <th onclick="setSort('course_name')" class="p-3.5 cursor-pointer hover:bg-slate-800 transition-colors select-none" title="Sort by Course Name">
+            Course Name ${getSortIndicator('course_name')}
+          </th>
+          <th onclick="setSort('program_name')" class="p-3.5 cursor-pointer hover:bg-slate-800 transition-colors select-none" title="Sort by Program">
+            Program ${getSortIndicator('program_name')}
+          </th>
+          <th onclick="setSort('semester')" class="p-3.5 text-center cursor-pointer hover:bg-slate-800 transition-colors select-none w-28" title="Sort by Semester">
+            Semester ${getSortIndicator('semester')}
+          </th>
           <th class="p-3.5">Faculty Allocation</th>
           <th class="p-3.5 text-right w-28">Actions</th>
         </tr>`;
       } else {
         head.innerHTML = `<tr>
-          <th class="p-3.5 w-36">Scholar ID</th>
-          <th class="p-3.5">Student Full Name</th>
-          <th class="p-3.5">Program</th>
-          <th class="p-3.5 text-center">Semester</th>
+          <th onclick="setSort('scholar_id')" class="p-3.5 w-36 cursor-pointer hover:bg-slate-800 transition-colors select-none" title="Sort by Scholar ID">
+            Scholar ID ${getSortIndicator('scholar_id')}
+          </th>
+          <th onclick="setSort('student_name')" class="p-3.5 cursor-pointer hover:bg-slate-800 transition-colors select-none" title="Sort by Student Name">
+            Student Full Name ${getSortIndicator('student_name')}
+          </th>
+          <th onclick="setSort('program_name')" class="p-3.5 cursor-pointer hover:bg-slate-800 transition-colors select-none" title="Sort by Program">
+            Program ${getSortIndicator('program_name')}
+          </th>
+          <th onclick="setSort('semester')" class="p-3.5 text-center cursor-pointer hover:bg-slate-800 transition-colors select-none w-28" title="Sort by Semester">
+            Semester ${getSortIndicator('semester')}
+          </th>
           <th class="p-3.5 text-right w-28">Actions</th>
         </tr>`;
       }
     }
 
     async function fetchData() {
-      const search = document.getElementById('searchBox').value;
+      const search = document.getElementById('searchBox').value.trim();
       const tbody = document.getElementById('tableBody');
       const empty = document.getElementById('emptyState');
       const loading = document.getElementById('loadingRow');
@@ -347,7 +703,18 @@
 
       const endpoint = currentTab === 'courses' ? 'all-courses' : 'all-students';
       try {
-        const r = await fetch(`/api/data/${endpoint}?search=${encodeURIComponent(search)}&session=${encodeURIComponent(currentSession)}&page=${currentPage}&limit=${PAGE_SIZE}`);
+        const queryParams = new URLSearchParams({
+          search,
+          session: currentSession,
+          page: currentPage,
+          limit: PAGE_SIZE
+        });
+        if (currentFilterSemester) queryParams.set('semester', currentFilterSemester);
+        if (currentFilterCourse) queryParams.set('course', currentFilterCourse);
+        if (currentSortBy) queryParams.set('sortBy', currentSortBy);
+        if (currentSortDir) queryParams.set('sortDir', currentSortDir);
+
+        const r = await fetch(`/api/data/${endpoint}?${queryParams.toString()}`);
         const data = await r.json();
         loading.classList.add('hidden');
         totalRecords = data.total;
@@ -513,6 +880,195 @@
     function closeEdit() { document.getElementById('editModal').classList.add('hidden'); }
     function closeEditIfBackdrop(e) { if (e.target.id === 'editModal') closeEdit(); }
 
+    // ── ADD SINGLE RECORD (STUDENT / COURSE) ───────────────────
+    async function populateProgramList() {
+      try {
+        const r = await fetch(`/api/data/programs?session=${encodeURIComponent(currentSession)}`);
+        const list = await r.json();
+        const dl = document.getElementById('programList');
+        if (dl) {
+          dl.innerHTML = list.map(p => `<option value="${esc(p.program_name)}"></option>`).join('');
+        }
+      } catch {}
+    }
+
+    function openAddModal() {
+      document.getElementById('addModalSession').textContent = currentSession;
+      populateProgramList();
+      if (currentTab === 'students') {
+        document.getElementById('addModalTitle').textContent = '➕ Add Single Student';
+        document.getElementById('btnSaveAdd').textContent = 'Save Student';
+        document.getElementById('addModalFields').innerHTML = `
+          <div>
+            <label class="block text-slate-700 font-bold uppercase mb-1">Scholar ID / Enrollment No *</label>
+            <input type="text" id="add_scholar_id" placeholder="e.g. 24MCA001" class="input-modern font-mono uppercase" required />
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold uppercase mb-1">Student Full Name *</label>
+            <input type="text" id="add_student_name" placeholder="e.g. Rahul Sharma" class="input-modern" required />
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold uppercase mb-1">Program Name *</label>
+            <input type="text" id="add_program_name" list="programList" placeholder="e.g. MCA-DS" class="input-modern" required />
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold uppercase mb-1">Semester *</label>
+            <select id="add_semester" class="select-modern">
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+              <option value="3">Semester 3</option>
+              <option value="4">Semester 4</option>
+              <option value="5">Semester 5</option>
+              <option value="6">Semester 6</option>
+              <option value="7">Semester 7</option>
+              <option value="8">Semester 8</option>
+            </select>
+          </div>
+        `;
+      } else {
+        document.getElementById('addModalTitle').textContent = '➕ Add Single Course';
+        document.getElementById('btnSaveAdd').textContent = 'Save Course';
+        document.getElementById('addModalFields').innerHTML = `
+          <div>
+            <label class="block text-slate-700 font-bold uppercase mb-1">Course Code *</label>
+            <input type="text" id="add_course_code" placeholder="e.g. MCA101" class="input-modern font-mono uppercase" required />
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold uppercase mb-1">Course Name *</label>
+            <input type="text" id="add_course_name" placeholder="e.g. Advanced Database Systems" class="input-modern" required />
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold uppercase mb-1">Program Name *</label>
+            <input type="text" id="add_program_name" list="programList" placeholder="e.g. MCA-DS" class="input-modern" required />
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold uppercase mb-1">Semester *</label>
+            <select id="add_semester" class="select-modern">
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+              <option value="3">Semester 3</option>
+              <option value="4">Semester 4</option>
+              <option value="5">Semester 5</option>
+              <option value="6">Semester 6</option>
+              <option value="7">Semester 7</option>
+              <option value="8">Semester 8</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold uppercase mb-1">Faculty In-Charge</label>
+            <input type="text" id="add_faculty_name" placeholder="e.g. Dr. Hemant Singh" class="input-modern" />
+          </div>
+        `;
+      }
+      document.getElementById('addModal').classList.remove('hidden');
+      setTimeout(() => {
+        const first = document.querySelector('#addModalFields input:not([disabled])');
+        if (first) first.focus();
+      }, 100);
+    }
+
+    async function saveAddRecord() {
+      if (currentTab === 'students') {
+        const scholar_id   = (document.getElementById('add_scholar_id')?.value || '').trim();
+        const student_name = (document.getElementById('add_student_name')?.value || '').trim();
+        const program_name = (document.getElementById('add_program_name')?.value || '').trim();
+        const semester     = (document.getElementById('add_semester')?.value || '').trim();
+
+        if (!scholar_id || !student_name || !program_name || !semester) {
+          showToast('Please fill all required fields', 'error');
+          return;
+        }
+
+        const btn = document.getElementById('btnSaveAdd');
+        btn.disabled = true;
+        btn.textContent = 'Saving…';
+
+        try {
+          const res = await fetch('/api/data/students', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              scholar_id,
+              student_name,
+              program_name,
+              semester,
+              session: currentSession
+            })
+          });
+          const data = await res.json();
+          btn.disabled = false;
+          btn.textContent = 'Save Student';
+
+          if (data.success) {
+            closeAdd();
+            showToast(data.message || 'Student added successfully', 'success');
+            fetchData();
+            loadStats();
+          } else {
+            showToast(data.error || 'Failed to add student', 'error');
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = 'Save Student';
+          showToast('Network error: ' + err.message, 'error');
+        }
+      } else {
+        const course_code  = (document.getElementById('add_course_code')?.value || '').trim();
+        const course_name  = (document.getElementById('add_course_name')?.value || '').trim();
+        const program_name = (document.getElementById('add_program_name')?.value || '').trim();
+        const semester     = (document.getElementById('add_semester')?.value || '').trim();
+        const faculty_name = (document.getElementById('add_faculty_name')?.value || '').trim();
+
+        if (!course_code || !course_name || !program_name || !semester) {
+          showToast('Please fill all required fields', 'error');
+          return;
+        }
+
+        const btn = document.getElementById('btnSaveAdd');
+        btn.disabled = true;
+        btn.textContent = 'Saving…';
+
+        try {
+          const res = await fetch('/api/data/courses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              course_code,
+              course_name,
+              program_name,
+              semester,
+              faculty_name,
+              session: currentSession
+            })
+          });
+          const data = await res.json();
+          btn.disabled = false;
+          btn.textContent = 'Save Course';
+
+          if (data.success) {
+            closeAdd();
+            showToast(data.message || 'Course added successfully', 'success');
+            fetchData();
+            loadStats();
+          } else {
+            showToast(data.error || 'Failed to add course', 'error');
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = 'Save Course';
+          showToast('Network error: ' + err.message, 'error');
+        }
+      }
+    }
+
+    function closeAdd() {
+      document.getElementById('addModal').classList.add('hidden');
+    }
+
+    function closeAddIfBackdrop(e) {
+      if (e.target.id === 'addModal') closeAdd();
+    }
+
     // ── DELETE ───────────────────────────────────────────────
     let deleteType = null, pendingDeleteProgram = null;
 
@@ -585,6 +1141,8 @@
     }
 
     renderHeader();
+    updateSortDropdownOptions();
+    loadFilterOptions();
     fetchData();
     loadStats();
   </script>

@@ -112,27 +112,67 @@ router.get('/stats', async (req, res) => {
 // ── DATA MANAGEMENT ──────────────────────────────────────────────────────────
 
 // List all courses (with optional search/pagination/session)
+// List all courses (with optional search/pagination/session/filter/sort)
 router.get('/all-courses', async (req, res) => {
-  const { search = '', session = '', page = 1, limit = 50 } = req.query;
+  const { search = '', session = '', semester = '', course = '', sortBy = '', sortDir = 'ASC', page = 1, limit = 50 } = req.query;
   const offset = (parseInt(page) - 1) * parseInt(limit);
   const like = `%${search}%`;
   try {
-    let whereClause = `(c.course_code ILIKE $1 OR c.course_name ILIKE $2 OR c.program_name ILIKE $3 OR c.faculty_name ILIKE $4 OR c.semester ILIKE $5)`;
-    const params = [like, like, like, like, like];
+    const whereClauses = [];
+    const params = [];
+
+    if (search) {
+      params.push(like);
+      const idx = params.length;
+      whereClauses.push(`(c.course_code ILIKE $${idx} OR c.course_name ILIKE $${idx} OR c.program_name ILIKE $${idx} OR c.faculty_name ILIKE $${idx} OR c.semester ILIKE $${idx})`);
+    }
 
     if (session) {
       params.push(session);
-      whereClause += ` AND c.session = $${params.length}`;
+      whereClauses.push(`c.session = $${params.length}`);
     }
 
-    const countSql = `SELECT COUNT(*) as count FROM courses c WHERE ${whereClause}`;
+    if (semester) {
+      params.push(semester);
+      whereClauses.push(`c.semester = $${params.length}`);
+    }
+
+    if (course) {
+      params.push(course);
+      whereClauses.push(`(c.course_code = $${params.length} OR c.course_name = $${params.length})`);
+    }
+
+    const whereStr = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    const countSql = `SELECT COUNT(*) as count FROM courses c ${whereStr}`;
     const total = await query(countSql, params);
+
+    const validSort = {
+      semester: 'c.semester',
+      course_code: 'c.course_code',
+      code: 'c.course_code',
+      course_name: 'c.course_name',
+      course: 'c.course_name',
+      program_name: 'c.program_name',
+      program: 'c.program_name',
+      faculty_name: 'c.faculty_name',
+      faculty: 'c.faculty_name'
+    };
+    const direction = (sortDir && sortDir.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
+    let orderClause = 'ORDER BY c.program_name, c.semester, c.course_name';
+    if (sortBy && validSort[sortBy.toLowerCase()]) {
+      if (sortBy.toLowerCase() === 'semester') {
+        orderClause = `ORDER BY NULLIF(regexp_replace(c.semester, '\\D', '', 'g'), '')::int ${direction} NULLS LAST, c.semester ${direction}, c.course_name ASC`;
+      } else {
+        const col = validSort[sortBy.toLowerCase()];
+        orderClause = `ORDER BY ${col} ${direction}, c.course_name ASC`;
+      }
+    }
 
     params.push(parseInt(limit), offset);
     const dataSql = `SELECT c.course_code, c.course_name, c.program_name, c.faculty_name, c.semester, c.session
        FROM courses c
-       WHERE ${whereClause}
-       ORDER BY c.program_name, c.semester, c.course_name
+       ${whereStr}
+       ${orderClause}
        LIMIT $${params.length - 1} OFFSET $${params.length}`;
 
     const rows = await query(dataSql, params);
@@ -140,32 +180,123 @@ router.get('/all-courses', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// List all students (with optional search/pagination/session)
+// List all students (with optional search/pagination/session/filter/sort)
 router.get('/all-students', async (req, res) => {
-  const { search = '', session = '', page = 1, limit = 50 } = req.query;
+  const { search = '', session = '', semester = '', course = '', sortBy = '', sortDir = 'ASC', page = 1, limit = 50 } = req.query;
   const offset = (parseInt(page) - 1) * parseInt(limit);
   const like = `%${search}%`;
   try {
-    let whereClause = `(scholar_id ILIKE $1 OR student_name ILIKE $2 OR program_name ILIKE $3 OR semester ILIKE $4)`;
-    const params = [like, like, like, like];
+    const whereClauses = [];
+    const params = [];
+
+    if (search) {
+      params.push(like);
+      const idx = params.length;
+      whereClauses.push(`(s.scholar_id ILIKE $${idx} OR s.student_name ILIKE $${idx} OR s.program_name ILIKE $${idx} OR s.semester ILIKE $${idx})`);
+    }
 
     if (session) {
       params.push(session);
-      whereClause += ` AND session = $${params.length}`;
+      whereClauses.push(`s.session = $${params.length}`);
     }
 
-    const countSql = `SELECT COUNT(*) as count FROM students WHERE ${whereClause}`;
+    if (semester) {
+      params.push(semester);
+      whereClauses.push(`s.semester = $${params.length}`);
+    }
+
+    if (course) {
+      params.push(course);
+      const idx = params.length;
+      whereClauses.push(`(
+        EXISTS (
+          SELECT 1 FROM courses c
+          WHERE (c.course_code = $${idx} OR c.course_name = $${idx})
+            AND c.session = s.session
+            AND c.program_name = s.program_name
+            AND c.semester = s.semester
+        )
+        OR EXISTS (
+          SELECT 1 FROM marks m
+          WHERE m.course_code = $${idx}
+            AND m.session = s.session
+            AND m.scholar_id = s.scholar_id
+        )
+      )`);
+    }
+
+    const whereStr = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    const countSql = `SELECT COUNT(*) as count FROM students s ${whereStr}`;
     const total = await query(countSql, params);
 
+    const validSort = {
+      semester: 's.semester',
+      student_name: 's.student_name',
+      name: 's.student_name',
+      scholar_id: 's.scholar_id',
+      id: 's.scholar_id',
+      program_name: 's.program_name',
+      program: 's.program_name'
+    };
+    const direction = (sortDir && sortDir.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
+    let orderClause = 'ORDER BY s.program_name, s.semester, s.student_name';
+    if (sortBy && validSort[sortBy.toLowerCase()]) {
+      if (sortBy.toLowerCase() === 'semester') {
+        orderClause = `ORDER BY NULLIF(regexp_replace(s.semester, '\\D', '', 'g'), '')::int ${direction} NULLS LAST, s.semester ${direction}, s.student_name ASC`;
+      } else {
+        const col = validSort[sortBy.toLowerCase()];
+        orderClause = `ORDER BY ${col} ${direction}, s.student_name ASC`;
+      }
+    }
+
     params.push(parseInt(limit), offset);
-    const dataSql = `SELECT scholar_id, student_name, program_name, semester, session
-       FROM students
-       WHERE ${whereClause}
-       ORDER BY program_name, semester, student_name
+    const dataSql = `SELECT s.scholar_id, s.student_name, s.program_name, s.semester, s.session
+       FROM students s
+       ${whereStr}
+       ${orderClause}
        LIMIT $${params.length - 1} OFFSET $${params.length}`;
 
     const rows = await query(dataSql, params);
     res.json({ rows, total: parseInt(total[0].count) });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Get list of distinct courses for filter dropdown
+router.get('/courses-list', async (req, res) => {
+  const { session } = req.query;
+  try {
+    let sql = 'SELECT DISTINCT course_code, course_name, program_name, semester FROM courses';
+    const params = [];
+    if (session) {
+      sql += ' WHERE session = $1';
+      params.push(session);
+    }
+    sql += ' ORDER BY course_code, course_name';
+    const rows = await query(sql, params);
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Get list of distinct semesters for filter dropdown
+router.get('/semesters-list', async (req, res) => {
+  const { session } = req.query;
+  try {
+    let sql;
+    const params = [];
+    if (session) {
+      sql = `SELECT DISTINCT semester FROM courses WHERE session = $1
+             UNION
+             SELECT DISTINCT semester FROM students WHERE session = $1
+             ORDER BY semester`;
+      params.push(session);
+    } else {
+      sql = `SELECT DISTINCT semester FROM courses
+             UNION
+             SELECT DISTINCT semester FROM students
+             ORDER BY semester`;
+    }
+    const rows = await query(sql, params);
+    res.json(rows.map(r => r.semester).filter(Boolean));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -271,4 +402,70 @@ router.delete('/students/:id', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// Add a single student
+router.post('/students', async (req, res) => {
+  const { scholar_id, student_name, program_name, semester, session } = req.body;
+  if (!scholar_id || !student_name || !program_name || semester === undefined || semester === null || semester === '') {
+    return res.status(400).json({ error: 'Scholar ID, student name, program name, and semester are required' });
+  }
+  const s = (session || 'July – December 2026').toString().trim();
+  const id = scholar_id.toString().trim();
+  const name = student_name.toString().trim();
+  const program = program_name.toString().trim();
+  const sem = semester.toString().trim();
+
+  try {
+    await pool.query(
+      `INSERT INTO students (scholar_id, student_name, program_name, semester, session)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (scholar_id, session) DO UPDATE
+       SET student_name = EXCLUDED.student_name,
+           program_name = EXCLUDED.program_name,
+           semester = EXCLUDED.semester`,
+      [id, name, program, sem, s]
+    );
+    await pool.query(
+      'INSERT INTO programs (program_name) VALUES ($1) ON CONFLICT DO NOTHING',
+      [program]
+    );
+    res.json({ success: true, message: `Student "${name}" (${id}) saved successfully.` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add a single course
+router.post('/courses', async (req, res) => {
+  const { course_code, course_name, program_name, semester, faculty_name = '', session } = req.body;
+  if (!course_code || !course_name || !program_name || semester === undefined || semester === null || semester === '') {
+    return res.status(400).json({ error: 'Course code, course name, program name, and semester are required' });
+  }
+  const s = (session || 'July – December 2026').toString().trim();
+  const code = course_code.toString().trim();
+  const name = course_name.toString().trim();
+  const program = program_name.toString().trim();
+  const sem = semester.toString().trim();
+  const faculty = (faculty_name || '').toString().trim();
+
+  try {
+    await pool.query(
+      `INSERT INTO courses (course_code, course_name, program_name, faculty_name, semester, session)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (course_code, program_name, session) DO UPDATE
+       SET course_name = EXCLUDED.course_name,
+           faculty_name = EXCLUDED.faculty_name,
+           semester = EXCLUDED.semester`,
+      [code, name, program, faculty, sem, s]
+    );
+    await pool.query(
+      'INSERT INTO programs (program_name) VALUES ($1) ON CONFLICT DO NOTHING',
+      [program]
+    );
+    res.json({ success: true, message: `Course "${code}" saved successfully.` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
+
