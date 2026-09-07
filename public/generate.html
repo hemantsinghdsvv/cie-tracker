@@ -282,7 +282,7 @@
 
     async function load() {
       try {
-        const r = await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(session)}`);
+        const r = await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&course=${encodeURIComponent(courseCode || '')}&session=${encodeURIComponent(session)}`);
         const students = await r.json();
         document.getElementById('metaCount').textContent = students.length;
 

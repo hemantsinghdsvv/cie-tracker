@@ -891,15 +891,19 @@
       } else { 
         document.getElementById(`${p}-faculty`).classList.add('hidden'); 
       }
-      sheetUpdateButtons(p);
+      sheetFetchStudents(p);
     }
 
     async function sheetFetchStudents(p) {
       const program  = document.getElementById(`${p}-program`).value;
       const semester = document.getElementById(`${p}-semester`).value;
+      const cElem    = document.getElementById(`${p}-course`);
+      const course   = (cElem && cElem.value) ? cElem.value : '';
       if (!program || !semester) { sheetClearStudents(p); return; }
       try {
-        sheetStudents[p] = await (await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(currentSession)}`)).json();
+        const q = new URLSearchParams({ program, semester, session: currentSession });
+        if (course) q.set('course', course);
+        sheetStudents[p] = await (await fetch(`/api/data/students?${q.toString()}`)).json();
         sheetRenderStudents(p);
       } catch {}
       sheetUpdateButtons(p);
@@ -1038,7 +1042,7 @@
 
       try {
         const [sRes, mRes] = await Promise.all([
-          fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(currentSession)}`),
+          fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&course=${encodeURIComponent(courseCode)}&session=${encodeURIComponent(currentSession)}`),
           fetch(`/api/marks?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&courseCode=${encodeURIComponent(courseCode)}&session=${encodeURIComponent(currentSession)}`)
         ]);
         mStudents = await sRes.json();

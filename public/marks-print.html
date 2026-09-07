@@ -197,7 +197,7 @@
       try {
         const [coursesRes, studentsRes, marksRes] = await Promise.all([
           fetch(`/api/data/courses?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(session)}`),
-          fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(session)}`),
+          fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&course=${encodeURIComponent(courseCode)}&session=${encodeURIComponent(session)}`),
           fetch(`/api/marks?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&courseCode=${encodeURIComponent(courseCode)}&session=${encodeURIComponent(session)}`)
         ]);
         const courses  = await coursesRes.json();

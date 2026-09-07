@@ -9,13 +9,33 @@ router.get('/', async (req, res) => {
   if (!program || !semester || !courseCode)
     return res.status(400).json({ error: 'program, semester, courseCode are required' });
   try {
-    let sql = `SELECT m.scholar_id, COALESCE(s.student_name, m.scholar_id) AS student_name, m.component, m.marks_obtained, m.updated_at
-       FROM marks m
-       LEFT JOIN students s ON s.scholar_id = m.scholar_id AND s.session = m.session
-       WHERE m.program_name = $1 AND m.semester = $2 AND m.course_code = $3`;
-    const params = [program, semester, courseCode];
+    const prog = (program || '').toString().trim().toUpperCase();
+    const sem = (semester || '').toString().trim();
+    const code = (courseCode || '').toString().trim().toUpperCase();
+
+    const isBit7Shared = (prog === 'BIT' && sem === '7') && (
+      code === 'CS401CON' || code === 'CS402SQL' || code.includes('NETWORK') || code.includes('QUERY') || code.includes('SQL')
+    );
+
+    let sql;
+    const params = [];
+
+    if (isBit7Shared) {
+      sql = `SELECT m.scholar_id, COALESCE(s.student_name, m.scholar_id) AS student_name, m.component, m.marks_obtained, m.updated_at
+         FROM marks m
+         LEFT JOIN students s ON s.scholar_id = m.scholar_id AND s.session = m.session
+         WHERE m.program_name IN ('BIT', 'BITR') AND m.semester = $1 AND m.course_code = $2`;
+      params.push(sem, courseCode);
+    } else {
+      sql = `SELECT m.scholar_id, COALESCE(s.student_name, m.scholar_id) AS student_name, m.component, m.marks_obtained, m.updated_at
+         FROM marks m
+         LEFT JOIN students s ON s.scholar_id = m.scholar_id AND s.session = m.session
+         WHERE m.program_name = $1 AND m.semester = $2 AND m.course_code = $3`;
+      params.push(program, semester, courseCode);
+    }
+
     if (session) {
-      sql += ' AND m.session = $4';
+      sql += ` AND m.session = $${params.length + 1}`;
       params.push(session);
     }
     sql += ' ORDER BY s.student_name, m.component';

@@ -62,16 +62,45 @@ router.get('/courses', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Get students for program + semester (+ session)
+// Get students for program + semester (+ session + optional course)
 router.get('/students', async (req, res) => {
-  const { program, semester, session } = req.query;
+  const { program, semester, session, course, courseCode } = req.query;
   if (!program || !semester) return res.status(400).json({ error: 'program and semester are required' });
   try {
-    let sql = 'SELECT scholar_id, student_name, session FROM students WHERE program_name = $1 AND semester = $2';
-    const params = [program, semester];
-    if (session) {
-      sql += ' AND session = $3';
-      params.push(session);
+    const prog = (program || '').toString().trim().toUpperCase();
+    const sem = (semester || '').toString().trim();
+    const cVal = (course || courseCode || '').toString().trim().toUpperCase();
+
+    const isBit7SharedCourse = (prog === 'BIT' && sem === '7') && (
+      cVal === 'CS401CON' ||
+      cVal === 'CS402SQL' ||
+      cVal.includes('NETWORK') ||
+      cVal.includes('QUERY') ||
+      cVal.includes('SQL')
+    );
+
+    let sql;
+    const params = [];
+
+    if (isBit7SharedCourse) {
+      // Semester 7 exception: 4 BITR students also counted as BIT 7 students for Computer Networks and SQL
+      sql = `SELECT scholar_id, student_name, program_name, semester, session
+             FROM students
+             WHERE program_name IN ('BIT', 'BITR') AND semester = $1`;
+      params.push(sem);
+      if (session) {
+        sql += ` AND session = $${params.length + 1}`;
+        params.push(session);
+      }
+    } else {
+      sql = `SELECT scholar_id, student_name, program_name, semester, session
+             FROM students
+             WHERE program_name = $1 AND semester = $2`;
+      params.push(program, semester);
+      if (session) {
+        sql += ` AND session = $${params.length + 1}`;
+        params.push(session);
+      }
     }
     sql += ' ORDER BY student_name';
     const rows = await query(sql, params);
@@ -213,8 +242,14 @@ router.get('/all-students', async (req, res) => {
           SELECT 1 FROM courses c
           WHERE (c.course_code = $${idx} OR c.course_name = $${idx})
             AND c.session = s.session
-            AND c.program_name = s.program_name
-            AND c.semester = s.semester
+            AND (
+              (c.program_name = s.program_name AND c.semester = s.semester)
+              OR (
+                c.semester = '7' AND s.semester = '7'
+                AND c.program_name = 'BIT' AND s.program_name = 'BITR'
+                AND (c.course_code IN ('CS401CON', 'CS402SQL') OR c.course_name ILIKE '%network%' OR c.course_name ILIKE '%query%' OR c.course_name ILIKE '%sql%')
+              )
+            )
         )
         OR EXISTS (
           SELECT 1 FROM marks m

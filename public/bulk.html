@@ -301,11 +301,14 @@
         }
 
         document.getElementById('loadingMsg').textContent = `Loading enrolled candidates for ${courses.length} courses…`;
-        const sRes = await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&session=${encodeURIComponent(session)}`);
-        const students = await sRes.json();
+        const sheetsHtml = await Promise.all(courses.map(async (c, i) => {
+          const sRes = await fetch(`/api/data/students?program=${encodeURIComponent(program)}&semester=${encodeURIComponent(semester)}&course=${encodeURIComponent(c.course_code)}&session=${encodeURIComponent(session)}`);
+          const students = await sRes.json();
+          return buildSheet(c, students, i, courses.length);
+        }));
 
         const container = document.getElementById('allSheets');
-        container.innerHTML = courses.map((c, i) => buildSheet(c, students, i, courses.length)).join('');
+        container.innerHTML = sheetsHtml.join('');
 
         document.getElementById('loadingState').classList.add('hidden');
         container.classList.remove('hidden');
