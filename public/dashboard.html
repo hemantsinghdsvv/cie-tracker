@@ -515,6 +515,17 @@
             <button id="sig-bulk" onclick="bulkSheet('sig','signature')" disabled class="btn-core w-full py-3 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200">
               <span>📥 Download All Program Signature Sheets (Bulk)</span>
             </button>
+
+            <div class="relative flex py-1 items-center">
+              <div class="flex-grow border-t border-slate-200"></div>
+              <span class="flex-shrink mx-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Single Student Template</span>
+              <div class="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            <button onclick="openSingleTemplate('sig')" class="btn-core w-full py-2.5 bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 flex items-center justify-center gap-2 text-xs font-bold transition-all">
+              <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span>📄 Single Student Template Sheet (Blank / Fillable)</span>
+            </button>
           </div>
 
         </div>
@@ -980,6 +991,28 @@
       const program  = document.getElementById(`${p}-program`).value;
       const semester = document.getElementById(`${p}-semester`).value;
       window.open(`/bulk.html?${new URLSearchParams({program,semester,type,session:currentSession})}`, '_blank');
+    }
+
+    function openSingleTemplate(p) {
+      const program    = document.getElementById(`${p}-program`)?.value || '';
+      const semester   = document.getElementById(`${p}-semester`)?.value || '';
+      const cSelect    = document.getElementById(`${p}-course`);
+      const courseCode = cSelect?.value || '';
+      const cOpt       = cSelect && cSelect.selectedIndex >= 0 ? cSelect.options[cSelect.selectedIndex] : null;
+      const courseName = cOpt?.dataset?.courseName || '';
+      const facultyEl  = document.getElementById(`${p}-facultyName`);
+      const faculty    = (facultyEl && facultyEl.textContent !== '–') ? facultyEl.textContent : '';
+
+      const params = new URLSearchParams();
+      if (program) params.set('program', program);
+      if (semester) params.set('semester', semester);
+      if (courseCode) params.set('courseCode', courseCode);
+      if (courseName) params.set('courseName', courseName);
+      if (faculty) params.set('faculty', faculty);
+      // As requested: Session is left blank in the template by default
+
+      const url = params.toString() ? `/single-template.html?${params.toString()}` : '/single-template.html';
+      window.open(url, '_blank');
     }
 
     // ── MARKS ENTRY LOGIC ────────────────────────────────────
