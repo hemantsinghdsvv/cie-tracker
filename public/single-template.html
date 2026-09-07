@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Single Student Signature Sheet Template | DSVV</title>
+  <title>Assessment Sheet Template (Single / 3-Course) | DSVV</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/css/main.css" />
   <link rel="stylesheet" href="/css/print.css" />
@@ -15,7 +15,7 @@
 
     @media screen {
       .preview-wrapper {
-        padding: 24px 16px 40px;
+        padding: 24px 16px;
         display: flex;
         justify-content: center;
         overflow-x: auto;
@@ -31,9 +31,6 @@
         padding: 14mm 16mm;
         box-sizing: border-box;
       }
-      .cie-table tbody tr {
-        height: 52px;
-      }
       .print-only-text {
         display: none !important;
       }
@@ -41,13 +38,13 @@
 
     @page {
       size: landscape;
-      margin: 7mm 9mm;
+      margin: 7mm 10mm;
     }
 
     @media print {
       @page {
         size: landscape;
-        margin: 7mm 9mm;
+        margin: 7mm 10mm;
       }
       *, html, body, .print-container, table, th, td, h1, h2, h3, p, span, div {
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
@@ -85,8 +82,12 @@
         padding-bottom: 3pt !important;
         margin-bottom: 5pt !important;
       }
+      .sheet-header-logo {
+        max-height: 44pt !important;
+        width: auto !important;
+      }
       .sheet-header-text h1 {
-        font-size: 13pt !important;
+        font-size: 13.5pt !important;
         color: #1c4c94 !important;
         font-weight: 800 !important;
         text-transform: uppercase !important;
@@ -95,12 +96,12 @@
       .sheet-header-text h2 {
         font-size: 10pt !important;
         color: #334155 !important;
-        margin: 2pt 0 !important;
+        margin: 1.5pt 0 !important;
       }
       .sheet-header-text h3 {
         font-size: 9.5pt !important;
         color: #1e293b !important;
-        margin: 2pt 0 0 0 !important;
+        margin: 1.5pt 0 0 0 !important;
       }
       .sheet-meta {
         display: flex !important;
@@ -112,6 +113,7 @@
         width: 100% !important;
         table-layout: fixed !important;
         border-collapse: collapse !important;
+        page-break-inside: avoid !important;
       }
       .cie-table th {
         background-color: #1c4c94 !important;
@@ -128,26 +130,14 @@
       .cie-table td {
         border: 1pt solid #1c4c94 !important;
         vertical-align: middle !important;
-        padding: 3pt !important;
-      }
-      /* Height adjustments for 1 page fit */
-      .layout-1course .cie-table tbody tr {
-        height: 52pt !important;
-      }
-      .layout-3courses-table .cie-table tbody tr {
-        height: 38pt !important;
-      }
-      .layout-3courses-stacked .course-block {
-        page-break-inside: avoid !important;
-        margin-bottom: 8pt !important;
-      }
-      .layout-3courses-stacked .cie-table tbody tr {
-        height: 24pt !important;
+        padding: 3pt 4pt !important;
+        font-size: 8.5pt !important;
       }
       .sheet-footer {
         margin-top: 24pt !important;
         display: flex !important;
         justify-content: space-between !important;
+        page-break-inside: avoid !important;
       }
       .footer-sign {
         width: 180pt !important;
@@ -155,7 +145,7 @@
       }
       .footer-sign .sign-line {
         border-top: 1pt solid #000 !important;
-        margin-top: 26pt !important;
+        margin-top: 28pt !important;
         margin-bottom: 3pt !important;
       }
       .footer-sign p {
@@ -165,12 +155,12 @@
       }
     }
 
-    /* Screen form inputs */
+    /* Screen Inputs */
     .screen-input {
       border: 1px solid #cbd5e1;
       background: #f8fafc;
-      padding: 3px 8px;
-      border-radius: 6px;
+      padding: 2.5px 6px;
+      border-radius: 5px;
       font-weight: 600;
       color: #0f172a;
       outline: none;
@@ -186,13 +176,19 @@
       font-weight: normal;
     }
 
-    /* Print Underline Line */
+    /* Print Underlines */
     .blank-underline {
       display: inline-block;
       border-bottom: 1pt solid #000;
-      min-width: 130px;
+      min-width: 120px;
       height: 1.1em;
       vertical-align: bottom;
+    }
+
+    .table-scroll-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
   </style>
 </head>
@@ -200,63 +196,73 @@
 
   <!-- ── TOP TOOLBAR (Hidden in Print) ────────────────────────── -->
   <div class="no-print glass-header sticky top-0 z-50 shadow-sm border-b border-slate-200 bg-white/95 backdrop-blur-md">
-    <div class="max-w-[297mm] mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+    <div class="max-w-[297mm] mx-auto px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2.5">
       
-      <div class="flex items-center gap-3 min-w-0">
+      <div class="flex items-center gap-2.5 min-w-0">
         <a href="/dashboard.html" class="btn-core btn-secondary text-xs py-1.5 px-3">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
           <span>Workspace</span>
         </a>
         <div class="h-4 w-px bg-slate-200"></div>
         <div class="flex items-center gap-2">
-          <span class="text-xs sm:text-sm font-extrabold text-slate-800">Signature Sheet Template</span>
-          <span class="badge-pill badge-blue text-[10px]">Print Format</span>
+          <span id="pageHeading" class="text-xs sm:text-sm font-extrabold text-slate-800">Assessment Sheet Template</span>
+          <span id="modeBadge" class="badge-pill badge-blue text-[10px]">3 Courses (Single Page)</span>
         </div>
       </div>
 
-      <div class="flex items-center flex-wrap gap-2">
-        <!-- Layout Mode Selector -->
-        <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200">
-          <span class="text-[11px] font-bold text-slate-600 pl-1.5">Format:</span>
-          <select id="layoutMode" onchange="changeLayoutMode()" class="text-xs font-bold py-1 px-2 rounded-md border border-slate-300 bg-white text-blue-700 focus:outline-none">
-            <option value="3courses-table" selected>🌟 3 Courses on 1 Page (Combined Table)</option>
-            <option value="3courses-stacked">📑 3 Courses on 1 Page (Stacked Blocks)</option>
-            <option value="1course">📄 1 Course per Page (Standard)</option>
-          </select>
+      <!-- Controls: Sheet Type, Course Count, Scheme -->
+      <div class="flex flex-wrap items-center gap-2">
+        
+        <!-- Sheet Type: Signature vs Marks Award -->
+        <div class="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-bold">
+          <button id="btnTypeSig" onclick="setSheetType('signature')" class="px-2.5 py-1 rounded-md bg-white text-blue-700 shadow-sm transition-all">
+            ✍️ Signature Sheet
+          </button>
+          <button id="btnTypeMarks" onclick="setSheetType('marks')" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all">
+            📝 Marks Award Sheet
+          </button>
         </div>
 
-        <!-- Scheme Select (Standard 4 vs MCA-DS 3) -->
-        <select id="evalScheme" onchange="changeLayoutMode()" class="text-xs font-semibold py-1.5 px-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-none">
-          <option value="standard" selected>4 Components (Assign 15, Sem 15, Quiz 10, Mid 20)</option>
-          <option value="mcads">3 Components (MCA-DS: Assign 10, Sem 10, Mid 20)</option>
+        <!-- Format: 3 Courses vs 1 Course -->
+        <select id="courseMode" onchange="renderTemplate()" class="text-xs font-semibold py-1.5 px-2 rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-none focus:border-blue-500">
+          <option value="3courses" selected>3 Courses (1 Page)</option>
+          <option value="1course">1 Course (Standard)</option>
         </select>
 
-        <button onclick="clearAll()" class="btn-core text-xs py-1.5 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300">
+        <!-- Evaluation Scheme -->
+        <select id="evalScheme" onchange="renderTemplate()" class="text-xs font-semibold py-1.5 px-2 rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-none focus:border-blue-500">
+          <option value="standard" selected>4 Components (15, 15, 10, 20)</option>
+          <option value="mcads">3 Components (MCA-DS: 10, 10, 20)</option>
+        </select>
+
+        <!-- Action Buttons -->
+        <button onclick="clearAll()" title="Reset all fields to clean blank lines for handwriting" class="btn-core text-xs py-1.5 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
           <span>Clear Blank</span>
         </button>
 
-        <button onclick="fillSample()" class="btn-core text-xs py-1.5 px-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold">
-          <span>Sample Fill</span>
+        <button onclick="fillSample()" title="Fill sample data across 3 courses to see layout" class="btn-core text-xs py-1.5 px-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300">
+          <span>Demo Fill</span>
         </button>
 
-        <button onclick="doPrint()" class="btn-core btn-primary-grad text-xs py-1.5 px-4 shadow-sm">
+        <button onclick="doPrint()" class="btn-core btn-primary-grad text-xs py-2 px-3.5 shadow-sm font-bold">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-          <span class="font-bold">Print Sheet</span>
+          <span>Print Sheet</span>
         </button>
       </div>
 
     </div>
   </div>
 
-  <!-- Instruction Banner (Hidden in Print) -->
-  <div class="no-print max-w-[297mm] mx-auto px-4 sm:px-6 pt-3">
-    <div class="p-2.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-xs flex items-center justify-between gap-2">
+  <!-- Instruction Tip Banner -->
+  <div class="no-print max-w-[297mm] mx-auto px-4 sm:px-6 pt-2.5">
+    <div class="p-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-xs flex items-center justify-between gap-2">
       <div class="flex items-center gap-2">
-        <span class="text-base">💡</span>
+        <span class="text-sm">📄</span>
         <span>
-          <strong>3 Courses on 1 Page:</strong> Ab aap ek hi page me <strong>3 Courses</strong> ka format print kar sakte hain! 
-          Session, Course Code, Faculty, Course Name, Program/Sem, aur Student Name sabhi blank underline ke sath print honge, ya aap yahi type karke bhi print nikaal sakte hain.
+          <strong>3 Courses Single-Page Format:</strong> Ek hi page par 3 alag-alag courses ka assessment format set hai.
+          Aap upar se <strong>Signature Sheet</strong> ya <strong>Marks Award Sheet</strong> select kar sakte hain.
+          Sabhi fields (Session, Courses, Faculty, Scholar ID, Student Name) blank/fillable hain. Print karne par clean underlines aayengi.
         </span>
       </div>
     </div>
@@ -265,417 +271,492 @@
   <!-- ── PRINT PREVIEW SHEET CONTAINER ────────────────────────── -->
   <div class="preview-wrapper">
     <div class="print-container" id="printArea">
-      <!-- Dynamic layout content rendered via JavaScript -->
-      <div id="dynamicSheetContent"></div>
+      <!-- Content dynamically injected here -->
     </div>
   </div>
 
   <script>
-    // State Store for Fields
-    const state = {
+    // State
+    let currentType = 'signature'; // 'signature' | 'marks'
+    let currentMode = '3courses';  // '3courses' | '1course'
+    let currentScheme = 'standard'; // 'standard' | 'mcads'
+
+    // Form field values cache to preserve data across mode/type switches
+    let formData = {
       session: '',
-      studentName: '',
       scholarId: '',
+      studentName: '',
       progSem: '',
+      // For 1-course mode
+      courseCode: '',
+      courseName: '',
+      faculty: '',
       totalEnrolled: '1',
-      courses: [
-        { code: '', name: '', faculty: '', progSem: '', totalEnrolled: '1', scholarId: '', studentName: '' },
-        { code: '', name: '', faculty: '', progSem: '', totalEnrolled: '1', scholarId: '', studentName: '' },
-        { code: '', name: '', faculty: '', progSem: '', totalEnrolled: '1', scholarId: '', studentName: '' }
-      ]
+      // For 3-courses mode
+      c1Code: '', c1Name: '', c1Faculty: '',
+      c2Code: '', c2Name: '', c2Faculty: '',
+      c3Code: '', c3Name: '', c3Faculty: ''
     };
+
+    function setSheetType(type) {
+      currentType = type;
+      document.getElementById('btnTypeSig').className = type === 'signature' 
+        ? 'px-2.5 py-1 rounded-md bg-white text-blue-700 shadow-sm transition-all' 
+        : 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all';
+      document.getElementById('btnTypeMarks').className = type === 'marks' 
+        ? 'px-2.5 py-1 rounded-md bg-white text-amber-700 shadow-sm transition-all' 
+        : 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all';
+      
+      const badge = document.getElementById('modeBadge');
+      if (type === 'marks') {
+        badge.className = 'badge-pill badge-gold text-[10px]';
+        badge.textContent = currentMode === '3courses' ? '3 Courses (Marks Award)' : '1 Course (Marks Award)';
+      } else {
+        badge.className = 'badge-pill badge-blue text-[10px]';
+        badge.textContent = currentMode === '3courses' ? '3 Courses (Signature)' : '1 Course (Signature)';
+      }
+      renderTemplate();
+    }
+
+    function saveCurrentInputs() {
+      // Read any inputs currently present in DOM
+      const fields = [
+        'inSession', 'inScholarId', 'inStudentName', 'inProgSem',
+        'inCourseCode', 'inCourseName', 'inFaculty', 'inTotalEnrolled',
+        'inC1Code', 'inC1Name', 'inC1Faculty',
+        'inC2Code', 'inC2Name', 'inC2Faculty',
+        'inC3Code', 'inC3Name', 'inC3Faculty'
+      ];
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          const key = id.replace(/^in/, '');
+          const lowerKey = key.charAt(0).toLowerCase() + key.slice(1);
+          formData[lowerKey] = el.value;
+        }
+      });
+    }
 
     function escapeHtml(str) {
       if (!str) return '';
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    function renderUnderline(minWidth = '130px', value = '') {
-      const v = (value || '').trim();
-      if (v) return `<span class="print-only-text font-semibold">${escapeHtml(v)}</span>`;
-      return `<span class="print-only-text"><span class="blank-underline" style="min-width: ${minWidth};"></span></span>`;
-    }
+    function renderTemplate() {
+      saveCurrentInputs();
+      currentMode = document.getElementById('courseMode').value;
+      currentScheme = document.getElementById('evalScheme').value;
 
-    // ── MAIN RENDERER ──────────────────────────────────────────
-    function changeLayoutMode() {
-      const mode = document.getElementById('layoutMode').value;
-      const scheme = document.getElementById('evalScheme').value;
-      const container = document.getElementById('dynamicSheetContent');
-      const isMcads = (scheme === 'mcads');
+      const isMarks = currentType === 'marks';
+      const is3Courses = currentMode === '3courses';
+      const isMcads = currentScheme === 'mcads';
 
-      const printArea = document.getElementById('printArea');
-      printArea.className = 'print-container layout-' + mode;
+      const typeTitle = isMarks ? 'Marks Award Sheet' : 'Signature Sheet';
+      document.getElementById('pageHeading').textContent = `${is3Courses ? '3-Course' : 'Single Student'} ${typeTitle}`;
 
-      if (mode === '3courses-table') {
-        render3CoursesTable(container, isMcads);
-      } else if (mode === '3courses-stacked') {
-        render3CoursesStacked(container, isMcads);
-      } else {
-        render1Course(container, isMcads);
-      }
-      syncInputsFromState();
-    }
-
-    // ── 1. THREE COURSES IN A SINGLE COMBINED TABLE (RECOMMENDED) ─
-    function render3CoursesTable(container, isMcads) {
-      const cols = isMcads ? [
-        { title: 'Assignment (10)', sub: 'Sign (Date & Time)', width: '18%' },
-        { title: 'Seminar (10)', sub: 'Sign (Date & Time)', width: '18%' },
-        { title: 'Mid Term Exam (20)', sub: 'Sign (Date & Time)', width: '18%' }
+      // Components definitions
+      const comps = isMcads ? [
+        { label: 'Assignment', max: 10 },
+        { label: 'Seminar', max: 10 },
+        { label: 'Mid Term Exam', max: 20 }
       ] : [
-        { title: 'Assignment (15)', sub: 'Sign (Date & Time)', width: '14%' },
-        { title: 'Seminar (15)', sub: 'Sign (Date & Time)', width: '14%' },
-        { title: 'Quiz (10)', sub: 'Sign (Date & Time)', width: '14%' },
-        { title: 'Mid Term Exam (20)', sub: 'Sign (Date & Time)', width: '14%' }
+        { label: 'Assignment', max: 15 },
+        { label: 'Seminar', max: 15 },
+        { label: 'Quiz', max: 10 },
+        { label: 'Mid Term Exam', max: 20 }
       ];
 
-      container.innerHTML = `
-        <!-- HEADER -->
-        <div class="sheet-header-flex sheet-header">
-          <img src="/logo.png" alt="DSVV Logo" class="sheet-header-logo" onerror="this.style.display='none'" />
-          <div class="sheet-header-text">
-            <h1>DEPARTMENT OF COMPUTER SCIENCE</h1>
-            <h2 class="font-semibold text-slate-800">Formative & Midterm Examination <span class="text-slate-300 mx-1">|</span> Signature Sheet</h2>
-            <h3 class="text-slate-800">
-              <span>Session:</span>
-              <input type="text" id="commonSession" class="screen-input w-48 text-xs text-right font-bold ml-1" placeholder="Khali / e.g. July – Dec 2026" oninput="state.session = this.value; changeLayoutMode();" />
-              ${renderUnderline('160px', state.session)}
-            </h3>
-          </div>
-        </div>
+      let html = '';
 
-        <!-- COMMON STUDENT & PROGRAM METADATA -->
-        <div class="sheet-meta" style="margin-top: 8px; margin-bottom: 10px;">
-          <div class="flex items-center gap-1.5">
-            <strong>Candidate Name:</strong>
-            <input type="text" id="commonStudentName" class="screen-input w-52 font-bold text-xs" placeholder="Student / Candidate Name" oninput="state.studentName = this.value; changeLayoutMode();" />
-            ${renderUnderline('160px', state.studentName)}
-          </div>
-          <div class="flex items-center gap-1.5">
-            <strong>Scholar ID:</strong>
-            <input type="text" id="commonScholarId" class="screen-input w-36 font-mono text-xs text-center" placeholder="Scholar ID" oninput="state.scholarId = this.value; changeLayoutMode();" />
-            ${renderUnderline('100px', state.scholarId)}
-          </div>
-          <div class="flex items-center gap-1.5">
-            <strong>Program / Semester:</strong>
-            <input type="text" id="commonProgSem" class="screen-input w-48 text-xs" placeholder="e.g. BCA / Semester 5" oninput="state.progSem = this.value; changeLayoutMode();" />
-            ${renderUnderline('140px', state.progSem)}
-          </div>
-        </div>
-
-        <!-- TABLE WITH 3 COURSE ROWS -->
-        <div class="table-scroll-wrap">
-          <table class="cie-table">
-            <thead>
-              <tr>
-                <th style="width: 4%;">S.No</th>
-                <th style="width: 12%;">Course Code</th>
-                <th style="width: 16%;">Course Name</th>
-                <th style="width: 14%;">Faculty In-Charge</th>
-                ${cols.map(c => `<th style="width:${c.width}">${c.title}<br/><span style="font-size:7.5pt;font-weight:normal">${c.sub}</span></th>`).join('')}
-              </tr>
-            </thead>
-            <tbody>
-              ${[0, 1, 2].map(i => `
-                <tr style="height: 54px;">
-                  <td class="sno font-bold" style="text-align: center;">${i + 1}</td>
-                  <td style="padding: 4px;">
-                    <input type="text" class="screen-input w-full uppercase font-mono text-xs" placeholder="Course Code ${i+1}" value="${escapeHtml(state.courses[i].code)}" oninput="state.courses[${i}].code = this.value; changeLayoutMode();" />
-                    ${renderUnderline('80px', state.courses[i].code)}
-                  </td>
-                  <td style="padding: 4px;">
-                    <input type="text" class="screen-input w-full font-semibold text-xs" placeholder="Course Name ${i+1}" value="${escapeHtml(state.courses[i].name)}" oninput="state.courses[${i}].name = this.value; changeLayoutMode();" />
-                    ${renderUnderline('110px', state.courses[i].name)}
-                  </td>
-                  <td style="padding: 4px;">
-                    <input type="text" class="screen-input w-full text-xs" placeholder="Faculty Name" value="${escapeHtml(state.courses[i].faculty)}" oninput="state.courses[${i}].faculty = this.value; changeLayoutMode();" />
-                    ${renderUnderline('90px', state.courses[i].faculty)}
-                  </td>
-                  ${cols.map(() => `<td style="background:#ffffff;"></td>`).join('')}
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-
-        <!-- FOOTER SIGNATURES -->
-        <div class="sheet-footer" style="margin-top: 30pt;">
-          <div class="footer-sign">
-            <div class="sign-line"></div>
-            <p>Teacher's / Course In-Charge Signature</p>
-          </div>
-          <div class="footer-sign">
-            <div class="sign-line"></div>
-            <p>HoD's Signature</p>
-          </div>
-        </div>
-      `;
-    }
-
-    // ── 2. THREE STACKED COURSES ON ONE PAGE ───────────────────
-    function render3CoursesStacked(container, isMcads) {
-      const cols = isMcads ? [
-        { title: 'Assignment (10)', width: '20%' },
-        { title: 'Seminar (10)', width: '20%' },
-        { title: 'Mid Term Exam (20)', width: '20%' }
-      ] : [
-        { title: 'Assignment (15)', width: '15%' },
-        { title: 'Seminar (15)', width: '15%' },
-        { title: 'Quiz (10)', width: '15%' },
-        { title: 'Mid Term Exam (20)', width: '15%' }
-      ];
-
-      let html = `
-        <!-- HEADER -->
-        <div class="sheet-header-flex sheet-header" style="margin-bottom: 4pt; padding-bottom: 2pt;">
-          <img src="/logo.png" alt="DSVV Logo" class="sheet-header-logo" style="max-height: 40px;" onerror="this.style.display='none'" />
-          <div class="sheet-header-text">
-            <h1 style="font-size: 11pt;">DEPARTMENT OF COMPUTER SCIENCE</h1>
-            <h2 style="font-size: 8.5pt;" class="font-semibold text-slate-800">Formative & Midterm Examination | Signature Sheet (3 Courses)</h2>
-            <h3 style="font-size: 8.5pt;" class="text-slate-800">
-              <span>Session:</span>
-              <input type="text" id="commonSession" class="screen-input w-44 text-xs text-right font-bold ml-1" placeholder="Khali / Session" oninput="state.session = this.value; changeLayoutMode();" />
-              ${renderUnderline('140px', state.session)}
-            </h3>
-          </div>
-        </div>
-      `;
-
-      [0, 1, 2].forEach(i => {
-        const c = state.courses[i];
-        html += `
-          <div class="course-block border border-slate-200 rounded-lg p-2.5 mb-2.5 bg-slate-50/50" style="page-break-inside: avoid;">
-            <div class="sheet-meta" style="margin: 0 0 4px 0; font-size: 8.5pt;">
-              <div><strong>Course ${i+1} Code:</strong> 
-                <input type="text" class="screen-input w-28 uppercase text-xs" placeholder="Course Code" value="${escapeHtml(c.code)}" oninput="state.courses[${i}].code = this.value; changeLayoutMode();" />
-                ${renderUnderline('70px', c.code)}
-              </div>
-              <div><strong>Course Name:</strong> 
-                <input type="text" class="screen-input w-48 text-xs" placeholder="Course Name" value="${escapeHtml(c.name)}" oninput="state.courses[${i}].name = this.value; changeLayoutMode();" />
-                ${renderUnderline('120px', c.name)}
-              </div>
-              <div><strong>Faculty:</strong> 
-                <input type="text" class="screen-input w-40 text-xs" placeholder="Faculty In-Charge" value="${escapeHtml(c.faculty)}" oninput="state.courses[${i}].faculty = this.value; changeLayoutMode();" />
-                ${renderUnderline('90px', c.faculty)}
-              </div>
-              <div><strong>Prog/Sem:</strong> 
-                <input type="text" class="screen-input w-32 text-xs" placeholder="Prog/Sem" value="${escapeHtml(c.progSem || state.progSem)}" oninput="state.courses[${i}].progSem = this.value; changeLayoutMode();" />
-                ${renderUnderline('80px', c.progSem || state.progSem)}
-              </div>
-            </div>
-
-            <table class="cie-table" style="font-size: 8pt;">
-              <thead>
-                <tr>
-                  <th style="width: 4%;">S.No</th>
-                  <th style="width: 14%;">Scholar ID</th>
-                  <th style="width: 22%;">Candidate Name</th>
-                  ${cols.map(col => `<th style="width:${col.width}">${col.title}<br/><span style="font-size:7pt;font-weight:normal">Sign (Date & Time)</span></th>`).join('')}
-                </tr>
-              </thead>
-              <tbody>
-                <tr style="height: 32px;">
-                  <td class="sno font-bold" style="text-align: center;">1</td>
-                  <td style="padding: 2px; text-align: center;">
-                    <input type="text" class="screen-input w-full text-center font-mono text-xs" placeholder="Scholar ID" value="${escapeHtml(c.scholarId || state.scholarId)}" oninput="state.courses[${i}].scholarId = this.value; changeLayoutMode();" />
-                    ${renderUnderline('70px', c.scholarId || state.scholarId)}
-                  </td>
-                  <td style="padding: 2px 6px;">
-                    <input type="text" class="screen-input w-full font-bold text-xs" placeholder="Student Name" value="${escapeHtml(c.studentName || state.studentName)}" oninput="state.courses[${i}].studentName = this.value; changeLayoutMode();" />
-                    ${renderUnderline('110px', c.studentName || state.studentName)}
-                  </td>
-                  ${cols.map(() => `<td style="background:#ffffff;"></td>`).join('')}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        `;
-      });
-
+      // ── 1. HEADER (DSVV + Dept + Formative Label + Session) ──
       html += `
-        <div class="sheet-footer" style="margin-top: 14pt;">
-          <div class="footer-sign">
-            <div class="sign-line" style="margin-top: 18pt;"></div>
-            <p style="font-size: 8.5pt;">Teacher's Signature</p>
-          </div>
-          <div class="footer-sign">
-            <div class="sign-line" style="margin-top: 18pt;"></div>
-            <p style="font-size: 8.5pt;">HoD's Signature</p>
-          </div>
-        </div>
-      `;
-      container.innerHTML = html;
-    }
-
-    // ── 3. SINGLE COURSE FULL PAGE ─────────────────────────────
-    function render1Course(container, isMcads) {
-      const c = state.courses[0];
-      const cols = isMcads ? [
-        { title: 'Assignment (10)', width: '19%' },
-        { title: 'Seminar (10)', width: '19%' },
-        { title: 'Mid Term Exam (20)', width: '19%' }
-      ] : [
-        { title: 'Assignment (15)', width: '15.5%' },
-        { title: 'Seminar (15)', width: '15.5%' },
-        { title: 'Quiz (10)', width: '15.5%' },
-        { title: 'Mid Term Exam (20)', width: '15.5%' }
-      ];
-
-      container.innerHTML = `
         <div class="sheet-header-flex sheet-header">
           <img src="/logo.png" alt="DSVV Logo" class="sheet-header-logo" onerror="this.style.display='none'" />
           <div class="sheet-header-text">
             <h1>DEPARTMENT OF COMPUTER SCIENCE</h1>
-            <h2 class="mt-0.5 font-semibold text-slate-800">Formative & Midterm Examination <span class="text-slate-300 mx-1">|</span> Signature Sheet</h2>
+            <h2 class="mt-0.5 font-semibold text-slate-800">
+              Formative & Midterm Examination <span class="text-slate-300 mx-1">|</span> ${typeTitle} ${is3Courses ? '<span class="text-xs text-blue-700 font-bold ml-1">(3 Courses)</span>' : ''}
+            </h2>
             <h3 class="text-slate-800 mt-1">
               <span>Session:</span>
-              <input type="text" id="commonSession" class="screen-input w-48 text-xs sm:text-sm text-right font-bold ml-1" placeholder="Khali / e.g. July – Dec 2026" oninput="state.session = this.value; changeLayoutMode();" />
-              ${renderUnderline('170px', state.session)}
+              <input type="text" id="inSession" class="screen-input w-48 text-xs sm:text-sm text-right font-bold ml-1" placeholder="Khali / e.g. July – Dec 2026" value="${escapeHtml(formData.session)}" oninput="syncAll()" />
+              <span id="printSession" class="print-only-text font-bold"><span class="blank-underline" style="min-width: 160px;"></span></span>
             </h3>
           </div>
         </div>
-
-        <div class="sheet-meta" style="margin-top: 10px; margin-bottom: 6px;">
-          <div class="flex items-center gap-1.5">
-            <strong>Course Code:</strong>
-            <input type="text" class="screen-input w-32 uppercase text-xs sm:text-sm" placeholder="Course Code" value="${escapeHtml(c.code)}" oninput="state.courses[0].code = this.value; changeLayoutMode();" />
-            ${renderUnderline('110px', c.code)}
-          </div>
-          <div class="flex items-center gap-1.5">
-            <strong>Course Name:</strong>
-            <input type="text" class="screen-input w-60 text-xs sm:text-sm" placeholder="Course Name" value="${escapeHtml(c.name)}" oninput="state.courses[0].name = this.value; changeLayoutMode();" />
-            ${renderUnderline('200px', c.name)}
-          </div>
-          <div class="flex items-center gap-1.5">
-            <strong>Program / Semester:</strong>
-            <input type="text" class="screen-input w-48 text-xs sm:text-sm" placeholder="Program / Semester" value="${escapeHtml(c.progSem || state.progSem)}" oninput="state.courses[0].progSem = this.value; state.progSem = this.value; changeLayoutMode();" />
-            ${renderUnderline('160px', c.progSem || state.progSem)}
-          </div>
-        </div>
-
-        <div class="sheet-meta" style="margin-top: 6px; margin-bottom: 12px;">
-          <div class="flex items-center gap-1.5">
-            <strong>Faculty In-Charge:</strong>
-            <input type="text" class="screen-input w-56 text-xs sm:text-sm" placeholder="Faculty In-Charge" value="${escapeHtml(c.faculty)}" oninput="state.courses[0].faculty = this.value; changeLayoutMode();" />
-            ${renderUnderline('180px', c.faculty)}
-          </div>
-          <div class="flex items-center gap-1.5">
-            <strong>Total Enrolled:</strong>
-            <input type="text" class="screen-input w-16 text-center text-xs sm:text-sm" value="${escapeHtml(c.totalEnrolled || '1')}" placeholder="1" oninput="state.courses[0].totalEnrolled = this.value; changeLayoutMode();" />
-            ${renderUnderline('40px', c.totalEnrolled || '1')}
-          </div>
-          <div></div>
-        </div>
-
-        <div class="table-scroll-wrap">
-          <table class="cie-table">
-            <thead>
-              <tr>
-                <th style="width: 4%;">S.No</th>
-                <th style="width: 13%;">Scholar ID</th>
-                <th style="width: 21%;">Candidate Name</th>
-                ${cols.map(col => `<th style="width:${col.width}">${col.title}<br/><span style="font-size:8pt;font-weight:normal">Sign (Date & Time)</span></th>`).join('')}
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="height: 64px;">
-                <td class="sno font-bold" style="text-align: center; font-size: 11pt;">1</td>
-                <td class="sid" style="text-align: center; padding: 4px;">
-                  <input type="text" class="screen-input w-full text-center font-mono text-sm" placeholder="Scholar ID" value="${escapeHtml(state.scholarId)}" oninput="state.scholarId = this.value; changeLayoutMode();" />
-                  ${renderUnderline('90px', state.scholarId)}
-                </td>
-                <td class="sname" style="padding: 4px 8px;">
-                  <input type="text" class="screen-input w-full font-bold text-sm" placeholder="Candidate / Student Name" value="${escapeHtml(state.studentName)}" oninput="state.studentName = this.value; changeLayoutMode();" />
-                  ${renderUnderline('160px', state.studentName)}
-                </td>
-                ${cols.map(() => `<td style="background:#ffffff;"></td>`).join('')}
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="sheet-footer" style="margin-top: 36pt;">
-          <div class="footer-sign">
-            <div class="sign-line"></div>
-            <p>Teacher's Signature</p>
-          </div>
-          <div class="footer-sign">
-            <div class="sign-line"></div>
-            <p>HoD's Signature</p>
-          </div>
-        </div>
       `;
+
+      if (is3Courses) {
+        // ── 3 COURSES CONSOLIDATED LAYOUT ──
+        // Candidate Meta Bar (Scholar ID, Candidate Name, Program / Semester)
+        html += `
+          <div class="sheet-meta" style="margin-top: 8px; margin-bottom: 10px; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+            <div class="flex items-center gap-1.5">
+              <strong>Scholar ID:</strong>
+              <input type="text" id="inScholarId" class="screen-input w-32 text-center font-mono text-xs sm:text-sm" placeholder="Scholar ID" value="${escapeHtml(formData.scholarId)}" oninput="syncAll()" />
+              <span id="printScholarId" class="print-only-text font-mono font-bold"><span class="blank-underline" style="min-width: 100px;"></span></span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <strong>Candidate Name:</strong>
+              <input type="text" id="inStudentName" class="screen-input w-64 font-bold text-xs sm:text-sm" placeholder="Candidate Name" value="${escapeHtml(formData.studentName)}" oninput="syncAll()" />
+              <span id="printStudentName" class="print-only-text font-bold"><span class="blank-underline" style="min-width: 200px;"></span></span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <strong>Program / Semester:</strong>
+              <input type="text" id="inProgSem" class="screen-input w-52 text-xs sm:text-sm" placeholder="e.g. BCA / Semester 5" value="${escapeHtml(formData.progSem)}" oninput="syncAll()" />
+              <span id="printProgSem" class="print-only-text"><span class="blank-underline" style="min-width: 150px;"></span></span>
+            </div>
+          </div>
+        `;
+
+        // TABLE: 3 COURSES
+        html += `<div class="table-scroll-wrap"><table class="cie-table"><thead>`;
+
+        if (!isMarks) {
+          // SIGNATURE SHEET THEAD
+          html += `
+            <tr>
+              <th style="width: 4%;">S.No</th>
+              <th style="width: 12%;">Course Code</th>
+              <th style="width: 20%;">Course Name</th>
+              <th style="width: 16%;">Faculty In-Charge</th>
+              ${comps.map(c => `<th style="width: ${Math.floor(48 / comps.length)}%;">${c.label} (${c.max})<br/><span style="font-size: 7.5pt; font-weight: normal;">Sign (Date & Time)</span></th>`).join('')}
+            </tr>
+          </thead><tbody>
+          `;
+
+          // 3 Course Rows for Signature Sheet
+          for (let i = 1; i <= 3; i++) {
+            const codeVal = formData[`c${i}Code`] || '';
+            const nameVal = formData[`c${i}Name`] || '';
+            const facVal = formData[`c${i}Faculty`] || '';
+
+            html += `
+              <tr style="height: 60px;">
+                <td class="sno font-bold" style="text-align: center; font-size: 11pt;">${i}</td>
+                <td style="padding: 4px;">
+                  <input type="text" id="inC${i}Code" class="screen-input w-full uppercase font-mono text-xs" placeholder="Course Code" value="${escapeHtml(codeVal)}" oninput="syncAll()" />
+                  <span id="printC${i}Code" class="print-only-text font-mono font-bold"><span class="blank-underline" style="min-width: 75px;"></span></span>
+                </td>
+                <td style="padding: 4px 6px;">
+                  <input type="text" id="inC${i}Name" class="screen-input w-full text-xs font-semibold" placeholder="Course Name" value="${escapeHtml(nameVal)}" oninput="syncAll()" />
+                  <span id="printC${i}Name" class="print-only-text font-semibold"><span class="blank-underline" style="min-width: 140px;"></span></span>
+                </td>
+                <td style="padding: 4px 6px;">
+                  <input type="text" id="inC${i}Faculty" class="screen-input w-full text-xs" placeholder="Faculty Name" value="${escapeHtml(facVal)}" oninput="syncAll()" />
+                  <span id="printC${i}Faculty" class="print-only-text"><span class="blank-underline" style="min-width: 110px;"></span></span>
+                </td>
+                ${comps.map(() => `<td style="background: #ffffff; min-height: 52px;"></td>`).join('')}
+              </tr>
+            `;
+          }
+        } else {
+          // MARKS AWARD SHEET THEAD (with 2 rows: Components + Marks/Sign subheaders)
+          html += `
+            <tr>
+              <th rowspan="2" style="width: 4%;">S.No</th>
+              <th rowspan="2" style="width: 11%;">Course Code</th>
+              <th rowspan="2" style="width: 18%;">Course Name</th>
+              <th rowspan="2" style="width: 14%;">Faculty In-Charge</th>
+              ${comps.map(c => `<th colspan="2" style="width: ${Math.floor(40 / comps.length)}%;">${c.label} (${c.max})</th>`).join('')}
+              <th rowspan="2" style="width: 6%;">Total<br/>(${isMcads ? 40 : 60})</th>
+              <th rowspan="2" style="width: 7%;">Faculty<br/>Sign</th>
+            </tr>
+            <tr>
+              ${comps.map(() => `
+                <th style="font-size: 7pt; font-weight: 600; background-color: #163d77 !important; border-left: 1pt solid rgba(255,255,255,0.25);">Marks</th>
+                <th style="font-size: 7pt; font-weight: 600; background-color: #163d77 !important; border-left: 1pt solid rgba(255,255,255,0.25);">Sign</th>
+              `).join('')}
+            </tr>
+          </thead><tbody>
+          `;
+
+          // 3 Course Rows for Marks Award Sheet
+          for (let i = 1; i <= 3; i++) {
+            const codeVal = formData[`c${i}Code`] || '';
+            const nameVal = formData[`c${i}Name`] || '';
+            const facVal = formData[`c${i}Faculty`] || '';
+
+            html += `
+              <tr style="height: 54px;">
+                <td class="sno font-bold" style="text-align: center; font-size: 11pt;">${i}</td>
+                <td style="padding: 4px;">
+                  <input type="text" id="inC${i}Code" class="screen-input w-full uppercase font-mono text-xs" placeholder="Course Code" value="${escapeHtml(codeVal)}" oninput="syncAll()" />
+                  <span id="printC${i}Code" class="print-only-text font-mono font-bold"><span class="blank-underline" style="min-width: 70px;"></span></span>
+                </td>
+                <td style="padding: 4px 6px;">
+                  <input type="text" id="inC${i}Name" class="screen-input w-full text-xs font-semibold" placeholder="Course Name" value="${escapeHtml(nameVal)}" oninput="syncAll()" />
+                  <span id="printC${i}Name" class="print-only-text font-semibold"><span class="blank-underline" style="min-width: 130px;"></span></span>
+                </td>
+                <td style="padding: 4px 6px;">
+                  <input type="text" id="inC${i}Faculty" class="screen-input w-full text-xs" placeholder="Faculty Name" value="${escapeHtml(facVal)}" oninput="syncAll()" />
+                  <span id="printC${i}Faculty" class="print-only-text"><span class="blank-underline" style="min-width: 100px;"></span></span>
+                </td>
+                ${comps.map(() => `
+                  <td style="background: #ffffff; text-align: center; border-right: 1pt solid #cbd5e1;"></td>
+                  <td style="background: #ffffff; text-align: center;"></td>
+                `).join('')}
+                <td style="background: #ffffff; text-align: center; font-weight: bold;"></td>
+                <td style="background: #ffffff;"></td>
+              </tr>
+            `;
+          }
+        }
+
+        html += `</tbody></table></div>`;
+
+        // FOOTER SIGNATURES FOR 3-COURSE SHEET
+        html += `
+          <div class="sheet-footer" style="margin-top: 28pt;">
+            <div class="footer-sign">
+              <div class="sign-line"></div>
+              <p>Candidate's Signature</p>
+            </div>
+            <div class="footer-sign">
+              <div class="sign-line"></div>
+              <p>Verified By (Exam Cell)</p>
+            </div>
+            <div class="footer-sign">
+              <div class="sign-line"></div>
+              <p>HoD's Signature</p>
+            </div>
+          </div>
+        `;
+
+      } else {
+        // ── 1 COURSE STANDARD SINGLE-STUDENT LAYOUT ──
+        html += `
+          <div class="sheet-meta" style="margin-top: 8px; margin-bottom: 4px;">
+            <div class="flex items-center gap-1.5">
+              <strong>Course Code:</strong>
+              <input type="text" id="inCourseCode" class="screen-input w-32 uppercase text-xs sm:text-sm" placeholder="Course Code" value="${escapeHtml(formData.courseCode)}" oninput="syncAll()" />
+              <span id="printCourseCode" class="print-only-text"><span class="blank-underline" style="min-width: 110px;"></span></span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <strong>Course Name:</strong>
+              <input type="text" id="inCourseName" class="screen-input w-60 text-xs sm:text-sm" placeholder="Course Name" value="${escapeHtml(formData.courseName)}" oninput="syncAll()" />
+              <span id="printCourseName" class="print-only-text"><span class="blank-underline" style="min-width: 200px;"></span></span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <strong>Program / Semester:</strong>
+              <input type="text" id="inProgSem" class="screen-input w-48 text-xs sm:text-sm" placeholder="Program / Semester" value="${escapeHtml(formData.progSem)}" oninput="syncAll()" />
+              <span id="printProgSem" class="print-only-text"><span class="blank-underline" style="min-width: 160px;"></span></span>
+            </div>
+          </div>
+
+          <div class="sheet-meta" style="margin-top: 4px; margin-bottom: 12px;">
+            <div class="flex items-center gap-1.5">
+              <strong>Faculty In-Charge:</strong>
+              <input type="text" id="inFaculty" class="screen-input w-56 text-xs sm:text-sm" placeholder="Faculty In-Charge" value="${escapeHtml(formData.faculty)}" oninput="syncAll()" />
+              <span id="printFaculty" class="print-only-text"><span class="blank-underline" style="min-width: 180px;"></span></span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <strong>Total Enrolled:</strong>
+              <input type="text" id="inTotalEnrolled" class="screen-input w-16 text-center text-xs sm:text-sm" value="${escapeHtml(formData.totalEnrolled || '1')}" placeholder="1" oninput="syncAll()" />
+              <span id="printTotalEnrolled" class="print-only-text font-bold">1</span>
+            </div>
+            <div></div>
+          </div>
+        `;
+
+        html += `<div class="table-scroll-wrap"><table class="cie-table"><thead>`;
+
+        if (!isMarks) {
+          // 1 Course - Signature Sheet
+          html += `
+            <tr>
+              <th style="width: 4%;">S.No</th>
+              <th style="width: 13%;">Scholar ID</th>
+              <th style="width: 21%;">Candidate Name</th>
+              ${comps.map(c => `<th style="width: ${Math.floor(62 / comps.length)}%;">${c.label} (${c.max})<br/><span style="font-size: 8pt; font-weight: normal;">Sign (Date & Time)</span></th>`).join('')}
+            </tr>
+          </thead><tbody>
+            <tr style="height: 64px;">
+              <td class="sno font-bold" style="text-align: center; font-size: 11pt;">1</td>
+              <td class="sid" style="text-align: center; padding: 4px;">
+                <input type="text" id="inScholarId" class="screen-input w-full text-center font-mono text-sm" placeholder="Scholar ID" value="${escapeHtml(formData.scholarId)}" oninput="syncAll()" />
+                <span id="printScholarId" class="print-only-text font-mono text-sm font-semibold"><span class="blank-underline" style="min-width: 90px;"></span></span>
+              </td>
+              <td class="sname" style="padding: 4px 8px;">
+                <input type="text" id="inStudentName" class="screen-input w-full font-bold text-sm" placeholder="Candidate Name" value="${escapeHtml(formData.studentName)}" oninput="syncAll()" />
+                <span id="printStudentName" class="print-only-text font-bold text-sm"><span class="blank-underline" style="min-width: 160px;"></span></span>
+              </td>
+              ${comps.map(() => `<td style="background: #ffffff;"></td>`).join('')}
+            </tr>
+          </tbody></table></div>`;
+        } else {
+          // 1 Course - Marks Award Sheet
+          html += `
+            <tr>
+              <th rowspan="2" style="width: 4%;">S.No</th>
+              <th rowspan="2" style="width: 13%;">Scholar ID</th>
+              <th rowspan="2" style="width: 21%;">Candidate Name</th>
+              ${comps.map(c => `<th colspan="2" style="width: ${Math.floor(50 / comps.length)}%;">${c.label} (${c.max})</th>`).join('')}
+              <th rowspan="2" style="width: 6%;">Total<br/>(${isMcads ? 40 : 60})</th>
+              <th rowspan="2" style="width: 6%;">Sign</th>
+            </tr>
+            <tr>
+              ${comps.map(() => `
+                <th style="font-size: 7.5pt; font-weight: 600; background-color: #163d77 !important; border-left: 1pt solid rgba(255,255,255,0.25);">Marks</th>
+                <th style="font-size: 7.5pt; font-weight: 600; background-color: #163d77 !important; border-left: 1pt solid rgba(255,255,255,0.25);">Sign</th>
+              `).join('')}
+            </tr>
+          </thead><tbody>
+            <tr style="height: 60px;">
+              <td class="sno font-bold" style="text-align: center; font-size: 11pt;">1</td>
+              <td class="sid" style="text-align: center; padding: 4px;">
+                <input type="text" id="inScholarId" class="screen-input w-full text-center font-mono text-sm" placeholder="Scholar ID" value="${escapeHtml(formData.scholarId)}" oninput="syncAll()" />
+                <span id="printScholarId" class="print-only-text font-mono text-sm font-semibold"><span class="blank-underline" style="min-width: 90px;"></span></span>
+              </td>
+              <td class="sname" style="padding: 4px 8px;">
+                <input type="text" id="inStudentName" class="screen-input w-full font-bold text-sm" placeholder="Candidate Name" value="${escapeHtml(formData.studentName)}" oninput="syncAll()" />
+                <span id="printStudentName" class="print-only-text font-bold text-sm"><span class="blank-underline" style="min-width: 160px;"></span></span>
+              </td>
+              ${comps.map(() => `
+                <td style="background: #ffffff; text-align: center; border-right: 1pt solid #cbd5e1;"></td>
+                <td style="background: #ffffff; text-align: center;"></td>
+              `).join('')}
+              <td style="background: #ffffff; text-align: center; font-weight: bold;"></td>
+              <td style="background: #ffffff;"></td>
+            </tr>
+          </tbody></table></div>`;
+        }
+
+        // FOOTER SIGNATURES FOR 1-COURSE
+        html += `
+          <div class="sheet-footer" style="margin-top: 36pt;">
+            <div class="footer-sign">
+              <div class="sign-line"></div>
+              <p>Teacher's Signature</p>
+            </div>
+            <div class="footer-sign">
+              <div class="sign-line"></div>
+              <p>HoD's Signature</p>
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('printArea').innerHTML = html;
+      syncAll();
     }
 
-    function syncInputsFromState() {
-      const s = document.getElementById('commonSession');
-      if (s) s.value = state.session || '';
-      const sn = document.getElementById('commonStudentName');
-      if (sn) sn.value = state.studentName || '';
-      const sc = document.getElementById('commonScholarId');
-      if (sc) sc.value = state.scholarId || '';
-      const sp = document.getElementById('commonProgSem');
-      if (sp) sp.value = state.progSem || '';
+    // ── SYNC INPUTS TO PRINT SPANS ─────────────────────────────
+    function syncAll() {
+      saveCurrentInputs();
+
+      syncField('inSession', 'printSession', '160px');
+      syncField('inScholarId', 'printScholarId', '90px');
+      syncField('inStudentName', 'printStudentName', '180px');
+      syncField('inProgSem', 'printProgSem', '150px');
+
+      if (currentMode === '3courses') {
+        syncField('inC1Code', 'printC1Code', '75px');
+        syncField('inC1Name', 'printC1Name', '140px');
+        syncField('inC1Faculty', 'printC1Faculty', '110px');
+
+        syncField('inC2Code', 'printC2Code', '75px');
+        syncField('inC2Name', 'printC2Name', '140px');
+        syncField('inC2Faculty', 'printC2Faculty', '110px');
+
+        syncField('inC3Code', 'printC3Code', '75px');
+        syncField('inC3Name', 'printC3Name', '140px');
+        syncField('inC3Faculty', 'printC3Faculty', '110px');
+      } else {
+        syncField('inCourseCode', 'printCourseCode', '110px');
+        syncField('inCourseName', 'printCourseName', '200px');
+        syncField('inFaculty', 'printFaculty', '180px');
+        syncField('inTotalEnrolled', 'printTotalEnrolled', '30px', '1');
+      }
+
+      // Dynamic Title
+      const sname = formData.studentName.trim();
+      const typeLabel = currentType === 'marks' ? 'Marks Award Sheet' : 'Signature Sheet';
+      if (sname) {
+        document.title = `${sname} - ${typeLabel} | DSVV`;
+      } else {
+        document.title = `${currentMode === '3courses' ? '3-Course ' : ''}${typeLabel} Template | DSVV`;
+      }
     }
 
-    // ── CLEAR ALL (TRUE BLANK) ─────────────────────────────────
+    function syncField(inputId, printId, minWidth, defaultVal = '') {
+      const inp = document.getElementById(inputId);
+      const prn = document.getElementById(printId);
+      if (!inp || !prn) return;
+      const val = inp.value.trim();
+      if (val) {
+        prn.innerHTML = escapeHtml(val);
+      } else if (defaultVal) {
+        prn.innerHTML = escapeHtml(defaultVal);
+      } else {
+        prn.innerHTML = `<span class="blank-underline" style="min-width: ${minWidth};"></span>`;
+      }
+    }
+
+    // ── CLEAR ALL (BLANK FOR HANDWRITING) ──────────────────────
     function clearAll() {
-      state.session = '';
-      state.studentName = '';
-      state.scholarId = '';
-      state.progSem = '';
-      state.totalEnrolled = '1';
-      state.courses = [
-        { code: '', name: '', faculty: '', progSem: '', totalEnrolled: '1', scholarId: '', studentName: '' },
-        { code: '', name: '', faculty: '', progSem: '', totalEnrolled: '1', scholarId: '', studentName: '' },
-        { code: '', name: '', faculty: '', progSem: '', totalEnrolled: '1', scholarId: '', studentName: '' }
-      ];
-      changeLayoutMode();
+      Object.keys(formData).forEach(k => {
+        formData[k] = (k === 'totalEnrolled') ? '1' : '';
+      });
+      renderTemplate();
     }
 
     // ── SAMPLE DEMO FILL ───────────────────────────────────────
     function fillSample() {
-      state.session = 'July – December 2026';
-      state.studentName = 'Abhishek Kumar';
-      state.scholarId = '2424038';
-      state.progSem = 'BCA / Semester 5';
-      state.courses = [
-        { code: 'CS302JSC', name: 'JavaScript', faculty: 'Mr. Hemant Singh', progSem: 'BCA / Sem 5', totalEnrolled: '1', scholarId: '2424038', studentName: 'Abhishek Kumar' },
-        { code: 'CS301PHP', name: 'Web Dev with PHP', faculty: 'Dr. Gopal Sharma', progSem: 'BCA / Sem 5', totalEnrolled: '1', scholarId: '2424038', studentName: 'Abhishek Kumar' },
-        { code: 'CS303OS',  name: 'Operating Systems', faculty: 'Mr. Ajay Kumar', progSem: 'BCA / Sem 5', totalEnrolled: '1', scholarId: '2424038', studentName: 'Abhishek Kumar' }
-      ];
-      changeLayoutMode();
+      formData.session = 'July – December 2026';
+      formData.scholarId = '2424038';
+      formData.studentName = 'Abhishek Kumar';
+      formData.progSem = 'BCA / Semester 5';
+
+      formData.courseCode = 'CS302JSC';
+      formData.courseName = 'JavaScript Programming';
+      formData.faculty = 'Mr. Hemant Singh';
+      formData.totalEnrolled = '1';
+
+      formData.c1Code = 'CS301CON';
+      formData.c1Name = 'Computer Networks';
+      formData.c1Faculty = 'Dr. Rajesh Sharma';
+
+      formData.c2Code = 'CS302JSC';
+      formData.c2Name = 'JavaScript Programming';
+      formData.c2Faculty = 'Mr. Hemant Singh';
+
+      formData.c3Code = 'CS303SQL';
+      formData.c3Name = 'Structured Query Language';
+      formData.c3Faculty = 'Dr. Anita Verma';
+
+      renderTemplate();
     }
 
     function doPrint() {
+      syncAll();
       window.print();
     }
 
-    // Initialize from URL parameters if provided
+    // ── INITIALIZATION ─────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('session')) state.session = params.get('session');
-      if (params.get('courseCode')) state.courses[0].code = params.get('courseCode');
-      if (params.get('courseName')) state.courses[0].name = params.get('courseName');
+      if (params.get('type')) currentType = params.get('type');
+      if (params.get('mode')) currentMode = params.get('mode');
+      if (params.get('scheme')) currentScheme = params.get('scheme');
+
+      if (params.get('session')) formData.session = params.get('session');
+      if (params.get('scholarId')) formData.scholarId = params.get('scholarId');
+      if (params.get('studentName')) formData.studentName = params.get('studentName');
       if (params.get('program') || params.get('semester')) {
         const p = params.get('program') || '';
         const s = params.get('semester') || '';
-        state.progSem = `${p}${s ? ' / Semester ' + s : ''}`.trim();
-        state.courses[0].progSem = state.progSem;
+        formData.progSem = `${p}${s ? ' / Semester ' + s : ''}`.trim();
       }
-      if (params.get('faculty')) state.courses[0].faculty = params.get('faculty');
-      if (params.get('scholarId')) state.scholarId = params.get('scholarId');
-      if (params.get('studentName')) state.studentName = params.get('studentName');
+      if (params.get('courseCode')) formData.courseCode = params.get('courseCode');
+      if (params.get('courseName')) formData.courseName = params.get('courseName');
+      if (params.get('faculty')) formData.faculty = params.get('faculty');
 
-      if ((params.get('program') || '').toUpperCase() === 'MCA-DS') {
-        document.getElementById('evalScheme').value = 'mcads';
-      }
-
-      if (params.get('layout')) {
-        document.getElementById('layoutMode').value = params.get('layout');
-      }
-
-      changeLayoutMode();
+      document.getElementById('courseMode').value = currentMode;
+      document.getElementById('evalScheme').value = currentScheme;
+      setSheetType(currentType);
     });
   </script>
 </body>
