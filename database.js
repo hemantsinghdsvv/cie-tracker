@@ -36,7 +36,7 @@ async function initDB() {
           faculty_name TEXT,
           semester TEXT NOT NULL DEFAULT '',
           session TEXT NOT NULL DEFAULT 'January – June 2026',
-          PRIMARY KEY (course_code, program_name, session)
+          PRIMARY KEY (course_code, program_name, semester, session)
         )
       `);
       await client.query(`
@@ -101,7 +101,7 @@ async function initDB() {
           -- Update courses primary key
           BEGIN
             ALTER TABLE courses DROP CONSTRAINT IF EXISTS courses_pkey;
-            ALTER TABLE courses ADD CONSTRAINT courses_pkey PRIMARY KEY (course_code, program_name, session);
+            ALTER TABLE courses ADD CONSTRAINT courses_pkey PRIMARY KEY (course_code, program_name, semester, session);
           EXCEPTION WHEN others THEN NULL;
           END;
 

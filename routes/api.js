@@ -33,14 +33,29 @@ router.get('/semesters', async (req, res) => {
   const { program, session } = req.query;
   if (!program) return res.status(400).json({ error: 'program is required' });
   try {
-    let sql = 'SELECT DISTINCT semester FROM students WHERE program_name = $1';
+    let sql;
     const params = [program];
     if (session) {
-      sql += ' AND session = $2';
+      sql = `SELECT DISTINCT semester FROM (
+               SELECT semester FROM students WHERE UPPER(program_name) = UPPER($1) AND session = $2
+               UNION
+               SELECT semester FROM courses WHERE UPPER(program_name) = UPPER($1) AND session = $2
+             ) s
+             WHERE semester IS NOT NULL AND semester != ''`;
       params.push(session);
+    } else {
+      sql = `SELECT DISTINCT semester FROM (
+               SELECT semester FROM students WHERE UPPER(program_name) = UPPER($1)
+               UNION
+               SELECT semester FROM courses WHERE UPPER(program_name) = UPPER($1)
+             ) s
+             WHERE semester IS NOT NULL AND semester != ''`;
     }
-    sql += ' ORDER BY semester';
     const rows = await query(sql, params);
+    rows.sort((a, b) => {
+      const na = parseInt(a.semester), nb = parseInt(b.semester);
+      return (!isNaN(na) && !isNaN(nb)) ? na - nb : String(a.semester).localeCompare(String(b.semester));
+    });
     res.json(rows);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -50,11 +65,36 @@ router.get('/courses', async (req, res) => {
   const { program, semester, session } = req.query;
   if (!program || !semester) return res.status(400).json({ error: 'program and semester are required' });
   try {
-    let sql = 'SELECT course_code, course_name, faculty_name, session FROM courses WHERE program_name = $1 AND semester = $2';
-    const params = [program, semester];
+    const prog = (program || '').toString().trim().toUpperCase();
+    const sem = (semester || '').toString().trim();
+
+    let sql;
+    const params = [prog, sem];
+
     if (session) {
-      sql += ' AND session = $3';
+      sql = `SELECT course_code, course_name, faculty_name, session, semester 
+             FROM courses 
+             WHERE UPPER(program_name) = $1 
+               AND (
+                 semester = $2 
+                 OR (
+                   $1 IN ('MULTI', 'SEC') 
+                   AND NOT EXISTS (SELECT 1 FROM courses WHERE UPPER(program_name) = $1 AND semester = $2 AND session = $3)
+                 )
+               )
+               AND session = $3`;
       params.push(session);
+    } else {
+      sql = `SELECT course_code, course_name, faculty_name, session, semester 
+             FROM courses 
+             WHERE UPPER(program_name) = $1 
+               AND (
+                 semester = $2 
+                 OR (
+                   $1 IN ('MULTI', 'SEC') 
+                   AND NOT EXISTS (SELECT 1 FROM courses WHERE UPPER(program_name) = $1 AND semester = $2)
+                 )
+               )`;
     }
     sql += ' ORDER BY course_name';
     const rows = await query(sql, params);
@@ -86,7 +126,7 @@ router.get('/students', async (req, res) => {
       // Semester 7 exception: 4 BITR students also counted as BIT 7 students for Computer Networks and SQL
       sql = `SELECT scholar_id, student_name, program_name, semester, session
              FROM students
-             WHERE program_name IN ('BIT', 'BITR') AND semester = $1`;
+             WHERE UPPER(program_name) IN ('BIT', 'BITR') AND semester = $1`;
       params.push(sem);
       if (session) {
         sql += ` AND session = $${params.length + 1}`;
@@ -95,7 +135,7 @@ router.get('/students', async (req, res) => {
     } else {
       sql = `SELECT scholar_id, student_name, program_name, semester, session
              FROM students
-             WHERE program_name = $1 AND semester = $2`;
+             WHERE UPPER(program_name) = UPPER($1) AND semester = $2`;
       params.push(program, semester);
       if (session) {
         sql += ` AND session = $${params.length + 1}`;
