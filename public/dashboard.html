@@ -914,22 +914,37 @@
       const preview = document.getElementById(`${p}-studentPreview`);
       const noMsg   = document.getElementById(`${p}-noStudents`);
       const list    = document.getElementById(`${p}-list`);
-      if (!st.length) { preview.classList.add('hidden'); noMsg.classList.remove('hidden'); return; }
+      if (!st || !st.length) { preview.classList.add('hidden'); noMsg.classList.remove('hidden'); return; }
       noMsg.classList.add('hidden'); list.innerHTML = '';
+
+      const hasBitr = st.some(s => (s.program_name || '').toUpperCase() === 'BITR');
+
       st.forEach((s, i) => {
         const li = document.createElement('li');
         li.className = 'p-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors';
+        const progBadge = (s.program_name && s.program_name.toUpperCase() === 'BITR')
+          ? '<span class="badge-pill badge-purple text-[10px] ml-1.5 font-bold">BITR</span>'
+          : '';
         li.innerHTML = `
           <div class="flex items-center gap-3">
             <span class="text-slate-400 font-mono text-[10px] w-5 text-right">${i+1}</span>
             <span class="font-mono text-xs font-bold text-primary-700">${s.scholar_id}</span>
             <span class="text-slate-800 font-medium">${s.student_name}</span>
+            ${progBadge}
           </div>
           <span class="badge-pill badge-slate text-[10px]">Sem ${s.semester}</span>
         `;
         list.appendChild(li);
       });
-      document.getElementById(`${p}-count`).textContent = `${st.length} Candidates`;
+
+      const countEl = document.getElementById(`${p}-count`);
+      if (hasBitr) {
+        countEl.textContent = `${st.length} Candidates (incl. 4 BITR)`;
+        countEl.className = 'badge-pill badge-purple text-xs font-mono font-bold';
+      } else {
+        countEl.textContent = `${st.length} Candidates`;
+        countEl.className = 'badge-pill badge-green text-xs font-mono';
+      }
       preview.classList.remove('hidden');
     }
 
