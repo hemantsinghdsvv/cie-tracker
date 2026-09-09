@@ -13,8 +13,10 @@ router.get('/', async (req, res) => {
     const sem = (semester || '').toString().trim();
     const code = (courseCode || '').toString().trim().toUpperCase();
 
-    const isBit7Shared = (prog === 'BIT' && sem === '7') && (
-      code === 'CS401CON' || code === 'CS402SQL' || code.includes('NETWORK') || code.includes('QUERY') || code.includes('SQL')
+    const isBit7Shared = ((prog === 'BIT' || prog === 'BITR') && sem === '7') && (
+      code === 'CS401CON' || code === 'CS402SQL' || code === 'CS406DMW' ||
+      code.includes('NETWORK') || code.includes('QUERY') || code.includes('SQL') ||
+      code.includes('MINING') || code.includes('WAREHOUS') || code.includes('DMW')
     );
 
     let sql;

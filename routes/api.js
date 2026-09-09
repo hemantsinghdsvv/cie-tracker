@@ -74,27 +74,39 @@ router.get('/courses', async (req, res) => {
     if (session) {
       sql = `SELECT course_code, course_name, faculty_name, session, semester 
              FROM courses 
-             WHERE UPPER(program_name) = $1 
-               AND (
-                 semester = $2 
-                 OR (
-                   $1 IN ('MULTI', 'SEC') 
-                   AND NOT EXISTS (SELECT 1 FROM courses WHERE UPPER(program_name) = $1 AND semester = $2 AND session = $3)
-                 )
+             WHERE (
+               UPPER(program_name) = $1 
+               OR (
+                 $1 = 'BITR' AND $2 = '7' AND UPPER(program_name) = 'BIT' AND semester = '7'
+                 AND (course_code IN ('CS401CON', 'CS402SQL', 'CS406DMW') OR course_name ILIKE '%network%' OR course_name ILIKE '%query%' OR course_name ILIKE '%sql%' OR course_name ILIKE '%mining%' OR course_name ILIKE '%warehous%' OR course_name ILIKE '%dmw%')
                )
-               AND session = $3`;
+             )
+             AND (
+               semester = $2 
+               OR (
+                 $1 IN ('MULTI', 'SEC') 
+                 AND NOT EXISTS (SELECT 1 FROM courses WHERE UPPER(program_name) = $1 AND semester = $2 AND session = $3)
+               )
+             )
+             AND session = $3`;
       params.push(session);
     } else {
       sql = `SELECT course_code, course_name, faculty_name, session, semester 
              FROM courses 
-             WHERE UPPER(program_name) = $1 
-               AND (
-                 semester = $2 
-                 OR (
-                   $1 IN ('MULTI', 'SEC') 
-                   AND NOT EXISTS (SELECT 1 FROM courses WHERE UPPER(program_name) = $1 AND semester = $2)
-                 )
-               )`;
+             WHERE (
+               UPPER(program_name) = $1 
+               OR (
+                 $1 = 'BITR' AND $2 = '7' AND UPPER(program_name) = 'BIT' AND semester = '7'
+                 AND (course_code IN ('CS401CON', 'CS402SQL', 'CS406DMW') OR course_name ILIKE '%network%' OR course_name ILIKE '%query%' OR course_name ILIKE '%sql%' OR course_name ILIKE '%mining%' OR course_name ILIKE '%warehous%' OR course_name ILIKE '%dmw%')
+               )
+             )
+             AND (
+               semester = $2 
+               OR (
+                 $1 IN ('MULTI', 'SEC') 
+                 AND NOT EXISTS (SELECT 1 FROM courses WHERE UPPER(program_name) = $1 AND semester = $2)
+               )
+             )`;
     }
     sql += ' ORDER BY course_name';
     const rows = await query(sql, params);
@@ -111,19 +123,23 @@ router.get('/students', async (req, res) => {
     const sem = (semester || '').toString().trim();
     const cVal = (course || courseCode || '').toString().trim().toUpperCase();
 
-    const isBit7SharedCourse = (prog === 'BIT' && sem === '7') && (
+    const isBit7SharedCourse = ((prog === 'BIT' || prog === 'BITR') && sem === '7') && (
       cVal === 'CS401CON' ||
       cVal === 'CS402SQL' ||
+      cVal === 'CS406DMW' ||
       cVal.includes('NETWORK') ||
       cVal.includes('QUERY') ||
-      cVal.includes('SQL')
+      cVal.includes('SQL') ||
+      cVal.includes('MINING') ||
+      cVal.includes('WAREHOUS') ||
+      cVal.includes('DMW')
     );
 
     let sql;
     const params = [];
 
     if (isBit7SharedCourse) {
-      // Semester 7 exception: 4 BITR students also counted as BIT 7 students for Computer Networks and SQL
+      // Semester 7 exception: BITR students also counted as BIT 7 students for Computer Networks, SQL, and Data Mining & Warehousing
       sql = `SELECT scholar_id, student_name, program_name, semester, session
              FROM students
              WHERE UPPER(program_name) IN ('BIT', 'BITR') AND semester = $1`;
@@ -286,8 +302,19 @@ router.get('/all-students', async (req, res) => {
               (c.program_name = s.program_name AND c.semester = s.semester)
               OR (
                 c.semester = '7' AND s.semester = '7'
-                AND c.program_name = 'BIT' AND s.program_name = 'BITR'
-                AND (c.course_code IN ('CS401CON', 'CS402SQL') OR c.course_name ILIKE '%network%' OR c.course_name ILIKE '%query%' OR c.course_name ILIKE '%sql%')
+                AND (
+                  (c.program_name = 'BIT' AND s.program_name = 'BITR')
+                  OR (c.program_name = 'BITR' AND s.program_name = 'BIT')
+                )
+                AND (
+                  c.course_code IN ('CS401CON', 'CS402SQL', 'CS406DMW')
+                  OR c.course_name ILIKE '%network%'
+                  OR c.course_name ILIKE '%query%'
+                  OR c.course_name ILIKE '%sql%'
+                  OR c.course_name ILIKE '%mining%'
+                  OR c.course_name ILIKE '%warehous%'
+                  OR c.course_name ILIKE '%dmw%'
+                )
               )
             )
         )

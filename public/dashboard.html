@@ -961,7 +961,8 @@
 
       const countEl = document.getElementById(`${p}-count`);
       if (hasBitr) {
-        countEl.textContent = `${st.length} Candidates (incl. 4 BITR)`;
+        const bitrCount = st.filter(s => (s.program_name || '').toUpperCase() === 'BITR').length;
+        countEl.textContent = `${st.length} Candidates (incl. ${bitrCount} BITR)`;
         countEl.className = 'badge-pill badge-purple text-xs font-mono font-bold';
       } else {
         countEl.textContent = `${st.length} Candidates`;
@@ -1138,7 +1139,10 @@
           tr.innerHTML = `
             <td class="p-3 text-center text-slate-400 font-mono text-xs">${i+1}</td>
             <td class="p-3 font-mono font-bold text-primary-700 text-xs">${s.scholar_id}</td>
-            <td class="p-3 font-bold text-slate-800 text-xs">${s.student_name}</td>
+            <td class="p-3 font-bold text-slate-800 text-xs flex items-center">
+              <span>${s.student_name}</span>
+              ${(s.program_name && s.program_name.toUpperCase() === 'BITR') ? '<span class="badge-pill badge-purple text-[10px] ml-1.5 font-bold">BITR</span>' : ''}
+            </td>
             ${mComponents.map(c => {
               const val = map[s.scholar_id]?.[c.key] ?? '';
               return `
